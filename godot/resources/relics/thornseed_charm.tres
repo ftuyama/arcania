@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="RelicData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/relics/RelicData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/relics/ModifierEntry.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_relic_icon_thornseed_charm.png" id="3_icon"]
+
+[sub_resource type="Resource" id="mod_root"]
+script = ExtResource("2")
+stat = &"organic_damage_mult"
+value = 1.1
+op = 2
+
+[sub_resource type="Resource" id="mod_mana"]
+script = ExtResource("2")
+stat = &"max_mana"
+value = -5.0
+op = 0
+
+[resource]
+script = ExtResource("1")
+id = &"thornseed_charm"
+display_name = "Thornseed Charm"
+description = "+10% organic spell damage. −5 max mana."
+tier = 0
+icon = ExtResource("3_icon")
+icon_color = Color(0.35, 0.65, 0.3, 1)
+modifiers = [SubResource("mod_root"), SubResource("mod_mana")]

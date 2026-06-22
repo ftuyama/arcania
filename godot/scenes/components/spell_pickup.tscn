@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://arcania_spell_pickup"]
+
+[ext_resource type="Script" path="res://scripts/world/spell_pickup.gd" id="1_pickup"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/world_pickup_glow.png" id="2_glow"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
+radius = 20.0
+
+[node name="SpellPickup" type="Area2D"]
+collision_layer = 128
+collision_mask = 2
+script = ExtResource("1_pickup")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_pickup")
+
+[node name="Glow" type="Sprite2D" parent="."]
+modulate = Color(0.6, 0.85, 0.55, 0.5)
+texture = ExtResource("2_glow")
+
+[node name="Sprite" type="Sprite2D" parent="."]

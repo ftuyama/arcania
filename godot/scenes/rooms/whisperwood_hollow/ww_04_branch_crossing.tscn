@@ -1,0 +1,66 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/bark_wraith.tscn" id="4_enemy"]
+
+[node name="ww_04_branch_crossing" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_04_branch_crossing"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 768.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 704, 1152, 64), Rect2(256, 544, 192, 20), Rect2(640, 480, 128, 20), Rect2(448, 416, 256, 20), Rect2(896, 544, 160, 20), Rect2(512, 352, 128, 20)])
+west_transition = true
+east_transition = true
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 676)
+
+[node name="from_left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 676)
+
+[node name="from_right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1052, 676)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="Enemy0" parent="Entities/Enemies" instance=ExtResource("4_enemy")]
+position = Vector2(400, 676)
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="West" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(32, 704)
+target_room_id = &"ww_03_thorn_hollow"
+spawn_marker = &"from_right"
+edge = &"west"
+
+[node name="East" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(1120, 704)
+target_room_id = &"ww_05_spore_glen"
+spawn_marker = &"from_left"
+edge = &"east"
+
+[node name="TreePhaseMarkers" type="Node2D" parent="."]
+
+[node name="Tree0" type="Marker2D" parent="TreePhaseMarkers" groups=["tree_phase_markers"]]
+position = Vector2(300, 676)
+
+[node name="Tree1" type="Marker2D" parent="TreePhaseMarkers" groups=["tree_phase_markers"]]
+position = Vector2(800, 676)
+

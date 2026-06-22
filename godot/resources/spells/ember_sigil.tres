@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/spells/SpellData.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_ember_sigil.png" id="2_icon"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_ember_sigil_cast.wav" id="3_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_ember_sigil_impact.wav" id="4_impact"]
+
+[resource]
+script = ExtResource("1")
+id = &"ember_sigil"
+display_name = "Ember Sigil"
+description = "Short-range fire burst that lights braziers and applies Smolder."
+icon = ExtResource("2_icon")
+category = 2
+mana_cost = 8
+cooldown = 0.4
+cast_time = 0.25
+can_overcast = true
+base_damage = 10
+poise_damage = 6.0
+aim_mode = 0
+gate_type = &"ember_receptor"
+exploration_tags = Array[StringName]([&"light", &"burn"])
+cast_sfx = ExtResource("3_cast")
+impact_sfx = ExtResource("4_impact")

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/spells/SpellData.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_veil_step.png" id="2_icon"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_veil_step_cast.wav" id="3_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_veil_step_impact.wav" id="4_impact"]
+
+[resource]
+script = ExtResource("1")
+id = &"veil_step"
+display_name = "Veil Step"
+description = "Phase dash with i-frames. Passes through thin barriers."
+icon = ExtResource("2_icon")
+category = 2
+mana_cost = 15
+cooldown = 1.8
+cast_time = 0.0
+can_overcast = true
+base_damage = 0
+poise_damage = 0.0
+aim_mode = 3
+exploration_tags = Array[StringName]([&"phase", &"mobility"])
+cast_sfx = ExtResource("3_cast")
+impact_sfx = ExtResource("4_impact")

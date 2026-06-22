@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"e_12_bark_wraith"
+display_name = "Bark Wraith"
+max_hp = 58
+move_speed = 70.0
+chase_speed = 100.0
+contact_damage = 10
+attack_damage = 18
+detection_radius = 170.0
+attack_range = 48.0
+poise = 12.0
+xp_reward = 24
+essence_reward = 11
+damage_multipliers = {
+&"physical": 0.9,
+&"fire": 1.5
+}

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/bosses/BossData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"boss_01_root_warden"
+display_name = "The Root Warden"
+region_id = &"whisperwood_hollow"
+max_hp = 600
+poise = 120.0
+essence_reward = 400
+phase_thresholds = Array[float]([0.66, 0.33])
+spell_unlock = &"rune_anchor"
+world_flag = &"defeated_boss_01_root_warden"

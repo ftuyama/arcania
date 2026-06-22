@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://arcania_anchor_point"]
+
+[ext_resource type="Script" path="res://scripts/world/anchor_point.gd" id="1_anchor"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/world_anchor_point.png" id="2_sprite"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_anchor"]
+radius = 12.0
+
+[node name="AnchorPoint" type="Area2D"]
+collision_layer = 256
+script = ExtResource("1_anchor")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_anchor")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_sprite")

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/spells/SpellData.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_rune_anchor.png" id="2_icon"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_rune_anchor_cast.wav" id="3_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_rune_anchor_impact.wav" id="4_impact"]
+
+[resource]
+script = ExtResource("1")
+id = &"rune_anchor"
+display_name = "Rune Anchor"
+description = "Grapple to anchor rings and pull foes off-balance."
+icon = ExtResource("2_icon")
+category = 2
+mana_cost = 12
+cooldown = 0.8
+cast_time = 0.35
+can_overcast = true
+base_damage = 8
+poise_damage = 20.0
+aim_mode = 0
+gate_type = &"grapple"
+exploration_tags = Array[StringName]([&"grapple", &"pull"])
+cast_sfx = ExtResource("3_cast")
+impact_sfx = ExtResource("4_impact")

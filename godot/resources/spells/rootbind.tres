@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/spells/SpellData.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_rootbind.png" id="2_icon"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_rootbind_cast.wav" id="3_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_rootbind_impact.wav" id="4_impact"]
+
+[resource]
+script = ExtResource("1")
+id = &"rootbind"
+display_name = "Rootbind"
+description = "Grow climbable vines to scale walls and trap rooted foes."
+icon = ExtResource("2_icon")
+category = 2
+mana_cost = 10
+cooldown = 1.0
+cast_time = 0.2
+can_overcast = true
+base_damage = 6
+poise_damage = 12.0
+aim_mode = 0
+gate_type = &"vine_growth"
+exploration_tags = Array[StringName]([&"vine", &"climb"])
+cast_sfx = ExtResource("3_cast")
+impact_sfx = ExtResource("4_impact")

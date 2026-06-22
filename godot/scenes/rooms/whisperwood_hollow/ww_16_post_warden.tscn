@@ -1,0 +1,52 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/components/focus_crucible.tscn" id="4_crucible"]
+
+[node name="ww_16_post_warden" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_16_post_warden"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 896.0
+offset_bottom = 640.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 576, 896, 64), Rect2(320, 448, 128, 20), Rect2(576, 480, 96, 20), Rect2(832, 448, 128, 20)])
+west_transition = true
+east_transition = false
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 548)
+
+[node name="from_left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 548)
+
+[node name="from_right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(796, 548)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="FocusCrucible" parent="." instance=ExtResource("4_crucible")]
+position = Vector2(200, 528)
+crucible_id = &"ww_16_crucible"
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="West" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(32, 576)
+target_room_id = &"ww_15_ironroot_depths"
+spawn_marker = &"from_right"
+edge = &"west"

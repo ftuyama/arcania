@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RegionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/world/RegionData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+region_id = &"whisperwood_hollow"
+display_name = "Whisperwood Hollow"
+grid_width = 8
+grid_height = 8
+room_layout = Array[String](["ww_01_forest_gate", "ww_02_whisper_path", "ww_s02_whisper_loop", "", "ww_03_thorn_hollow", "ww_04_branch_crossing", "ww_05_spore_glen", "ww_s01_gardener_cache", "ww_18_moss_bridge", "ww_19_fungal_shelf", "ww_20_root_archive", "ww_21_spore_vault", "ww_06_root_pit", "ww_07_heartwood_chamber", "ww_08_vine_lift", "ww_17_upper_canopy", "ww_22_bark_gallery", "ww_23_thorn_maze", "ww_24_heartwood_loft", "ww_25_silk_chamber", "ww_09_canopy_walk", "ww_s03_canopy_nest", "ww_10_matron_approach", "ww_11_heartwood_grove", "ww_26_canopy_edge", "ww_27_grove_rest", "ww_28_vine_cathedral", "ww_29_ironroot_overlook", "ww_12_ironroot_gate", "ww_13_cart_tunnel", "ww_14_anchor_tutorial", "ww_15_ironroot_depths", "ww_30_cart_bypass", "ww_31_anchor_loft", "ww_32_matron_backtrail", "ww_33_whisper_depths", "ww_16_post_warden", "ww_34_spore_sink", "ww_35_larva_nursery", "ww_36_hunter_roost", "ww_37_garden_remnant", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""])
+total_secrets = 3
+total_bosses = 2

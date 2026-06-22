@@ -1,0 +1,72 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/components/anchor_point.tscn" id="4_anchor"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/root_warden.tscn" id="5_warden"]
+
+[ext_resource type="PackedScene" path="res://scenes/components/relic_pickup.tscn" id="6_relic"]
+
+[node name="ww_15_ironroot_depths" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_15_ironroot_depths"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 1024.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 960, 1280, 64), Rect2(256, 704, 192, 20), Rect2(832, 704, 192, 20), Rect2(512, 576, 256, 20), Rect2(128, 576, 128, 20), Rect2(1024, 576, 128, 20), Rect2(384, 448, 96, 20), Rect2(768, 448, 96, 20)])
+west_transition = true
+east_transition = true
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 932)
+
+[node name="from_left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 932)
+
+[node name="from_right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1180, 932)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="RootWarden" parent="Entities" instance=ExtResource("5_warden")]
+position = Vector2(640, 932)
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="Anchor0" parent="." instance=ExtResource("4_anchor")]
+position = Vector2(256, 832)
+
+[node name="Anchor1" parent="." instance=ExtResource("4_anchor")]
+position = Vector2(1024, 832)
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="West" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(32, 960)
+target_room_id = &"ww_14_anchor_tutorial"
+spawn_marker = &"from_right"
+edge = &"west"
+
+[node name="East" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(1248, 960)
+target_room_id = &"ww_16_post_warden"
+spawn_marker = &"from_left"
+edge = &"east"
+
+[node name="RelicPickup" parent="." instance=ExtResource("6_relic")]
+position = Vector2(200, 900)
+relic_id = &"iron_grip"
+pickup_id = &"ww_15_iron_grip"
+

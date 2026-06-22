@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://arcania_e01_decor"]
+
+[ext_resource type="SpriteFrames" path="res://assets/sprites/enemies/e01_ash_wisp/e01_sheet.tres" id="1_frames"]
+
+[node name="AshWispDecor" type="AnimatedSprite2D"]
+sprite_frames = ExtResource("1_frames")
+animation = &"idle"
+autoplay = "idle"
+position = Vector2(0, -16)

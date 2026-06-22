@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/styled_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/components/focus_crucible.tscn" id="4_crucible"]
+
+[node name="at_01_threshold_hub" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"at_01_threshold_hub"
+region_id = &"ashen_threshold"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1024.0
+offset_bottom = 768.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+tileset_path = "res://assets/sprites/tilesets/01_ashen_threshold/tileset.png"
+platform_rects = Array[Rect2]([Rect2(0, 704, 1024, 64), Rect2(128, 576, 192, 20), Rect2(512, 512, 256, 20), Rect2(768, 608, 128, 20), Rect2(960, 480, 160, 20)])
+west_transition = false
+east_transition = true
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 676)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="FocusCrucible" parent="." instance=ExtResource("4_crucible")]
+position = Vector2(200, 676)
+crucible_id = &"at_hub_crucible"
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="East" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(992, 704)
+target_room_id = &"at_03_east_road"
+spawn_marker = &"from_left"
+edge = &"east"

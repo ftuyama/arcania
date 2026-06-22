@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="RelicData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/relics/RelicData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/relics/ModifierEntry.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_relic_icon_mist_walker.png" id="3_icon"]
+
+[sub_resource type="Resource" id="mod_iframes"]
+script = ExtResource("2")
+stat = &"veil_step_iframes_flat"
+value = 4.0
+op = 0
+
+[sub_resource type="Resource" id="mod_fall"]
+script = ExtResource("2")
+stat = &"fall_damage_mult"
+value = 1.2
+op = 2
+
+[resource]
+script = ExtResource("1")
+id = &"mist_walker"
+display_name = "Mist Walker"
+description = "Veil Step i-frames +4 frames. Fall damage +20%."
+tier = 0
+icon = ExtResource("3_icon")
+icon_color = Color(0.7, 0.75, 0.8, 1)
+modifiers = [SubResource("mod_iframes"), SubResource("mod_fall")]

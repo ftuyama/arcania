@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://arcania_focus_crucible"]
+
+[ext_resource type="Script" path="res://scripts/world/focus_crucible.gd" id="1_crucible"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/world_focus_crucible.png" id="2_sprite"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 32.0
+
+[node name="FocusCrucible" type="Area2D"]
+collision_layer = 256
+collision_mask = 2
+script = ExtResource("1_crucible")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_interact")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(0, -20)
+texture = ExtResource("2_sprite")

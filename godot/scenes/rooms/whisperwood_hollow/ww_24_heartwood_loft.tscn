@@ -1,0 +1,47 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/thornweft_larva.tscn" id="4_enemy"]
+
+[node name="ww_24_heartwood_loft" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_24_heartwood_loft"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1024.0
+offset_bottom = 768.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 704, 1024, 64)])
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 676)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="Enemy0" parent="Entities/Enemies" instance=ExtResource("4_enemy")]
+position = Vector2(512, 676)
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="East" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(1012, 676)
+target_room_id = &"ww_25_silk_chamber"
+spawn_marker = &"default"
+
+[node name="West" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(12, 676)
+target_room_id = &"ww_23_thorn_maze"
+spawn_marker = &"default"

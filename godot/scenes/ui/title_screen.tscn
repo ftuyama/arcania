@@ -1,0 +1,173 @@
+[gd_scene load_steps=3 format=3 uid="uid://arcania_title_screen"]
+
+[ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1_title"]
+[ext_resource type="Script" path="res://scripts/ui/title_screen_backdrop.gd" id="2_backdrop"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="TitleBackdrop" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_backdrop")
+
+[node name="ScreenFrame" type="ReferenceRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+border_color = Color(0.72, 0.48, 0.18, 0.5)
+border_width = 1.0
+
+[node name="SafeArea" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 16
+
+[node name="MainLayout" type="VBoxContainer" parent="SafeArea"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="TitleLabel" type="Label" parent="SafeArea/MainLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.8, 0.58, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 32
+text = "ARCANIA"
+horizontal_alignment = 1
+
+[node name="TaglineLabel" type="Label" parent="SafeArea/MainLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.54, 0.48, 1)
+theme_override_font_sizes/font_size = 10
+text = "The weave is torn. You are the last thread."
+horizontal_alignment = 1
+
+[node name="HeaderSpacer" type="Control" parent="SafeArea/MainLayout"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="MenuCenter" type="CenterContainer" parent="SafeArea/MainLayout"]
+layout_mode = 2
+
+[node name="MenuPanel" type="VBoxContainer" parent="SafeArea/MainLayout/MenuCenter"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="NewGameButton" type="Button" parent="SafeArea/MainLayout/MenuCenter/MenuPanel"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "New Game"
+
+[node name="ContinueButton" type="Button" parent="SafeArea/MainLayout/MenuCenter/MenuPanel"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Continue"
+
+[node name="LoadButton" type="Button" parent="SafeArea/MainLayout/MenuCenter/MenuPanel"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Load Game"
+
+[node name="QuitButton" type="Button" parent="SafeArea/MainLayout/MenuCenter/MenuPanel"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Quit"
+
+[node name="FlexSpacer" type="Control" parent="SafeArea/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PromptLabel" type="Label" parent="SafeArea/MainLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.46, 0.4, 1)
+theme_override_font_sizes/font_size = 9
+text = "Space / E — New Game"
+horizontal_alignment = 1
+
+[node name="VersionLabel" type="Label" parent="SafeArea/MainLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.32, 0.30, 0.28, 1)
+theme_override_font_sizes/font_size = 8
+text = "Phase 4"
+horizontal_alignment = 2
+
+[node name="LoadPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -100.0
+offset_right = 170.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="LoadPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="LoadPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LoadTitle" type="Label" parent="LoadPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.78, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "Load Game"
+horizontal_alignment = 1
+
+[node name="SlotList" type="ItemList" parent="LoadPanel/Margin/VBox"]
+custom_minimum_size = Vector2(300, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+
+[node name="LoadStatus" type="Label" parent="LoadPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+
+[node name="LoadConfirmButton" type="Button" parent="LoadPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "Load Selected"
+
+[node name="LoadBackButton" type="Button" parent="LoadPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "Back"

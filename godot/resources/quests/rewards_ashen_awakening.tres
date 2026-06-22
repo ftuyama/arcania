@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="QuestRewards" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/quests/QuestRewards.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weave_silk = 2
+world_flags = Array[StringName]([&"quest_ashen_awakening_done"])

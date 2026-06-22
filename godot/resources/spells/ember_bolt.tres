@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/spells/SpellData.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_ember_bolt.png" id="2_icon"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_ember_bolt_cast.wav" id="3_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_ember_bolt_impact.wav" id="4_impact"]
+
+[resource]
+script = ExtResource("1")
+id = &"ember_bolt"
+display_name = "Ember Bolt"
+description = "Ranged fire projectile. Strong against nature enemies."
+icon = ExtResource("2_icon")
+category = 0
+mana_cost = 12
+cooldown = 0.6
+cast_time = 0.2
+can_overcast = true
+base_damage = 14
+poise_damage = 8.0
+aim_mode = 0
+exploration_tags = Array[StringName]([&"fire", &"ranged"])
+cast_sfx = ExtResource("3_cast")
+impact_sfx = ExtResource("4_impact")

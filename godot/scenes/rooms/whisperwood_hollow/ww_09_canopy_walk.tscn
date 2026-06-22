@@ -1,0 +1,72 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/thornweft_larva.tscn" id="4_enemy"]
+
+[ext_resource type="PackedScene" path="res://scenes/components/arc_step_gate.tscn" id="5_arcgate"]
+
+[node name="ww_09_canopy_walk" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_09_canopy_walk"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1792.0
+offset_bottom = 512.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 448, 1792, 64), Rect2(128, 288, 384, 20), Rect2(640, 256, 256, 20), Rect2(1024, 224, 320, 20), Rect2(1536, 288, 256, 20), Rect2(256, 160, 128, 20), Rect2(1280, 160, 128, 20)])
+west_transition = true
+east_transition = true
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 420)
+
+[node name="from_left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 420)
+
+[node name="from_right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1692, 420)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="Enemy0" parent="Entities/Enemies" instance=ExtResource("4_enemy")]
+position = Vector2(500, 420)
+
+[node name="Enemy1" parent="Entities/Enemies" instance=ExtResource("4_enemy")]
+position = Vector2(800, 420)
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="West" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(32, 448)
+target_room_id = &"ww_08_vine_lift"
+spawn_marker = &"from_right"
+edge = &"west"
+
+[node name="East" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(1760, 448)
+target_room_id = &"ww_10_matron_approach"
+spawn_marker = &"from_left"
+edge = &"east"
+
+[node name="ArcStepGate" parent="AbilityGates" instance=ExtResource("5_arcgate")]
+position = Vector2(1400, 380)
+gate_id = &"ww_s03_trunk"
+target_room_id = &"ww_s03_canopy_nest"
+spawn_marker = &"default"
+
+[node name="from_nest" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1500, 420)
+

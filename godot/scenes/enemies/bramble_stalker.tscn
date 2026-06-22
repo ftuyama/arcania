@@ -1,0 +1,88 @@
+[gd_scene load_steps=15 format=3 uid="uid://arcania_bramble_stalker"]
+
+[ext_resource type="Script" path="res://scripts/enemies/base_enemy.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://resources/enemies/e_03_bramble_stalker.tres" id="2_data"]
+[ext_resource type="Script" path="res://scripts/components/state_machine.gd" id="3_sm"]
+[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_patrol.gd" id="4_patrol"]
+[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_chase.gd" id="5_chase"]
+[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_attack.gd" id="6_attack"]
+[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_hit.gd" id="7_hit"]
+[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_dead.gd" id="8_dead"]
+[ext_resource type="Script" path="res://scripts/components/health_component.gd" id="9_health"]
+[ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="10_hurt"]
+[ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="11_hitbox"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/enemies/e03_bramble_stalker/e03_sheet.tres" id="12_frames"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(18, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(20, 32)
+
+[node name="BrambleStalker" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_enemy")
+data = ExtResource("2_data")
+patrol_left = -80.0
+patrol_right = 80.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -16)
+sprite_frames = ExtResource("12_frames")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="Telegraph" type="ColorRect" parent="."]
+visible = false
+offset_left = -14.0
+offset_top = -28.0
+offset_right = 14.0
+offset_bottom = 6.0
+color = Color(0.32, 0.72, 0.53, 0.5)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("9_health")
+
+[node name="HurtboxComponent" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 8
+script = ExtResource("10_hurt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="HitboxComponent" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+script = ExtResource("11_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+position = Vector2(16, 0)
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="DetectionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("3_sm")
+
+[node name="Patrol" type="Node" parent="StateMachine"]
+script = ExtResource("4_patrol")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("5_chase")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("6_attack")
+
+[node name="Hit" type="Node" parent="StateMachine"]
+script = ExtResource("7_hit")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("8_dead")

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="RelicData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/relics/RelicData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/relics/ModifierEntry.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_relic_icon_gloom_lens.png" id="3_icon"]
+
+[sub_resource type="Resource" id="mod_drain"]
+script = ExtResource("2")
+stat = &"ley_sight_drain_mult"
+value = 0.7
+op = 2
+
+[sub_resource type="Resource" id="mod_hp"]
+script = ExtResource("2")
+stat = &"max_hp"
+value = -5.0
+op = 0
+
+[resource]
+script = ExtResource("1")
+id = &"gloom_lens"
+display_name = "Gloom Lens"
+description = "Ley Sight drain −30%. −5 max HP."
+tier = 0
+icon = ExtResource("3_icon")
+icon_color = Color(0.45, 0.55, 0.7, 1)
+modifiers = [SubResource("mod_drain"), SubResource("mod_hp")]

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"e_07_mothling_swarm"
+display_name = "Mothling Swarm"
+max_hp = 35
+move_speed = 60.0
+chase_speed = 90.0
+contact_damage = 5
+attack_damage = 10
+detection_radius = 180.0
+attack_range = 64.0
+poise = 4.0
+xp_reward = 16
+essence_reward = 7
+damage_multipliers = {
+&"physical": 0.5,
+&"fire": 2.0
+}

@@ -1,0 +1,395 @@
+[gd_scene load_steps=9 format=3 uid="uid://arcania_ui_layer"]
+
+[ext_resource type="Script" path="res://scripts/ui/ui_manager.gd" id="1_ui"]
+[ext_resource type="Script" path="res://scripts/ui/inventory_panel.gd" id="2_inv"]
+[ext_resource type="Script" path="res://scripts/ui/quest_log.gd" id="3_quest"]
+[ext_resource type="Script" path="res://scripts/ui/map_overlay.gd" id="4_map"]
+[ext_resource type="Script" path="res://scripts/ui/spell_wheel.gd" id="5_wheel"]
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="6_pause"]
+[ext_resource type="Script" path="res://scripts/ui/relic_toast.gd" id="7_toast"]
+[ext_resource type="Script" path="res://scripts/ui/game_over_screen.gd" id="8_gameover"]
+
+[node name="UILayer" type="CanvasLayer"]
+script = ExtResource("1_ui")
+
+[node name="InventoryPanel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_inv")
+
+[node name="Panel" type="PanelContainer" parent="InventoryPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -160.0
+offset_right = 220.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="InventoryPanel/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="InventoryPanel/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Relics"
+horizontal_alignment = 1
+
+[node name="RelicList" type="ItemList" parent="InventoryPanel/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(380, 180)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DetailLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="CurrencyLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Silk: 0"
+
+[node name="QuestLog" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_quest")
+
+[node name="Panel" type="PanelContainer" parent="QuestLog"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -140.0
+offset_right = 200.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="QuestLog/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="QuestLog/Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="QuestLog/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Quest Log"
+horizontal_alignment = 1
+
+[node name="QuestList" type="ItemList" parent="QuestLog/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(360, 120)
+layout_mode = 2
+
+[node name="ObjectiveLabel" type="Label" parent="QuestLog/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+text = "No active quests"
+
+[node name="MapOverlay" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_map")
+
+[node name="Panel" type="PanelContainer" parent="MapOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -200.0
+offset_right = 220.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="MapOverlay/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="MapOverlay/Panel/Margin"]
+layout_mode = 2
+
+[node name="RegionLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Region"
+horizontal_alignment = 1
+
+[node name="CompletionLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Completion: 0%"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="MapOverlay/Panel/Margin/VBox"]
+layout_mode = 2
+columns = 4
+
+[node name="SpellWheel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("5_wheel")
+
+[node name="Panel" type="PanelContainer" parent="SpellWheel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -180.0
+offset_right = 240.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="SpellWheel/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="SpellWheel/Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SpellWheel/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Spell Wheel"
+horizontal_alignment = 1
+
+[node name="SlotGrid" type="GridContainer" parent="SpellWheel/Panel/Margin/VBox"]
+layout_mode = 2
+columns = 4
+
+[node name="AcquiredList" type="ItemList" parent="SpellWheel/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(440, 100)
+layout_mode = 2
+
+[node name="HintLabel" type="Label" parent="SpellWheel/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 2
+
+[node name="PauseMenu" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_pause")
+
+[node name="Dimmer" type="ColorRect" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Panel" type="PanelContainer" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -160.0
+offset_right = 160.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="PauseMenu/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="SlotList" type="ItemList" parent="PauseMenu/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+
+[node name="SaveButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Save Game"
+
+[node name="LoadButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="QuestButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Quest Log"
+
+[node name="ResumeButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Resume"
+
+[node name="StatusLabel" type="Label" parent="PauseMenu/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+
+[node name="GameOverScreen" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_gameover")
+
+[node name="Dimmer" type="ColorRect" parent="GameOverScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.06, 0.82)
+
+[node name="Panel" type="PanelContainer" parent="GameOverScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -130.0
+offset_top = -98.0
+offset_right = 130.0
+offset_bottom = 98.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="GameOverScreen/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="GameOverScreen/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="GameOverScreen/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.58, 0.58, 1)
+theme_override_font_sizes/font_size = 18
+text = "The Veil Fades"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="GameOverScreen/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.54, 0.48, 1)
+theme_override_font_sizes/font_size = 10
+text = "Elara's sigil dims in the ash."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="RetryButton" type="Button" parent="GameOverScreen/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Try Again"
+
+[node name="LoadButton" type="Button" parent="GameOverScreen/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Load Save"
+
+[node name="TitleButton" type="Button" parent="GameOverScreen/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Return to Title"
+
+[node name="StatusLabel" type="Label" parent="GameOverScreen/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+
+[node name="RelicToast" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 80.0
+offset_right = 200.0
+offset_bottom = 120.0
+grow_horizontal = 2
+script = ExtResource("7_toast")
+
+[node name="Panel" type="PanelContainer" parent="RelicToast"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="RelicToast/Panel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Relic Acquired"
+horizontal_alignment = 1
+vertical_alignment = 1

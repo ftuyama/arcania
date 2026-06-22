@@ -1,0 +1,9 @@
+# Godot user cache
+.godot/
+*.import
+
+# Runtime saves (also gitignored in data/saves/)
+user://
+
+# OS
+.DS_Store

@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/components/arc_step_gate.gd" id="1_gate"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(24, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pass"]
+size = Vector2(32, 64)
+
+[node name="ArcStepGate" type="Area2D"]
+script = ExtResource("1_gate")
+
+[node name="Blocker" type="StaticBody2D" parent="."]
+collision_layer = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Blocker"]
+position = Vector2(0, -48)
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Visual" type="ColorRect" parent="."]
+offset_left = -12.0
+offset_top = -96.0
+offset_right = 12.0
+color = Color(0.15, 0.22, 0.12, 1)
+
+[node name="Passage" type="Area2D" parent="."]
+collision_layer = 128
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Passage"]
+position = Vector2(0, -32)
+shape = SubResource("RectangleShape2D_pass")

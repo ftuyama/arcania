@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/components/relic_pickup.tscn" id="4_relic"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/canopy_hunter.tscn" id="5_hunter"]
+
+[node name="ww_s03_canopy_nest" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_s03_canopy_nest"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1024.0
+offset_bottom = 896.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 832, 1024, 64), Rect2(128, 576, 768, 64)])
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 804)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="CanopyHunter" parent="Entities/Enemies" instance=ExtResource("5_hunter")]
+position = Vector2(512, 804)
+
+[node name="RelicPickup" parent="." instance=ExtResource("4_relic")]
+position = Vector2(512, 764)
+relic_id = &"mist_walker"
+pickup_id = &"ww_s03_mist_walker"
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="Exit" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(12, 804)
+target_room_id = &"ww_09_canopy_walk"
+spawn_marker = &"from_nest"

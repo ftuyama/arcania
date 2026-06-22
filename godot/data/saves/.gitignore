@@ -1,0 +1,2 @@
+# Runtime save files — do not commit
+*.json

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/spells/SpellData.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_arc_step.png" id="2_icon"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_arc_step_cast.wav" id="3_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/spells/sfx_arc_step_impact.wav" id="4_impact"]
+
+[resource]
+script = ExtResource("1")
+id = &"arc_step"
+display_name = "Arc Step"
+description = "Short arc-blink through thin walls and reposition in combat."
+icon = ExtResource("2_icon")
+category = 2
+mana_cost = 12
+cooldown = 1.5
+cast_time = 0.0
+can_overcast = true
+base_damage = 0
+poise_damage = 0.0
+aim_mode = 3
+gate_type = &"phase"
+exploration_tags = Array[StringName]([&"blink", &"mobility"])
+cast_sfx = ExtResource("3_cast")
+impact_sfx = ExtResource("4_impact")

@@ -1,0 +1,66 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/thornweft_matron.tscn" id="4_matron"]
+
+[ext_resource type="PackedScene" path="res://scenes/components/gated_room_transition.tscn" id="5_gated"]
+
+[node name="ww_11_heartwood_grove" type="Node2D"]
+script = ExtResource("1_room")
+room_id = &"ww_11_heartwood_grove"
+region_id = &"whisperwood_hollow"
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 896.0
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2_geom")
+floor_color = Color(0.1, 0.16, 0.08, 1)
+platform_color = Color(0.2, 0.34, 0.14, 1)
+platform_rects = Array[Rect2]([Rect2(0, 832, 1152, 64), Rect2(128, 640, 160, 20), Rect2(864, 640, 160, 20), Rect2(384, 544, 128, 20), Rect2(704, 544, 128, 20), Rect2(512, 448, 96, 20)])
+west_transition = true
+east_transition = true
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="default" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 804)
+
+[node name="from_left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(80, 804)
+
+[node name="from_right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1052, 804)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="ThornweftMatron" parent="Entities" instance=ExtResource("4_matron")]
+position = Vector2(576, 804)
+
+[node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="RoomTransitions" type="Node2D" parent="."]
+
+[node name="West" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(32, 832)
+target_room_id = &"ww_10_matron_approach"
+spawn_marker = &"from_right"
+edge = &"west"
+
+[node name="East" parent="RoomTransitions" instance=ExtResource("3_door")]
+position = Vector2(1120, 832)
+target_room_id = &"ww_12_ironroot_gate"
+spawn_marker = &"from_left"
+edge = &"east"
+
+[node name="VineDropShortcut" parent="RoomTransitions" instance=ExtResource("5_gated")]
+position = Vector2(576, 500)
+target_room_id = &"ww_01_forest_gate"
+spawn_marker = &"from_shortcut"
+required_boss_id = &"mb_01_thornweft_matron"
+

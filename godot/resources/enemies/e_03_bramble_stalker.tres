@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"e_03_bramble_stalker"
+display_name = "Bramble Stalker"
+max_hp = 55
+move_speed = 80.0
+chase_speed = 120.0
+contact_damage = 10
+attack_damage = 14
+detection_radius = 160.0
+attack_range = 52.0
+poise = 10.0
+xp_reward = 18
+essence_reward = 8
+damage_multipliers = {
+&"physical": 0.8,
+&"fire": 1.5
+}

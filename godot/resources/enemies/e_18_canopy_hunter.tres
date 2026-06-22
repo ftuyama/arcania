@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"e_18_canopy_hunter"
+display_name = "Canopy Hunter"
+max_hp = 120
+move_speed = 60.0
+chase_speed = 140.0
+contact_damage = 12
+attack_damage = 22
+detection_radius = 220.0
+attack_range = 72.0
+poise = 20.0
+xp_reward = 45
+essence_reward = 22
+damage_multipliers = {
+&"physical": 0.85,
+&"fire": 1.5
+}

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"e_15_thornweft_larva"
+display_name = "Thornweft Larva"
+max_hp = 40
+move_speed = 50.0
+chase_speed = 70.0
+contact_damage = 8
+attack_damage = 8
+detection_radius = 200.0
+attack_range = 220.0
+poise = 6.0
+xp_reward = 16
+essence_reward = 7
+damage_multipliers = {
+&"physical": 1.0,
+&"fire": 1.5
+}
