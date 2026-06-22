@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
 [ext_resource type="Script" path="res://scripts/world/styled_room_geometry.gd" id="2_geom"]
 [ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
 [ext_resource type="PackedScene" path="res://scenes/components/focus_crucible.tscn" id="4_crucible"]
+[ext_resource type="PackedScene" path="res://scenes/world/npc.tscn" id="5_npc"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/npcs/npc_magister_corin.tres" id="6_corin"]
 
 [node name="at_01_threshold_hub" type="Node2D"]
 script = ExtResource("1_room")
@@ -29,6 +31,14 @@ position = Vector2(80, 676)
 [node name="Entities" type="Node2D" parent="."]
 
 [node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="MagisterCorin" parent="Entities" instance=ExtResource("5_npc")]
+position = Vector2(360, 688)
+sprite_frames = ExtResource("6_corin")
+npc_id = &"magister_corin"
+display_name = "Magister Corin"
+dialogue_lines = PackedStringArray("You wake where the Conclave left you to die.", "The Ember Sigil still burns — use it on the braziers that block the east road.", "Whisperwood waits beyond. Do not trust the silence.")
+one_shot = false
 
 [node name="AbilityGates" type="Node2D" parent="."]
 

@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
 [ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
 [ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/mothling_swarm.tscn" id="4_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/mothling_swarm.tscn" id="4_mothling"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/thornweft_larva.tscn" id="5_larva"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/bramble_stalker.tscn" id="6_stalker"]
 
 [node name="ww_02_whisper_path" type="Node2D"]
 script = ExtResource("1_room")
@@ -37,8 +39,28 @@ position = Vector2(1436, 420)
 
 [node name="Enemies" type="Node2D" parent="Entities"]
 
-[node name="Enemy0" parent="Entities/Enemies" instance=ExtResource("4_enemy")]
+[node name="Stalker0" parent="Entities/Enemies" instance=ExtResource("6_stalker")]
+position = Vector2(768, 356)
+
+[node name="Larva0" parent="Entities/Enemies" instance=ExtResource("5_larva")]
 position = Vector2(500, 420)
+patrol_left = -64.0
+patrol_right = 64.0
+
+[node name="Larva1" parent="Entities/Enemies" instance=ExtResource("5_larva")]
+position = Vector2(1152, 260)
+patrol_left = -48.0
+patrol_right = 48.0
+
+[node name="MothlingPatrol" parent="Entities/Enemies" instance=ExtResource("4_mothling")]
+position = Vector2(320, 420)
+
+[node name="MothlingOrbit" parent="Entities/Enemies" instance=ExtResource("4_mothling")]
+position = Vector2(512, 292)
+orbit_mode = true
+orbit_radius = 56.0
+orbit_speed = 1.5
+orbit_angle_start = 0.8
 
 [node name="AbilityGates" type="Node2D" parent="."]
 

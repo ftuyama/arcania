@@ -28,6 +28,7 @@ func refresh() -> void:
 			var spell := SpellManager.get_spell(spell_id)
 			btn.text = "[%d] %s" % [i + 1, spell.display_name if spell else String(spell_id)]
 		btn.pressed.connect(_on_wheel_slot_pressed.bind(i))
+		UiSfx.wire_button(btn)
 		slot_grid.add_child(btn)
 	acquired_list.clear()
 	for spell_id in SpellManager.get_acquired_spells():

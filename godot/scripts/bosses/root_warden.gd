@@ -1,10 +1,19 @@
 extends BaseBoss
-## BOSS-01 Root Warden — 3-phase anchor/grapple boss.
+## BOSS-01 Root Warden — 3-phase anchor/grapple boss with counterable mass-pull.
+
+
+var _counter_window_active: bool = false
+var _pull_cancelled: bool = false
 
 
 func _ready() -> void:
 	super._ready()
-	sprite.color = Color(0.45, 0.38, 0.28, 1.0)
+	EventBus.spell_cast.connect(_on_spell_cast)
+
+
+func _exit_tree() -> void:
+	if EventBus.spell_cast.is_connected(_on_spell_cast):
+		EventBus.spell_cast.disconnect(_on_spell_cast)
 
 
 func _perform_attack() -> void:
@@ -24,7 +33,7 @@ func _perform_attack() -> void:
 
 
 func _anchor_pull() -> void:
-	await show_telegraph(0.5, Color(1.0, 0.84, 0.0, 0.9))
+	await show_telegraph(0.5, Color(1.0, 0.84, 0.0, 0.9), 3)
 	if player == null:
 		return
 	var pull_dir := (global_position - player.global_position).normalized()
@@ -39,7 +48,8 @@ func _anchor_pull() -> void:
 
 
 func _root_spear() -> void:
-	await show_telegraph(0.35)
+	await show_telegraph(0.35, Color(1.0, 0.42, 0.21, 0.85), 2)
+	play_animation(&"attack")
 	var dir := 1.0 if player.global_position.x >= global_position.x else -1.0
 	hitbox_component.damage = 22
 	hitbox_component.damage_type = &"nature"
@@ -48,10 +58,12 @@ func _root_spear() -> void:
 	hitbox_component.enable_hitbox()
 	await get_tree().create_timer(0.2).timeout
 	hitbox_component.disable_hitbox()
+	play_animation(&"idle")
 
 
 func _lattice_merge_attack() -> void:
-	await show_telegraph(0.4, Color(0.25, 0.57, 0.45, 0.9))
+	await show_telegraph(0.4, Color(0.25, 0.57, 0.45, 0.9), 2)
+	play_animation(&"phase2")
 	modulate = Color(0.7, 0.9, 0.8, 0.85)
 	await get_tree().create_timer(0.6).timeout
 	modulate = Color.WHITE
@@ -59,8 +71,23 @@ func _lattice_merge_attack() -> void:
 
 
 func _mass_pull() -> void:
-	await show_telegraph(0.55, Color(1.0, 0.3, 0.2, 0.95))
+	_pull_cancelled = false
+	_counter_window_active = true
+	await show_telegraph(0.55, Color(0.48, 0.17, 0.75, 0.95), 3)
 	if player == null:
+		_counter_window_active = false
+		return
+	# T4 safe window — counter with Rune Anchor or Veil Step dash.
+	telegraph.visible = true
+	telegraph.modulate = Color(0.28, 0.79, 0.89, 0.9)
+	await get_tree().create_timer(0.35).timeout
+	telegraph.visible = false
+	_counter_window_active = false
+	if _pull_cancelled or player == null:
+		EventBus.ui_toast.emit("Pull countered!")
+		modulate = Color(0.6, 0.9, 1.0, 1.0)
+		await get_tree().create_timer(0.4).timeout
+		modulate = Color.WHITE
 		return
 	var pull_dir := (global_position - player.global_position).normalized()
 	player.velocity = pull_dir * 360.0
@@ -73,9 +100,16 @@ func _mass_pull() -> void:
 	hitbox_component.disable_hitbox()
 
 
+func _on_spell_cast(spell_id: StringName, caster: Node2D) -> void:
+	if not _counter_window_active or caster != player:
+		return
+	if spell_id == &"rune_anchor" or spell_id == &"veil_step" or spell_id == &"arc_step":
+		_pull_cancelled = true
+
+
 func _on_phase_enter(phase: int) -> void:
 	match phase:
 		1:
-			sprite.color = Color(0.3, 0.5, 0.35, 1.0)
+			play_animation(&"phase2")
 		2:
-			sprite.color = Color(0.55, 0.2, 0.25, 1.0)
+			play_animation(&"phase3")

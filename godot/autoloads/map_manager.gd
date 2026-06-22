@@ -5,6 +5,7 @@ extends Node
 enum DiscoveryState { UNKNOWN, ADJACENT, VISITED, MAPPED }
 
 const REGION_PATHS: Array[String] = [
+	"res://resources/world/ashen_threshold.tres",
 	"res://resources/world/whisperwood_hollow.tres",
 ]
 

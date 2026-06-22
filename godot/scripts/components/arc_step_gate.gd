@@ -32,13 +32,14 @@ func _exit_tree() -> void:
 
 
 func _on_spell_cast(spell_id: StringName, caster: Node2D) -> void:
-	if _cleared or spell_id != &"arc_step":
-		return
-	if not SpellManager.has_spell(&"arc_step"):
+	if _cleared:
 		return
 	if caster == null or caster.global_position.distance_to(global_position) > proximity_radius:
 		return
-	_clear(true)
+	if spell_id == &"arc_step" and SpellManager.has_spell(&"arc_step"):
+		_clear(true)
+		return
+	GateFailureFeedback.try_emit(spell_id, &"arc_step")
 
 
 func _clear(emit_event: bool) -> void:

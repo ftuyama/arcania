@@ -1,9 +1,13 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
 [ext_resource type="Script" path="res://scripts/world/styled_room_geometry.gd" id="2_geom"]
 [ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/bramble_stalker.tscn" id="4_stalker"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/mothling_swarm.tscn" id="5_mothling"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/thornweft_larva.tscn" id="6_larva"]
+[ext_resource type="PackedScene" path="res://scenes/components/spell_pickup.tscn" id="7_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/components/phase_barrier.tscn" id="8_barrier"]
 
 [node name="at_03_east_road" type="Node2D"]
 script = ExtResource("1_room")
@@ -40,9 +44,44 @@ position = Vector2(1436, 420)
 position = Vector2(480, 420)
 
 [node name="Stalker1" parent="Entities/Enemies" instance=ExtResource("4_stalker")]
-position = Vector2(720, 420)
+position = Vector2(960, 324)
+
+[node name="Larva0" parent="Entities/Enemies" instance=ExtResource("6_larva")]
+position = Vector2(320, 420)
+patrol_left = -48.0
+patrol_right = 48.0
+
+[node name="Larva1" parent="Entities/Enemies" instance=ExtResource("6_larva")]
+position = Vector2(1152, 228)
+patrol_left = -40.0
+patrol_right = 40.0
+
+[node name="MothlingOrbit" parent="Entities/Enemies" instance=ExtResource("5_mothling")]
+position = Vector2(640, 260)
+orbit_mode = true
+orbit_radius = 52.0
+orbit_speed = 1.6
+orbit_angle_start = 0.0
+
+[node name="MothlingSwarm" parent="Entities/Enemies" instance=ExtResource("5_mothling")]
+position = Vector2(1280, 292)
+orbit_mode = true
+orbit_radius = 44.0
+orbit_speed = 1.2
+orbit_angle_start = 1.57
 
 [node name="AbilityGates" type="Node2D" parent="."]
+
+[node name="PhaseShortcut" parent="AbilityGates" instance=ExtResource("8_barrier")]
+position = Vector2(1040, 300)
+barrier_id = &"at_03_phase_shortcut"
+
+[node name="VeilStepShrine" parent="." instance=ExtResource("7_pickup")]
+position = Vector2(1232, 228)
+spell_id = &"veil_step"
+pickup_id = &"at_03_veil_step"
+celebrate_unlock = true
+glow_color = Color(0.62, 0.31, 0.87, 0.7)
 
 [node name="RoomTransitions" type="Node2D" parent="."]
 

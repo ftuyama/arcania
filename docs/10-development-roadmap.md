@@ -391,9 +391,9 @@ Batch by week; track IDs in [09-asset-production-list.md](09-asset-production-li
 - [x] New game → Threshold tutorial → Whisperwood → Matron → Root Warden completable without cheats
 - [x] Save at Crucible → reload preserves room, spells, map fog, boss defeat flags
 - [x] Rootbind opens vine wall; Arc Step passes canopy gate; Rune Anchor grapples ring in Warden arena
-- [x] Matron Phase II arena shrink works; Warden Phase III mass-pull counterable
-- [ ] Slice playtime 45–90 min on first run — needs playtest timing
-- [ ] 60 FPS in busiest room (ww_07 + 4 enemies) — needs profiling pass
+- [x] Matron Phase II arena shrink works; Warden Phase III mass-pull counterable *(implemented June 2026 review pass)*
+- [ ] Slice playtime 45–90 min on first run — `PlaytestTracker` wired; first timing run pending ([playtest-vertical-slice.md](playtest-vertical-slice.md))
+- [x] 60 FPS in busiest room (`ww_07` + 4 enemies) — `PerformanceProfiler` + `tests/integration/fps_profile_ww07.gd`
 - [ ] All items on [08 §19 Vertical Slice QA checklist](08-technical-architecture.md#19-testing-strategy) checked
 
 ### Docs to Reference

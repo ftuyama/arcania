@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://arcania_hud"]
+[gd_scene load_steps=3 format=3 uid="uid://arcania_hud"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/region_title_card.gd" id="2_region_title"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -175,3 +176,97 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 13
 text = "Toast"
 horizontal_alignment = 1
+
+[node name="RegionNameToast" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_region_title")
+
+[node name="Center" type="CenterContainer" parent="RegionNameToast"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="RegionNameToast/Center"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleRow" type="HBoxContainer" parent="RegionNameToast/Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="LeftLine" type="ColorRect" parent="RegionNameToast/Center/VBox/TitleRow"]
+custom_minimum_size = Vector2(72, 1)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.929, 0.878, 0.784, 0.45)
+
+[node name="TitleLabel" type="Label" parent="RegionNameToast/Center/VBox/TitleRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.929, 0.878, 0.784, 1)
+theme_override_colors/font_shadow_color = Color(0.02, 0.02, 0.05, 0.85)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/shadow_outline_size = 4
+theme_override_font_sizes/font_size = 34
+text = "Region Name"
+horizontal_alignment = 1
+
+[node name="RightLine" type="ColorRect" parent="RegionNameToast/Center/VBox/TitleRow"]
+custom_minimum_size = Vector2(72, 1)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.929, 0.878, 0.784, 0.45)
+
+[node name="SubtitleLabel" type="Label" parent="RegionNameToast/Center/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.749, 0.718, 0.647, 0.9)
+theme_override_colors/font_shadow_color = Color(0.02, 0.02, 0.05, 0.7)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 1
+theme_override_constants/shadow_outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = ""
+horizontal_alignment = 1
+
+[node name="SpellToast" type="HBoxContainer" parent="."]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 56.0
+offset_right = 120.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="SpellIcon" type="TextureRect" parent="SpellToast"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SpellNameLabel" type="Label" parent="SpellToast"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.62, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
+text = "Spell Acquired"
+vertical_alignment = 1

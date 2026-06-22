@@ -37,9 +37,28 @@ const BACKED_REGIONS: Array[StringName] = [
 	&"whisperwood_hollow",
 ]
 
+const REGION_AUDIO: Dictionary = {
+	&"ashen_threshold": {
+		"music": "res://assets/audio/music/mus_01_threshold.wav",
+		"ambience": "res://assets/audio/ambient/amb_01_threshold.wav",
+	},
+	&"dev": {
+		"music": "res://assets/audio/music/mus_01_threshold.wav",
+		"ambience": "res://assets/audio/ambient/amb_01_threshold.wav",
+	},
+	&"whisperwood_hollow": {
+		"music": "res://assets/audio/music/mus_02_whisperwood.wav",
+		"ambience": "res://assets/audio/ambient/amb_02_whisperwood.wav",
+	},
+}
+
 
 static func region_has_backdrop(id: StringName) -> bool:
 	return id in BACKED_REGIONS
+
+
+static func get_region_audio(id: StringName) -> Dictionary:
+	return REGION_AUDIO.get(id, {})
 
 
 func _ready() -> void:

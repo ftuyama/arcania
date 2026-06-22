@@ -23,6 +23,10 @@ const TWEEN_DURATION := 0.18
 @onready var quest_label: Label = $QuestTracker/QuestLabel
 @onready var boss_bar: ProgressBar = $BossBarContainer/BossHealthBar
 @onready var boss_name_label: Label = $BossBarContainer/BossNameLabel
+@onready var region_title: Control = $RegionNameToast
+@onready var spell_toast: Control = $SpellToast
+@onready var spell_icon: TextureRect = $SpellToast/SpellIcon
+@onready var spell_name_label: Label = $SpellToast/SpellNameLabel
 
 var _player: Player
 var _active_boss: BaseBoss = null
@@ -30,19 +34,23 @@ var _hp_tween: Tween
 var _mana_tween: Tween
 var _hp_fill_style: StyleBoxFlat
 var _mana_fill_style: StyleBoxFlat
+var _shard_row: HBoxContainer
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 10
 	_style_hud_bars()
+	_build_shard_row()
 	EventBus.player_spawned.connect(_on_player_spawned)
+	EventBus.region_entered.connect(_on_region_entered)
 	EventBus.enemy_defeated.connect(_on_enemy_defeated)
 	EventBus.boss_fight_started.connect(_on_boss_fight_started)
 	EventBus.boss_defeated.connect(_on_boss_defeated)
 	EventBus.game_paused.connect(_on_game_paused)
 	EventBus.game_resumed.connect(_on_game_resumed)
 	EventBus.ui_toast.connect(_on_ui_toast)
+	EventBus.spell_acquired.connect(_on_spell_acquired)
 	EventBus.quest_started.connect(_on_quest_changed)
 	EventBus.quest_updated.connect(_on_quest_changed)
 	EventBus.quest_completed.connect(_on_quest_changed)
@@ -68,12 +76,16 @@ func _exit_tree() -> void:
 		EventBus.game_resumed.disconnect(_on_game_resumed)
 	if EventBus.ui_toast.is_connected(_on_ui_toast):
 		EventBus.ui_toast.disconnect(_on_ui_toast)
+	if EventBus.spell_acquired.is_connected(_on_spell_acquired):
+		EventBus.spell_acquired.disconnect(_on_spell_acquired)
 	if EventBus.quest_started.is_connected(_on_quest_changed):
 		EventBus.quest_started.disconnect(_on_quest_changed)
 	if EventBus.quest_updated.is_connected(_on_quest_changed):
 		EventBus.quest_updated.disconnect(_on_quest_changed)
 	if EventBus.quest_completed.is_connected(_on_quest_changed):
 		EventBus.quest_completed.disconnect(_on_quest_changed)
+	if EventBus.region_entered.is_connected(_on_region_entered):
+		EventBus.region_entered.disconnect(_on_region_entered)
 
 
 func _process(_delta: float) -> void:
@@ -133,8 +145,10 @@ func _bind_player(player: Player) -> void:
 	player.health_component.healed.connect(_on_hp_changed)
 	player.mana_component.mana_changed.connect(_on_mana_changed)
 	player.mana_component.overcast_used.connect(_on_overcast_used)
+	player.mana_component.focus_shards_changed.connect(_on_focus_shards_changed)
 	_on_hp_changed(0, null)
 	_on_mana_changed(player.mana_component.current_mana, float(player.mana_component.max_mana))
+	_on_focus_shards_changed(player.mana_component.focus_shard_count, ManaComponent.MAX_SHARDS)
 	_update_essence()
 
 
@@ -235,6 +249,30 @@ func _on_ui_toast(message: String) -> void:
 	, CONNECT_ONE_SHOT)
 
 
+func _on_spell_acquired(spell_id: StringName) -> void:
+	var spell := SpellManager.get_spell(spell_id)
+	if spell == null:
+		return
+	spell_name_label.text = spell.display_name
+	if spell.icon:
+		spell_icon.texture = spell.icon
+	spell_toast.visible = true
+	spell_toast.modulate = Color.WHITE
+	var tween := create_tween()
+	tween.tween_property(spell_toast, "modulate:a", 1.0, 0.12)
+	get_tree().create_timer(2.5).timeout.connect(func() -> void:
+		if not is_instance_valid(self):
+			return
+		var fade := create_tween()
+		fade.tween_property(spell_toast, "modulate:a", 0.0, 0.25)
+		fade.tween_callback(func() -> void:
+			if is_instance_valid(spell_toast):
+				spell_toast.visible = false
+				spell_toast.modulate = Color.WHITE
+		)
+	, CONNECT_ONE_SHOT)
+
+
 func _on_quest_changed(_a = null, _b = null) -> void:
 	_update_quest_tracker()
 
@@ -248,3 +286,39 @@ func _update_quest_tracker() -> void:
 	if quest == null:
 		return
 	quest_label.text = "%s: %s" % [quest.title, QuestManager.get_active_objective_text(active[0])]
+
+
+func _build_shard_row() -> void:
+	var mana_row := $MarginContainer/VBox/ManaRow
+	_shard_row = HBoxContainer.new()
+	_shard_row.name = "ShardRow"
+	_shard_row.add_theme_constant_override(&"separation", 2)
+	mana_row.add_child(_shard_row)
+	mana_row.move_child(_shard_row, 0)
+
+
+func _on_focus_shards_changed(count: int, max_shards: int) -> void:
+	if _shard_row == null:
+		return
+	for child in _shard_row.get_children():
+		child.queue_free()
+	for i in max_shards:
+		var pip := ColorRect.new()
+		pip.custom_minimum_size = Vector2(8, 8)
+		pip.color = Color(0.0, 0.85, 0.95, 0.95) if i < count else Color(0.15, 0.15, 0.2, 0.8)
+		_shard_row.add_child(pip)
+
+
+func _on_region_entered(region_id: StringName) -> void:
+	if region_id == &"dev" or region_id.is_empty():
+		return
+	var region := MapManager.get_region(region_id)
+	var title := region.display_name if region else _format_region_id(region_id)
+	if title.is_empty():
+		return
+	if region_title.has_method(&"show_title"):
+		region_title.show_title(title)
+
+
+func _format_region_id(region_id: StringName) -> String:
+	return String(region_id).replace("_", " ").capitalize()

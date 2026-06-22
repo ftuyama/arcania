@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RegionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/world/RegionData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+region_id = &"ashen_threshold"
+display_name = "Ashen Threshold"
+grid_width = 4
+grid_height = 4
+room_layout = Array[String](["at_01_threshold_hub", "at_03_east_road", "", "", "", "", "", "", "", "", "", "", "", "", "", ""])
+total_secrets = 0
+total_bosses = 0

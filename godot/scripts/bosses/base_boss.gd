@@ -9,7 +9,7 @@ extends CharacterBody2D
 @onready var hurtbox_component: HurtboxComponent = $HurtboxComponent
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var phase_manager: BossPhaseManager = $BossPhaseManager
-@onready var sprite: ColorRect = $Sprite
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var telegraph: ColorRect = $Telegraph
 @onready var arena_boundary: StaticBody2D = $ArenaBoundary
 
@@ -17,6 +17,7 @@ var player: Player
 var _fight_active: bool = false
 var _attack_timer: float = 2.0
 var _defeated: bool = false
+var _current_anim: StringName = &""
 
 
 func _ready() -> void:
@@ -37,6 +38,7 @@ func _ready() -> void:
 		arena_boundary.set_deferred(&"collision_layer", 0)
 	await get_tree().process_frame
 	player = get_tree().get_first_node_in_group(&"player") as Player
+	play_animation(&"idle")
 
 
 func _physics_process(delta: float) -> void:
@@ -86,15 +88,28 @@ func face_player() -> void:
 	if player == null:
 		return
 	var dir := 1 if player.global_position.x >= global_position.x else -1
-	sprite.scale.x = absf(sprite.scale.x) * float(dir)
+	animated_sprite.flip_h = dir < 0
 
 
-func show_telegraph(duration: float, color: Color = Color(1.0, 0.42, 0.21, 0.85)) -> void:
+func play_animation(anim_name: StringName) -> void:
+	if _current_anim == anim_name:
+		return
+	if not animated_sprite.sprite_frames or not animated_sprite.sprite_frames.has_animation(anim_name):
+		return
+	_current_anim = anim_name
+	animated_sprite.play(anim_name)
+
+
+func show_telegraph(duration: float, color: Color = Color(1.0, 0.42, 0.21, 0.85), tier: int = 2) -> void:
+	play_animation(&"telegraph")
 	telegraph.visible = true
 	telegraph.modulate = color
+	CombatJuice.on_boss_telegraph(tier)
 	await get_tree().create_timer(duration).timeout
 	if is_instance_valid(telegraph):
 		telegraph.visible = false
+	if not _defeated:
+		play_animation(&"idle")
 
 
 func _get_attack_interval() -> float:

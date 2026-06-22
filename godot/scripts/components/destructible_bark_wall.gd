@@ -39,14 +39,19 @@ func on_hit_by_spell(spell_id: StringName, _hitbox: HitboxComponent) -> void:
 		return
 	if spell_id == &"ember_sigil":
 		_take_hit(15)
+		return
+	GateFailureFeedback.try_emit(spell_id, &"ember_sigil")
 
 
 func _on_spell_cast(spell_id: StringName, caster: Node2D) -> void:
-	if _destroyed or spell_id != &"ember_sigil":
+	if _destroyed:
 		return
 	if caster == null or caster.global_position.distance_to(global_position) > 96.0:
 		return
-	_take_hit(15)
+	if spell_id == &"ember_sigil":
+		_take_hit(15)
+		return
+	GateFailureFeedback.try_emit(spell_id, &"ember_sigil")
 
 
 func _take_hit(amount: int) -> void:

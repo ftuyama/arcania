@@ -36,6 +36,7 @@ func load_game(slot_id: String) -> bool:
 	if parsed == null or not parsed is Dictionary:
 		push_error("SaveManager: invalid JSON in %s" % path)
 		return false
+	PlaytestTracker.disable_tracking()
 	_apply_save_data(parsed)
 	current_slot = slot_id
 	EventBus.game_loaded.emit(slot_id)
@@ -111,6 +112,7 @@ func start_new_game() -> void:
 	InventorySystem.reset_to_defaults()
 	QuestManager.reset_to_defaults()
 	MapManager.reset_to_defaults()
+	PlaytestTracker.begin_new_game_session()
 
 
 func _apply_save_data(data: Dictionary) -> void:
@@ -122,3 +124,7 @@ func _apply_save_data(data: Dictionary) -> void:
 	InventorySystem.apply_save_data(data.get("inventory", {}))
 	QuestManager.apply_save_data(data.get("quests", {}))
 	MapManager.apply_save_data(data.get("map", {}))
+	var settings: Dictionary = data.get("settings", {})
+	if not settings.is_empty():
+		GameManager.apply_settings(settings)
+		AudioManager.apply_settings(settings)

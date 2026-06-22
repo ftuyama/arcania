@@ -29,6 +29,10 @@ C_PURPLE = (0x9D, 0x4E, 0xDD, 255)
 C_VINE = (0x52, 0xB7, 0x88, 255)
 C_LEAF_DARK = (0x38, 0x59, 0x3D, 255)
 C_YELLOW = (0xFF, 0xD6, 0x0A, 255)
+C_NULL_WHITE = (0xE8, 0xE8, 0xE8, 255)
+C_INK = (0x0B, 0x09, 0x0A, 255)
+C_ASH_GREY = (0x8D, 0x99, 0xAE, 255)
+C_BEARD = (0x9A, 0x9A, 0xA8, 255)
 C_TRANSPARENT = (0, 0, 0, 0)
 
 # Implemented spells — icons (48×48) + VFX sheets (128×128 cells)
@@ -59,12 +63,15 @@ def ensure_dirs() -> None:
         ASSETS / "sprites/player",
         ASSETS / "sprites/enemies/e01_ash_wisp",
         ASSETS / "sprites/enemies/e03_bramble_stalker",
+        ASSETS / "sprites/bosses/mb_01_thornweft_matron",
+        ASSETS / "sprites/bosses/boss_01_root_warden",
         ASSETS / "sprites/tilesets/01_ashen_threshold",
         ASSETS / "sprites/tilesets/02_whisperwood_hollow",
         ASSETS / "sprites/vfx/spells",
         ASSETS / "sprites/ui",
         ASSETS / "sprites/ui/icons",
         ASSETS / "sprites/world",
+        ASSETS / "sprites/npcs",
         ASSETS / "audio/ambient",
         ASSETS / "audio/sfx/player",
         ASSETS / "audio/sfx/ui",
@@ -85,6 +92,7 @@ def draw_elara_frame(draw: ImageDraw.ImageDraw, frame: int, anim: str) -> None:
     leg_r = 0
     arm_swing = 0
     robe_flare = 0
+    lean = 0
     squash = 1.0
     glow_pulse = 0.6 + 0.4 * math.sin(frame * 0.8)
 
@@ -106,38 +114,50 @@ def draw_elara_frame(draw: ImageDraw.ImageDraw, frame: int, anim: str) -> None:
         leg_r = -2
         arm_swing = -4
     elif anim == "dash":
-        squash = 0.85
-        robe_flare = 6
-        bob = -2
+        squash = 0.82 if frame < 2 else 0.9
+        robe_flare = 4 + frame
+        bob = -3 if frame < 3 else -1
+        lean = -4 - frame * 2
     elif anim == "melee_1":
-        squash = 0.95 if frame < 2 else 1.05
-        arm_swing = [-6, 8, 6, 1][min(frame, 3)]
-        bob = 1 if frame == 2 else 0
+        squash = 0.92 if frame < 2 else (1.06 if frame < 4 else 0.98)
+        arm_swing = [-8, -4, 10, 12, 6, 2][min(frame, 5)]
+        bob = 2 if frame in (2, 3) else 0
+        robe_flare = 3 if frame in (2, 3) else 0
     elif anim == "melee_2":
-        squash = 0.95 if frame < 2 else 1.0
-        arm_swing = [-4, 10, 8, 2][min(frame, 3)]
-        robe_flare = 2 if frame == 2 else 0
+        squash = 0.94 if frame < 2 else (1.04 if frame < 4 else 1.0)
+        arm_swing = [-6, -2, 12, 14, 8, 3][min(frame, 5)]
+        robe_flare = 4 if frame in (2, 3) else 1
+        bob = 1 if frame == 3 else 0
     elif anim == "melee_3":
-        squash = 1.1 if frame < 2 else 0.9
-        arm_swing = [-8, -10, 12, 4][min(frame, 3)]
-        bob = -3 if frame < 2 else 1
+        squash = 1.12 if frame < 2 else (0.88 if frame < 4 else 0.95)
+        arm_swing = [-10, -12, 14, 16, 8, 2][min(frame, 5)]
+        bob = -4 if frame < 2 else (2 if frame == 3 else 0)
+        robe_flare = 5 if frame in (2, 3) else 2
     elif anim == "cast":
-        squash = 1.05 if frame in (2, 3) else 1.0
-        arm_swing = min(frame * 2, 8)
-        glow_pulse = 0.7 + 0.3 * math.sin(frame * 1.4)
-        bob = -1 if frame >= 2 else 0
+        squash = 1.08 if frame in (2, 3) else (0.96 if frame == 0 else 1.0)
+        arm_swing = [0, 2, 6, 10, 8, 4][min(frame, 5)]
+        glow_pulse = 0.65 + 0.35 * math.sin(frame * 1.6)
+        bob = -2 if frame in (2, 3) else 0
+        robe_flare = 2 + frame if frame < 4 else 3
+    elif anim == "hit":
+        squash = 0.9 if frame < 2 else 0.95
+        lean = [-6, -8, -4, -2][min(frame, 3)]
+        bob = 2 if frame < 2 else 0
+        arm_swing = [4, 6, 2, 0][min(frame, 3)]
+        glow_pulse = 0.25 + 0.15 * (3 - frame)
 
     body_h = int(22 * squash)
     body_top = oy - 28 - bob
+    draw_ox = ox + lean
 
     # Robe hem / legs
     hem_y = oy - 10 - bob
     draw.polygon(
         [
-            (ox - 10 - robe_flare, hem_y),
-            (ox + 10 + robe_flare, hem_y),
-            (ox + 8 + leg_r, oy),
-            (ox - 8 + leg_l, oy),
+            (draw_ox - 10 - robe_flare, hem_y),
+            (draw_ox + 10 + robe_flare, hem_y),
+            (draw_ox + 8 + leg_r, oy),
+            (draw_ox - 8 + leg_l, oy),
         ],
         fill=C_BASE,
         outline=C_SHADOW,
@@ -145,44 +165,66 @@ def draw_elara_frame(draw: ImageDraw.ImageDraw, frame: int, anim: str) -> None:
 
     # Torso
     draw.rectangle(
-        (ox - 9, body_top + 8, ox + 9, hem_y),
+        (draw_ox - 9, body_top + 8, draw_ox + 9, hem_y),
         fill=C_BASE,
         outline=C_MID,
     )
 
     # Trim line
-    draw.line((ox - 7, body_top + 14, ox + 7, body_top + 14), fill=C_MID, width=1)
+    draw.line((draw_ox - 7, body_top + 14, draw_ox + 7, body_top + 14), fill=C_MID, width=1)
 
     # Hood + head
     head_cy = body_top + 4
-    draw.ellipse((ox - 8, head_cy - 10, ox + 8, head_cy + 6), fill=C_SHADOW, outline=C_MID)
-    draw.ellipse((ox - 5, head_cy - 4, ox + 5, head_cy + 2), fill=C_SKIN)
+    draw.ellipse((draw_ox - 8, head_cy - 10, draw_ox + 8, head_cy + 6), fill=C_SHADOW, outline=C_MID)
+    draw.ellipse((draw_ox - 5, head_cy - 4, draw_ox + 5, head_cy + 2), fill=C_SKIN)
 
     # Left arm + ember sigil palm
-    palm_x = ox - 12 - arm_swing
+    palm_x = draw_ox - 12 - arm_swing
     palm_y = body_top + 16
-    draw.line((ox - 6, body_top + 12, palm_x, palm_y), fill=C_MID, width=2)
+    draw.line((draw_ox - 6, body_top + 12, palm_x, palm_y), fill=C_MID, width=2)
     glow = tuple(int(c * glow_pulse) for c in C_ACCENT[:3]) + (255,)
     draw.ellipse((palm_x - 3, palm_y - 3, palm_x + 3, palm_y + 3), fill=glow)
     draw.ellipse((palm_x - 1, palm_y - 1, palm_x + 1, palm_y + 1), fill=(255, 220, 180, 255))
 
     # Right arm (combat hand)
-    right_x = ox + 12 + arm_swing
+    right_x = draw_ox + 12 + arm_swing
     right_y = body_top + 18
     if anim == "melee_3" and frame < 2:
         right_y = body_top + 6 - frame * 2
-        right_x = ox + 8 + frame * 2
+        right_x = draw_ox + 8 + frame * 2
     elif anim == "cast" and frame >= 2:
-        right_x = ox + 18 + arm_swing
+        right_x = draw_ox + 18 + arm_swing
         right_y = body_top + 14
-    draw.line((ox + 6, body_top + 12, right_x, right_y), fill=C_MID, width=2)
+    elif anim == "hit":
+        right_x = draw_ox + 6 + arm_swing
+        right_y = body_top + 20 + frame
+    draw.line((draw_ox + 6, body_top + 12, right_x, right_y), fill=C_MID, width=2)
     if anim == "cast" and frame >= 2:
         cast_glow = tuple(int(c * glow_pulse) for c in C_ACCENT[:3]) + (255,)
         draw.ellipse((right_x - 4, right_y - 4, right_x + 4, right_y + 4), fill=cast_glow)
+        # Sigil bloom ring
+        ring_r = 6 + frame
+        draw.ellipse(
+            (right_x - ring_r, right_y - ring_r, right_x + ring_r, right_y + ring_r),
+            outline=(*C_CYAN[:3], 100),
+            width=1,
+        )
 
     if anim == "dash":
-        # Cyan after-image streak
-        draw.line((ox - 20, body_top + 14, ox - 4, body_top + 14), fill=(*C_CYAN[:3], 120), width=2)
+        # Cyan after-image streaks — Arc Step read
+        for streak in range(3):
+            sx = draw_ox - 14 - streak * 10 - frame * 4
+            sy = body_top + 12 + streak * 2
+            alpha = 140 - streak * 40
+            draw.line((sx, sy, sx + 18, sy), fill=(*C_CYAN[:3], alpha), width=2)
+            draw.ellipse((sx - 4, sy - 6, sx + 4, sy + 2), fill=(*C_PURPLE[:3], alpha // 2))
+
+    if anim == "hit" and frame < 2:
+        # Crimson impact flash on torso
+        draw.ellipse(
+            (draw_ox - 6, body_top + 10, draw_ox + 6, body_top + 22),
+            fill=(*C_ACCENT[:3], 80),
+        )
 
 
 def build_elara_sheet() -> Path:
@@ -192,10 +234,11 @@ def build_elara_sheet() -> Path:
         "jump": 6,
         "fall": 4,
         "dash": 6,
-        "melee_1": 4,
-        "melee_2": 4,
-        "melee_3": 4,
+        "melee_1": 6,
+        "melee_2": 6,
+        "melee_3": 6,
         "cast": 6,
+        "hit": 4,
     }
     max_frames = max(anims.values())
     sheet_w = max_frames * 64
@@ -226,10 +269,11 @@ def build_elara_sheet() -> Path:
             "jump": 12.0,
             "fall": 10.0,
             "dash": 18.0,
-            "melee_1": 14.0,
-            "melee_2": 14.0,
-            "melee_3": 14.0,
+            "melee_1": 16.0,
+            "melee_2": 16.0,
+            "melee_3": 16.0,
             "cast": 14.0,
+            "hit": 14.0,
         },
     )
     return out
@@ -240,7 +284,10 @@ def write_sprite_frames_tres(
     out_path: Path,
     regions: dict[str, list[tuple[int, int, int, int]]],
     speeds: dict[str, float],
+    loop_anims: set[str] | None = None,
 ) -> None:
+    if loop_anims is None:
+        loop_anims = {"idle", "walk", "fall"}
     lines = [
         '[gd_resource type="SpriteFrames" load_steps=2 format=3]',
         "",
@@ -258,7 +305,7 @@ def write_sprite_frames_tres(
             frames.append(
                 f'{{"duration": 1.0, "texture": SubResource("AtlasTexture_{sub_id}")}}'
             )
-        loop = "true" if anim_name in ("idle", "walk", "fall") else "false"
+        loop = "true" if anim_name in loop_anims else "false"
         speed = speeds.get(anim_name, 10.0)
         anim_entries.append(
             "{\n"
@@ -394,6 +441,105 @@ def draw_bramble_frame(draw: ImageDraw.ImageDraw, frame: int, anim: str) -> None
     draw.point((head_x + 2, head_y), fill=C_ACCENT)
 
 
+def draw_corin_frame(draw: ImageDraw.ImageDraw, frame: int) -> None:
+    """Draw a 64×64 Magister Corin frame — weary Conclave mentor silhouette."""
+    ox, oy = 32, 62  # feet pivot (matches Elara)
+    bob = int(math.sin(frame * 0.65) * 1.0)
+    stoop = 3
+
+    coat_top = oy - 34 - bob - stoop
+    hem_y = oy - 12 - bob
+
+    # Boots
+    draw.rectangle((ox - 8, oy - 6, ox - 1, oy), fill=C_INK, outline=C_SHADOW)
+    draw.rectangle((ox + 1, oy - 6, ox + 8, oy), fill=C_INK, outline=C_SHADOW)
+
+    # Long coat hem — faded null-white with ash staining
+    draw.polygon(
+        [
+            (ox - 11, hem_y),
+            (ox + 11, hem_y),
+            (ox + 9, oy - 6),
+            (ox - 9, oy - 6),
+        ],
+        fill=C_NULL_WHITE,
+        outline=C_ASH_GREY,
+    )
+    draw.line((ox - 8, hem_y + 2, ox + 8, hem_y + 4), fill=C_ASH_GREY, width=1)
+
+    # Inner robe
+    draw.rectangle((ox - 7, coat_top + 14, ox + 7, hem_y), fill=C_INK, outline=C_SHADOW)
+
+    # Outer coat panels
+    draw.polygon(
+        [
+            (ox - 12, coat_top + 10),
+            (ox - 7, coat_top + 12),
+            (ox - 8, hem_y),
+            (ox - 13, hem_y - 2),
+        ],
+        fill=(*C_NULL_WHITE[:3], 230),
+        outline=C_ASH_GREY,
+    )
+    draw.polygon(
+        [
+            (ox + 12, coat_top + 10),
+            (ox + 7, coat_top + 12),
+            (ox + 8, hem_y),
+            (ox + 13, hem_y - 2),
+        ],
+        fill=(*C_NULL_WHITE[:3], 230),
+        outline=C_ASH_GREY,
+    )
+
+    # Null-thread belt
+    draw.line((ox - 10, hem_y - 4, ox + 10, hem_y - 3), fill=C_ASH_GREY, width=2)
+    draw.line((ox - 9, hem_y - 1, ox - 6, hem_y + 2), fill=C_ASH_GREY, width=1)
+
+    # Head — slight forward stoop
+    head_cx = ox + 1
+    head_cy = coat_top + 6
+    draw.ellipse((head_cx - 7, head_cy - 9, head_cx + 7, head_cy + 5), fill=C_SKIN, outline=C_MID)
+    draw.ellipse((head_cx - 6, head_cy - 1, head_cx + 6, head_cy + 6), fill=C_BEARD)
+
+    # Tired eyes
+    draw.point((head_cx - 3, head_cy - 2), fill=C_INK)
+    draw.point((head_cx + 3, head_cy - 2), fill=C_INK)
+    draw.line((head_cx - 4, head_cy - 4, head_cx - 1, head_cy - 3), fill=C_MID, width=1)
+    draw.line((head_cx + 1, head_cy - 3, head_cx + 4, head_cy - 4), fill=C_MID, width=1)
+
+    # Cracked focus orb on chain
+    chain_y = coat_top + 16
+    draw.line((head_cx + 5, head_cy + 2, head_cx + 10, chain_y), fill=C_GOLD, width=1)
+    orb_x, orb_y = head_cx + 12, chain_y + 2
+    draw.ellipse((orb_x - 4, orb_y - 4, orb_x + 4, orb_y + 4), fill=(*C_CYAN[:3], 180), outline=C_GOLD)
+    draw.line((orb_x - 2, orb_y - 1, orb_x + 1, orb_y + 2), fill=C_INK, width=1)
+
+
+def build_corin_sheet() -> Path:
+    """Magister Corin — Threshold mentor NPC."""
+    frames = 4
+    sheet = Image.new("RGBA", (64 * frames, 64), C_TRANSPARENT)
+    regions: dict[str, list[tuple[int, int, int, int]]] = {"idle": []}
+    for f in range(frames):
+        frame_img = Image.new("RGBA", (64, 64), C_TRANSPARENT)
+        draw = ImageDraw.Draw(frame_img)
+        draw_corin_frame(draw, f)
+        x = f * 64
+        sheet.paste(frame_img, (x, 0))
+        regions["idle"].append((x, 0, 64, 64))
+
+    out = ASSETS / "sprites/npcs/npc_magister_corin.png"
+    sheet.save(out)
+    write_sprite_frames_tres(
+        out.relative_to(GODOT),
+        ASSETS / "sprites/npcs/npc_magister_corin.tres",
+        regions,
+        {"idle": 6.0},
+    )
+    return out
+
+
 def build_bramble_stalker_sheet() -> Path:
     """E-03 Bramble Stalker — thorny ground predator."""
     anims = {"idle": 4, "walk": 6}
@@ -423,6 +569,238 @@ def build_bramble_stalker_sheet() -> Path:
         {"idle": 8.0, "walk": 10.0},
     )
     return out
+
+
+BOSS_FRAME = 96
+
+# Whisperwood Matron palette (docs/03-art-bible.md §8.1)
+C_MATRON_DARK = (0x1B, 0x43, 0x32, 255)
+C_MATRON_MID = (0x40, 0x91, 0x6C, 255)
+C_MATRON_SILK = (0xD8, 0xF3, 0xDC, 255)
+C_MATRON_THORN = (0x2D, 0x6A, 0x4F, 255)
+C_MATRON_SPORE = (0x74, 0xC6, 0x9D, 255)
+
+# Root Warden palette — ironroot lattice fused magistrate
+C_WARDEN_BARK = (0x5C, 0x4A, 0x38, 255)
+C_WARDEN_ROOT = (0x3D, 0x5A, 0x42, 255)
+C_WARDEN_DARK = (0x2A, 0x22, 0x18, 255)
+C_WARDEN_LEY = (0x4A, 0xC8, 0xB8, 255)
+C_WARDEN_RUNE = (0xE9, 0xC4, 0x6A, 255)
+
+
+def _build_creature_sheet(
+    out_dir: Path,
+    sheet_name: str,
+    anims: dict[str, int],
+    draw_fn,
+    speeds: dict[str, float],
+    frame_size: int = BOSS_FRAME,
+) -> Path:
+    max_frames = max(anims.values())
+    sheet_w = max_frames * frame_size
+    sheet_h = len(anims) * frame_size
+    sheet = Image.new("RGBA", (sheet_w, sheet_h), C_TRANSPARENT)
+    regions: dict[str, list[tuple[int, int, int, int]]] = {}
+
+    for row, (name, count) in enumerate(anims.items()):
+        regions[name] = []
+        for f in range(count):
+            frame_img = Image.new("RGBA", (frame_size, frame_size), C_TRANSPARENT)
+            draw = ImageDraw.Draw(frame_img)
+            draw_fn(draw, f, name, frame_size)
+            x = f * frame_size
+            y = row * frame_size
+            sheet.paste(frame_img, (x, y))
+            regions[name].append((x, y, frame_size, frame_size))
+
+    out = out_dir / f"{sheet_name}.png"
+    sheet.save(out)
+    write_sprite_frames_tres(
+        out.relative_to(GODOT),
+        out_dir / f"{sheet_name}.tres",
+        regions,
+        speeds,
+        loop_anims={"idle"},
+    )
+    return out
+
+
+def draw_matron_frame(draw: ImageDraw.ImageDraw, frame: int, anim: str, size: int) -> None:
+    """MB-01 Thornweft Matron — bloated silk moth with thorn legs."""
+    ox, oy = size // 2, size - 10
+    bob = int(math.sin(frame * 0.7) * 2)
+    wing_spread = 0
+    lash = 0
+    glow = 0.5 + 0.5 * math.sin(frame * 0.9)
+    body_color = C_MATRON_MID
+    silk_alpha = 180
+
+    if anim == "idle":
+        wing_spread = int(4 + math.sin(frame * 1.1) * 3)
+    elif anim == "attack":
+        lash = min(frame * 14, 42)
+        wing_spread = 6
+        bob = -2 if frame >= 2 else 0
+    elif anim == "telegraph":
+        glow = 0.7 + 0.3 * math.sin(frame * 1.6)
+        wing_spread = 10 + frame * 2
+        body_color = C_MATRON_SPORE
+    elif anim == "phase2":
+        wing_spread = 14
+        body_color = (0x52, 0xA3, 0x6F, 255)
+        silk_alpha = 220
+        bob = int(math.sin(frame * 1.4) * 3)
+
+    body_top = oy - 58 - bob
+    body_w = 34
+    body_h = 40
+
+    # Thorn legs
+    for side, phase in ((-1, 0.0), (1, math.pi * 0.5)):
+        lx = ox + side * (body_w // 2 + 4)
+        ly = oy - 18 - bob
+        knee_y = ly + 14 + int(math.sin(frame * 1.2 + phase) * 3)
+        draw.line((lx, ly, lx + side * 10, knee_y, lx + side * 6, oy - 6), fill=C_MATRON_THORN, width=3)
+        draw.polygon(
+            [(lx + side * 6, oy - 8), (lx + side * 10, oy - 2), (lx + side * 2, oy - 2)],
+            fill=C_MATRON_DARK,
+        )
+
+    # Silk wing membranes
+    for side in (-1, 1):
+        wx = ox + side * (14 + wing_spread)
+        draw.polygon(
+            [
+                (ox + side * 8, body_top + 8),
+                (wx, body_top - 6),
+                (wx + side * 8, body_top + 22),
+                (ox + side * 10, body_top + 30),
+            ],
+            fill=(*C_MATRON_SILK[:3], silk_alpha),
+            outline=C_MATRON_MID,
+        )
+
+    # Bloated abdomen
+    draw.ellipse(
+        (ox - body_w // 2, body_top + 10, ox + body_w // 2, body_top + body_h + 10),
+        fill=body_color,
+        outline=C_MATRON_DARK,
+    )
+    # Thorax / head bulb
+    draw.ellipse(
+        (ox - 14, body_top - 6, ox + 14, body_top + 18),
+        fill=C_MATRON_MID,
+        outline=C_MATRON_THORN,
+    )
+    # Spore core
+    core_r = 5 + int(glow * 3)
+    draw.ellipse(
+        (ox - core_r, body_top + 20 - core_r, ox + core_r, body_top + 20 + core_r),
+        fill=(*C_MATRON_SPORE[:3], int(120 + glow * 100)),
+    )
+    # Eyes
+    draw.point((ox - 5, body_top + 4), fill=C_MATRON_SILK)
+    draw.point((ox + 5, body_top + 4), fill=C_MATRON_SILK)
+
+    if lash > 0:
+        draw.line((ox + 16, body_top + 24, ox + 16 + lash, body_top + 30), fill=C_VINE, width=4)
+        for i in range(3):
+            tx = ox + 20 + lash - i * 8
+            draw.polygon([(tx, body_top + 26), (tx - 2, body_top + 32), (tx + 2, body_top + 32)], fill=C_MATRON_THORN)
+
+
+def draw_warden_frame(draw: ImageDraw.ImageDraw, frame: int, anim: str, size: int) -> None:
+    """BOSS-01 Root Warden — root-lattice fused mine magistrate."""
+    ox, oy = size // 2, size - 8
+    bob = int(math.sin(frame * 0.6) * 1.5)
+    spear = 0
+    pull_glow = 0.4
+    body_color = C_WARDEN_BARK
+    root_color = C_WARDEN_ROOT
+    ley_alpha = 160
+
+    if anim == "idle":
+        pull_glow = 0.45 + 0.35 * math.sin(frame * 0.8)
+    elif anim == "attack":
+        spear = min(frame * 18, 48)
+        bob = -1 if frame >= 2 else 0
+    elif anim == "telegraph":
+        pull_glow = 0.75 + 0.25 * math.sin(frame * 1.8)
+        body_color = (0x6A, 0x58, 0x44, 255)
+    elif anim == "phase2":
+        body_color = C_WARDEN_ROOT
+        root_color = (0x2E, 0x6B, 0x55, 255)
+        ley_alpha = 200
+        pull_glow = 0.8
+    elif anim == "phase3":
+        body_color = (0x34, 0x2C, 0x24, 255)
+        root_color = (0x5A, 0x38, 0x72, 255)
+        pull_glow = 0.95
+
+    torso_top = oy - 54 - bob
+
+    # Root tendrils anchoring to ground
+    for side, phase in ((-1, 0.0), (1, 1.2)):
+        base_x = ox + side * 22
+        sway = int(math.sin(frame * 0.9 + phase) * 4)
+        draw.line((base_x, oy - 4, base_x + sway, oy - 20, base_x + side * 6, oy - 36), fill=root_color, width=4)
+        draw.ellipse((base_x + side * 4 - 3, oy - 40, base_x + side * 4 + 3, oy - 34), fill=C_WARDEN_LEY)
+
+    # Heavy torso fused with roots
+    draw.polygon(
+        [
+            (ox - 20, torso_top + 28),
+            (ox + 20, torso_top + 28),
+            (ox + 16, oy - 10),
+            (ox - 16, oy - 10),
+        ],
+        fill=body_color,
+        outline=C_WARDEN_DARK,
+    )
+    # Shoulder lattice plates
+    draw.rectangle((ox - 24, torso_top + 6, ox - 10, torso_top + 20), fill=root_color, outline=C_WARDEN_DARK)
+    draw.rectangle((ox + 10, torso_top + 6, ox + 24, torso_top + 20), fill=root_color, outline=C_WARDEN_DARK)
+    # Head / helm silhouette
+    draw.rectangle((ox - 12, torso_top - 8, ox + 12, torso_top + 10), fill=C_WARDEN_DARK, outline=root_color)
+    draw.rectangle((ox - 8, torso_top - 2, ox + 8, torso_top + 4), fill=(*C_WARDEN_LEY[:3], ley_alpha))
+    # Ley core
+    core_r = 4 + int(pull_glow * 4)
+    draw.ellipse(
+        (ox - core_r, torso_top + 14 - core_r, ox + core_r, torso_top + 14 + core_r),
+        fill=(*C_WARDEN_LEY[:3], int(100 + pull_glow * 120)),
+    )
+    # Rune scars
+    draw.line((ox - 6, torso_top + 22, ox + 6, torso_top + 30), fill=C_WARDEN_RUNE, width=2)
+    draw.line((ox, torso_top + 18, ox, torso_top + 34), fill=C_WARDEN_RUNE, width=2)
+
+    if spear > 0:
+        tip_x = ox + 18 + spear
+        draw.line((ox + 14, torso_top + 16, tip_x, torso_top + 20), fill=root_color, width=5)
+        draw.polygon([(tip_x, torso_top + 16), (tip_x + 10, torso_top + 20), (tip_x, torso_top + 24)], fill=C_WARDEN_LEY)
+
+
+def build_thornweft_matron_sheet() -> Path:
+    """MB-01 Thornweft Matron — 96px boss sprite sheet."""
+    out_dir = ASSETS / "sprites/bosses/mb_01_thornweft_matron"
+    return _build_creature_sheet(
+        out_dir,
+        "mb_01_sheet",
+        {"idle": 6, "attack": 5, "telegraph": 4, "phase2": 6},
+        draw_matron_frame,
+        {"idle": 10.0, "attack": 12.0, "telegraph": 8.0, "phase2": 10.0},
+    )
+
+
+def build_root_warden_sheet() -> Path:
+    """BOSS-01 Root Warden — 96px boss sprite sheet."""
+    out_dir = ASSETS / "sprites/bosses/boss_01_root_warden"
+    return _build_creature_sheet(
+        out_dir,
+        "boss_01_sheet",
+        {"idle": 6, "attack": 5, "telegraph": 4, "phase2": 4, "phase3": 4},
+        draw_warden_frame,
+        {"idle": 10.0, "attack": 12.0, "telegraph": 8.0, "phase2": 10.0, "phase3": 10.0},
+    )
 
 
 def build_tileset() -> Path:
@@ -1008,6 +1386,31 @@ def gen_music_game_over() -> Path:
     return wav
 
 
+def gen_sfx_game_over() -> Path:
+    """Short D-minor death sting — sfx_game_over."""
+    duration = 2.4
+    n = int(SAMPLE_RATE * duration)
+    notes = [293.66, 261.63, 233.08, 196.0, 146.83]  # D4 down to D3
+    samples = []
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        seg = min(int(t / (duration / len(notes))), len(notes) - 1)
+        local_t = t - seg * (duration / len(notes))
+        freq = notes[seg]
+        env = math.exp(-local_t * 3.5) * (1.0 - t / duration)
+        s = (
+            _sine(freq, t, 0.22 * env)
+            + _sine(freq * 0.5, t, 0.1 * env)
+            + _sine(73.42, t, 0.06) * math.exp(-t * 0.6)
+        )
+        if t < 0.02:
+            s *= t / 0.02
+        samples.append(s)
+    wav = ASSETS / "audio/sfx/ui/sfx_game_over.wav"
+    _write_wav(wav, samples)
+    return wav
+
+
 def gen_stinger_main_menu() -> Path:
     duration = 3.0
     n = int(SAMPLE_RATE * duration)
@@ -1358,8 +1761,11 @@ def main() -> None:
     ensure_dirs()
     print("Generating sprites...")
     build_elara_sheet()
+    build_corin_sheet()
     build_enemy_sheet()
     build_bramble_stalker_sheet()
+    build_thornweft_matron_sheet()
+    build_root_warden_sheet()
     build_tileset()
     build_parallax()
     build_whisperwood_parallax()
@@ -1375,6 +1781,7 @@ def main() -> None:
         gen_footstep(f"sfx_footstep_stone_{i}", 200 + i * 20, i + 10)
     gen_ui_sound("ui_menu_select", 520, 680)
     gen_ui_sound("ui_menu_confirm", 440, 880, 0.12)
+    gen_sfx_game_over()
     gen_player_sfx("sfx_dash", "dash")
     gen_player_sfx("sfx_jump", "jump")
     gen_player_sfx("sfx_land", "land")

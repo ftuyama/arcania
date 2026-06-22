@@ -58,13 +58,20 @@ func _make_ashen_awakening() -> QuestData:
 	obj_wake.objective_type = QuestObjective.ObjectiveType.REACH_LOCATION
 	obj_wake.target_id = &"at_01_threshold_hub"
 
+	var obj_veil := QuestObjective.new()
+	obj_veil.id = &"learn_veil_step"
+	obj_veil.description = "Learn Veil Step on the East Road"
+	obj_veil.objective_type = QuestObjective.ObjectiveType.ACQUIRE_SPELL
+	obj_veil.target_id = &"veil_step"
+	obj_veil.optional = true
+
 	var obj_wood := QuestObjective.new()
 	obj_wood.id = &"enter_wood"
 	obj_wood.description = "Reach Whisperwood Forest Gate"
 	obj_wood.objective_type = QuestObjective.ObjectiveType.REACH_LOCATION
 	obj_wood.target_id = &"ww_01_forest_gate"
 
-	quest.objectives = [obj_wake, obj_wood]
+	quest.objectives = [obj_wake, obj_veil, obj_wood]
 
 	var rewards := QuestRewards.new()
 	rewards.weave_silk = 2

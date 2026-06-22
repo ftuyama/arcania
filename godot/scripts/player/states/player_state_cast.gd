@@ -42,6 +42,7 @@ func enter(payload: Dictionary) -> void:
 	_timer = spell.cast_time if spell else 0.15
 	player.velocity.x = 0.0
 	player.play_animation(&"cast", true)
+	_apply_cast_stretch(player)
 
 
 func physics_update(delta: float) -> void:
@@ -63,3 +64,9 @@ func physics_update(delta: float) -> void:
 
 func _get_player() -> Player:
 	return state_machine.get_parent() as Player
+
+
+func _apply_cast_stretch(player: Player) -> void:
+	var tween := player.create_tween()
+	player.animated_sprite.scale = Vector2(1.0, 1.1)
+	tween.tween_property(player.animated_sprite, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_QUAD)

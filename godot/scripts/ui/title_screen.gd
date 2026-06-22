@@ -3,7 +3,6 @@ extends Control
 
 
 const GAME_WORLD_SCENE := "res://scenes/world/game_world.tscn"
-const TITLE_MUSIC := "res://assets/audio/music/mus_01_threshold.wav"
 const TITLE_STINGER := "res://assets/audio/music/mus_stinger_main_menu.wav"
 
 const COLOR_GOLD := Color(0.92, 0.78, 0.55, 1.0)
@@ -32,7 +31,7 @@ var _starting: bool = false
 func _ready() -> void:
 	GameManager.state = GameManager.GameState.TITLE
 	AudioManager.play_ui(TITLE_STINGER)
-	AudioManager.play_music(TITLE_MUSIC)
+	AudioManager.play_region(&"ashen_threshold")
 	_style_buttons()
 	_style_load_panel()
 	_style_slot_list()
@@ -47,6 +46,7 @@ func _ready() -> void:
 	_populate_save_slots()
 	_refresh_continue_button()
 	load_panel.visible = false
+	UiSfx.wire_tree(self)
 	new_game_button.grab_focus()
 	_start_prompt_pulse()
 
@@ -217,6 +217,7 @@ func _on_quit_pressed() -> void:
 
 func _enter_game_world() -> void:
 	GameManager.state = GameManager.GameState.LOADING
+	AudioManager.enter_gameplay()
 	get_tree().change_scene_to_file(GAME_WORLD_SCENE)
 
 

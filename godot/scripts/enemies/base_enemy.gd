@@ -31,6 +31,7 @@ func _ready() -> void:
 		hurtbox_component.set_damage_multipliers(data.damage_multipliers)
 	health_component.damaged.connect(_on_damaged)
 	health_component.died.connect(_on_died)
+	health_component.poise_broken.connect(_on_poise_broken)
 	play_animation(&"idle")
 	await get_tree().process_frame
 	player = get_tree().get_first_node_in_group(&"player") as Player
@@ -90,6 +91,18 @@ func _on_damaged(_amount: int, _source: Node) -> void:
 		var current := state_machine.current_state
 		if current and current.name != &"Hit" and current.name != &"Dead":
 			state_machine.transition_to(&"Hit", {})
+
+
+func _on_poise_broken() -> void:
+	if health_component.current_hp <= 0:
+		return
+	velocity = Vector2.ZERO
+	telegraph.visible = true
+	telegraph.modulate = Color(0.29, 0.8, 0.95, 0.85)
+	get_tree().create_timer(0.45).timeout.connect(func() -> void:
+		if is_instance_valid(telegraph):
+			telegraph.visible = false
+	, CONNECT_ONE_SHOT)
 
 
 func _on_died() -> void:

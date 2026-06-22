@@ -21,18 +21,23 @@ func _exit_tree() -> void:
 
 
 func _on_spell_cast(spell_id: StringName, caster: Node2D) -> void:
-	if spell_id != required_spell:
-		return
-	if not SpellManager.has_spell(required_spell):
+	if _is_cleared():
 		return
 	if caster == null or caster.global_position.distance_to(global_position) > 140.0:
 		return
-	_clear_gate()
+	if spell_id == required_spell and SpellManager.has_spell(required_spell):
+		_clear_gate()
+		return
+	GateFailureFeedback.try_emit(spell_id, required_spell)
 
 
 func on_hit_by_spell(spell_id: StringName, _hitbox: HitboxComponent) -> void:
+	if _is_cleared():
+		return
 	if spell_id == required_spell:
 		_clear_gate()
+		return
+	GateFailureFeedback.try_emit(spell_id, required_spell)
 
 
 func _clear_gate() -> void:
@@ -51,3 +56,7 @@ func _clear_visual() -> void:
 		(visual as Sprite2D).modulate = Color(0.32, 0.62, 0.28, 0.5)
 	elif visual is ColorRect:
 		(visual as ColorRect).color = Color(0.32, 0.62, 0.28, 0.5)
+
+
+func _is_cleared() -> bool:
+	return get_node_or_null("Blocker") == null

@@ -2,7 +2,6 @@ extends Control
 ## Game over screen — retry, load save, return to title.
 
 
-const GAME_OVER_MUSIC := "res://assets/audio/music/mus_game_over.wav"
 const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 
 const COLOR_GOLD := Color(0.92, 0.78, 0.55, 1.0)
@@ -29,6 +28,7 @@ func _ready() -> void:
 	retry_button.pressed.connect(_on_retry_pressed)
 	load_button.pressed.connect(_on_load_pressed)
 	title_button.pressed.connect(_on_title_pressed)
+	UiSfx.wire_tree(self)
 
 
 func present() -> void:
@@ -36,7 +36,6 @@ func present() -> void:
 	status_label.text = ""
 	_refresh_load_button()
 	retry_button.grab_focus()
-	AudioManager.play_music(GAME_OVER_MUSIC)
 
 
 func dismiss() -> void:

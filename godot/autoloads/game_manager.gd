@@ -15,7 +15,15 @@ var _world_flags: Dictionary = {}
 var _cleared_gates: Array[StringName] = []
 var _collected_pickups: Array[StringName] = []
 var _last_crucible_id: StringName = &""
+var _last_crucible_room_id: StringName = &""
+var _last_crucible_position: Vector2 = Vector2.ZERO
 var _pending_load: Dictionary = {}
+var _settings: Dictionary = {
+	"master_volume": 1.0,
+	"music_volume": 1.0,
+	"sfx_volume": 1.0,
+	"damage_numbers": false,
+}
 
 
 func _ready() -> void:
@@ -68,6 +76,8 @@ func reset_session() -> void:
 	_cleared_gates.clear()
 	_collected_pickups.clear()
 	_last_crucible_id = &""
+	_last_crucible_room_id = &""
+	_last_crucible_position = Vector2.ZERO
 	_pending_load = {}
 	_room_loader = null
 
@@ -76,6 +86,10 @@ func register_room_loader(loader: Node) -> void:
 	_room_loader = loader
 	if not _pending_load.is_empty():
 		_apply_pending_load()
+
+
+func get_room_loader() -> Node:
+	return _room_loader
 
 
 func change_room(room_id: StringName, spawn_marker: StringName = &"") -> void:
@@ -117,6 +131,23 @@ func set_world_value(key: StringName, value: Variant) -> void:
 
 func set_last_crucible(crucible_id: StringName) -> void:
 	_last_crucible_id = crucible_id
+
+
+func bind_crucible_rest(crucible_id: StringName, room_id: StringName, position: Vector2) -> void:
+	_last_crucible_id = crucible_id
+	_last_crucible_room_id = room_id
+	_last_crucible_position = position
+
+
+func has_bound_crucible() -> bool:
+	return not _last_crucible_id.is_empty()
+
+
+func get_last_crucible_respawn() -> Dictionary:
+	return {
+		"room_id": _last_crucible_room_id,
+		"position": _last_crucible_position,
+	}
 
 
 func mark_pickup_collected(pickup_id: StringName) -> void:
@@ -176,6 +207,7 @@ func get_player_snapshot() -> Dictionary:
 		"hp_max": player.health_component.max_hp,
 		"mana_current": player.mana_component.current_mana,
 		"mana_max": player.mana_component.max_mana,
+		"focus_shards": player.mana_component.focus_shard_count,
 		"essence": player.essence_collected,
 		"facing": player.facing_direction,
 	}
@@ -187,15 +219,19 @@ func get_world_flags() -> Dictionary:
 		"cleared_gates": _cleared_gates.duplicate(),
 		"collected_pickups": _collected_pickups.duplicate(),
 		"last_crucible": String(_last_crucible_id),
+		"last_crucible_room": String(_last_crucible_room_id),
+		"last_crucible_x": _last_crucible_position.x,
+		"last_crucible_y": _last_crucible_position.y,
 	}
 
 
 func get_settings_snapshot() -> Dictionary:
-	return {
-		"master_volume": 1.0,
-		"music_volume": 1.0,
-		"sfx_volume": 1.0,
-	}
+	return _settings.duplicate()
+
+
+func apply_settings(settings: Dictionary) -> void:
+	for key in settings:
+		_settings[key] = settings[key]
 
 
 func apply_save_data(player_data: Dictionary, world_data: Dictionary) -> void:
@@ -203,6 +239,11 @@ func apply_save_data(player_data: Dictionary, world_data: Dictionary) -> void:
 	_cleared_gates.assign(world_data.get("cleared_gates", []))
 	_collected_pickups.assign(world_data.get("collected_pickups", []))
 	_last_crucible_id = StringName(world_data.get("last_crucible", ""))
+	_last_crucible_room_id = StringName(world_data.get("last_crucible_room", ""))
+	_last_crucible_position = Vector2(
+		float(world_data.get("last_crucible_x", 0.0)),
+		float(world_data.get("last_crucible_y", 0.0))
+	)
 	playtime_seconds = float(player_data.get("playtime_seconds", playtime_seconds))
 
 	var room_id := StringName(player_data.get("room_id", &"at_01_threshold_hub"))
@@ -236,6 +277,9 @@ func _apply_pending_load() -> void:
 		return
 	if data.has("position"):
 		player.global_position = data["position"]
+	if has_bound_crucible() and _last_crucible_position != Vector2.ZERO:
+		player.set_respawn_position(_last_crucible_position)
+	elif data.has("position"):
 		player.set_respawn_position(data["position"])
 	if data.has("hp_current"):
 		player.health_component.max_hp = int(data.get("hp_max", player.health_component.max_hp))
@@ -243,6 +287,8 @@ func _apply_pending_load() -> void:
 	if data.has("mana_current"):
 		player.mana_component.max_mana = int(data.get("mana_max", player.mana_component.max_mana))
 		player.mana_component.current_mana = float(data["mana_current"])
+	if data.has("focus_shards"):
+		player.mana_component.set_focus_shard_count(int(data["focus_shards"]))
 	if data.has("essence"):
 		player.essence_collected = int(data["essence"])
 	if data.has("facing"):

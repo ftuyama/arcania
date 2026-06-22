@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://arcania_player"]
+[gd_scene load_steps=22 format=3 uid="uid://arcania_player"]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/state_machine.gd" id="2_sm"]
@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://scripts/components/hit_flash.gd" id="18_flash"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/player/elara_core.tres" id="19_frames"]
 [ext_resource type="Script" path="res://scripts/vfx/melee_swing_vfx.gd" id="20_swing"]
+[ext_resource type="Script" path="res://scripts/components/camera_shake.gd" id="21_shake"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(14, 28)
@@ -45,6 +46,9 @@ autoplay = "idle"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = false
+
+[node name="CameraShake" type="Node" parent="Camera2D"]
+script = ExtResource("21_shake")
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("12_health")

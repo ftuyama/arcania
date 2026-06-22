@@ -62,11 +62,13 @@ func blink_player(player: Player, direction: Vector2, distance: float) -> void:
 	var iframe_bonus := int(mods.get("veil_step_iframes_flat", 0))
 	var iframe_duration := 0.14 + float(iframe_bonus) / 60.0
 	player.set_invulnerable(true)
+	player.set_phasing(true)
 	player.global_position += direction.normalized() * distance
 	player.velocity = direction.normalized() * Player.DASH_SPEED
 	player.get_tree().create_timer(iframe_duration).timeout.connect(func() -> void:
 		if is_instance_valid(player):
 			player.set_invulnerable(false)
+			player.set_phasing(false)
 	, CONNECT_ONE_SHOT)
 
 

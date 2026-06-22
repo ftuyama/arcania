@@ -34,6 +34,8 @@ Core pillars:
 | 08 | [Technical Architecture](docs/08-technical-architecture.md) | Godot 4 folder structure, systems design |
 | 09 | [Asset Production List](docs/09-asset-production-list.md) | Animation specs, audio prompts, asset checklist |
 | 10 | [Development Roadmap](docs/10-development-roadmap.md) | Solo-dev phased plan |
+| 11 | [Scoped Release Plan](docs/11-scoped-release.md) | Intentional 1.0 scope cut |
+| 12 | [Improvements Backlog](docs/12-improvements-backlog.md) | Prioritized post-review improvement backlog |
 
 ---
 
@@ -54,11 +56,11 @@ Core pillars:
 | Area | Status |
 |------|--------|
 | **Boot flow** | Title screen → New Game / Continue / Load (3 slots) |
-| **Regions** | Ashen Threshold (2 rooms) + Whisperwood Hollow (16 rooms) + 3 dev rooms |
+| **Regions** | Ashen Threshold (2 rooms) + Whisperwood Hollow (16 critical path + 3 secrets) |
 | **Spells** | 6 of 14 — Ember Sigil, Ember Bolt, Veil Step, Rootbind, Arc Step, Rune Anchor |
 | **Bosses** | Thornweft Matron (mini), Root Warden (major) |
-| **Enemies** | E-03 Bramble Stalker |
-| **Systems** | Save/load, Focus Crucible, map fog-of-war, relics, quests, spell wheel, pause menu |
+| **Enemies** | Bramble Stalker + Mothling, Bark Wraith, Thornweft Larva, Canopy Hunter |
+| **Systems** | Save/load, Focus Crucibles, Focus Shards, map fog-of-war, relics, quests, spell wheel, pause/settings, gamepad, dialogue |
 | **Audio** | Title music, threshold ambient, SFX (footsteps, spells, UI) |
 
 ---
@@ -80,7 +82,7 @@ Core pillars:
 | Melee attack (3-hit combo) | **J** |
 | Ember Sigil (short-range fire) | **1** or **K** |
 | Ember Bolt (ranged projectile) | **2** |
-| Veil Step (phase dash + i-frames) | **3** or **Shift** |
+| Veil Step (phase dash + i-frames) | **3** or **Shift** *(East Road shrine — not available at start)* |
 | Rootbind (vine growth / gates) | **4** *(after pickup in Whisperwood)* |
 | Rest / save at Focus Crucible | **E** |
 | Pause menu (save/load) | **Esc** |
@@ -97,7 +99,7 @@ The current build covers **Phase 4 — Systems** on top of the Phase 3 vertical 
 **Critical path**
 
 ```
-at_01_threshold_hub → at_03_east_road → ww_01 … ww_16_post_warden
+at_01_threshold_hub → at_03_east_road (Veil Step shrine) → ww_01 … ww_16_post_warden
                               ↓
                     Thornweft Matron (ww_11) → Arc Step
                     Root Warden (ww_15) → Rune Anchor
@@ -118,6 +120,7 @@ at_01_threshold_hub → at_03_east_road → ww_01 … ww_16_post_warden
 
 | Spell | How to get | Use |
 |-------|------------|-----|
+| **Veil Step** | Shrine on `at_03_east_road` (upper platform, past enemies) | Key **3** / **Shift** — phase dash with i-frames |
 | **Rootbind** | Pickup in `ww_07_heartwood_chamber` | Key **4** — grows a vine platform; clears vine gates |
 | **Arc Step** | Defeat Thornweft Matron | Aim + cast — short blink with i-frames |
 | **Rune Anchor** | Defeat Root Warden | Grapple to golden anchor rings |
@@ -165,7 +168,13 @@ combat_test_arena ──► test_room_02 ◄──► test_room_01
 
 ### Debug Overlay
 
-Press **F3** to toggle an on-screen overlay showing FPS, current room/region, and a quick control reference.
+Press **F3** to toggle an on-screen overlay showing FPS, frame-time averages, room physics budget, current room/region, and a quick control reference.
+
+Run the automated ww_07 profile from the Godot project folder:
+
+```bash
+godot --headless --path godot --script res://tests/integration/fps_profile_ww07.gd
+```
 
 ### Known Limitations (Phase 5+)
 

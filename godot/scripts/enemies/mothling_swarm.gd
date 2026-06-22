@@ -5,13 +5,20 @@ extends BaseEnemy
 const ENGULF_RANGE := 72.0
 const HOVER_HEIGHT := -32.0
 
+@export var orbit_mode: bool = false
+@export var orbit_radius: float = 56.0
+@export var orbit_speed: float = 1.4
+@export var orbit_angle_start: float = 0.0
+
 var _ai_state: StringName = &"patrol"
 var _timer: float = 0.0
 var _engulfing: bool = false
+var _orbit_angle: float = 0.0
 
 
 func _ready() -> void:
 	super._ready()
+	_orbit_angle = orbit_angle_start
 	state_machine.set_physics_process(false)
 	health_component.damaged.disconnect(_on_damaged)
 	health_component.damaged.connect(_on_custom_damaged)
@@ -43,6 +50,9 @@ func _patrol(delta: float) -> void:
 	if player and global_position.distance_to(player.global_position) <= stats.detection_radius:
 		_ai_state = &"chase"
 		return
+	if orbit_mode:
+		_orbit_patrol(delta)
+		return
 	var left := home_position.x + patrol_left
 	var right := home_position.x + patrol_right
 	velocity = Vector2(stats.move_speed * float(facing_direction), 0.0)
@@ -52,6 +62,15 @@ func _patrol(delta: float) -> void:
 		facing_direction = 1
 	elif global_position.x >= right:
 		facing_direction = -1
+	update_facing()
+	play_animation(&"walk")
+
+
+func _orbit_patrol(delta: float) -> void:
+	_orbit_angle += orbit_speed * delta
+	var center := home_position + Vector2(0, HOVER_HEIGHT)
+	global_position = center + Vector2(cos(_orbit_angle), sin(_orbit_angle)) * orbit_radius
+	facing_direction = 1 if cos(_orbit_angle + PI * 0.5) >= 0.0 else -1
 	update_facing()
 	play_animation(&"walk")
 

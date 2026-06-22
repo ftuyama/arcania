@@ -128,7 +128,7 @@ func _apply_modifiers_to_player() -> void:
 		return
 	var mods := get_aggregated_modifiers()
 	var base_hp := 100
-	var base_mana := 100
+	var base_mana := player.mana_component.focus_shard_count * ManaComponent.MANA_PER_SHARD
 	if mods.has("max_hp"):
 		player.health_component.max_hp = maxi(base_hp + int(mods["max_hp"]), 1)
 		player.health_component.current_hp = mini(

@@ -416,7 +416,8 @@ def build_specs() -> list[dict]:
         "width": 24,
         "height": 8,
         "platforms": room_platforms("at_03_east_road", 24, 8),
-        "enemies": [(480, spawn_y(8)), (720, spawn_y(8))],
+        "enemies": [(480, spawn_y(8)), (720, spawn_y(8)), (640, 260), (1100, 228)],
+        "spell_pickup": ("veil_step", 19 * 64, 228, "at_03_veil_step"),
         "spawns": {"from_left": (80, spawn_y(8)), "from_right": (24 * 64 - 100, spawn_y(8))},
         "transitions": [
             {"name": "West", "x": door_x("west", 24), "y": door_y(8), "target": "at_01_threshold_hub", "spawn": "default"},

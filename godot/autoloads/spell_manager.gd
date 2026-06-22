@@ -2,7 +2,7 @@ extends Node
 ## Spell wheel loadout, quick slots, and casting helpers.
 
 
-const STARTER_SPELLS: Array[StringName] = [&"ember_sigil", &"veil_step", &"ember_bolt"]
+const STARTER_SPELLS: Array[StringName] = [&"ember_sigil", &"ember_bolt"]
 const WHEEL_SIZE := 8
 const QUICK_SLOT_COUNT := 4
 
@@ -37,7 +37,7 @@ func _ready() -> void:
 
 
 func _init_default_loadout() -> void:
-	var defaults: Array[StringName] = [&"ember_sigil", &"ember_bolt", &"veil_step", &"rootbind"]
+	var defaults: Array[StringName] = [&"ember_sigil", &"ember_bolt", &"rootbind", &"veil_step"]
 	for i in QUICK_SLOT_COUNT:
 		if i < defaults.size() and has_spell(defaults[i]):
 			_quick_slots[i] = defaults[i]
@@ -76,6 +76,8 @@ func acquire_spell(spell_id: StringName) -> void:
 		if _wheel[i].is_empty():
 			_wheel[i] = spell_id
 			break
+	if spell_id == &"veil_step" and _quick_slots[2].is_empty():
+		_quick_slots[2] = spell_id
 	EventBus.spell_acquired.emit(spell_id)
 
 

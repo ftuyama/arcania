@@ -4,10 +4,12 @@ extends BaseEnemy
 
 const PROJECTILE_SCENE := preload("res://scenes/enemies/enemy_projectile.tscn")
 const SPIT_COOLDOWN := 1.4
+const CRAWL_SPEED_MULT := 0.65
 
 var _ai_state: StringName = &"patrol"
 var _timer: float = 0.0
 var _spit_ready: bool = true
+var _wobble: float = 0.0
 
 
 func _ready() -> void:
@@ -18,6 +20,8 @@ func _ready() -> void:
 	health_component.died.disconnect(_on_died)
 	health_component.died.connect(_on_custom_died)
 	animated_sprite.modulate = Color(0.35, 0.72, 0.55, 1.0)
+	animated_sprite.position = Vector2(0, -6)
+	animated_sprite.scale = Vector2(0.78, 0.78)
 
 
 func _physics_process(delta: float) -> void:
@@ -47,12 +51,14 @@ func _patrol(delta: float) -> void:
 		return
 	var left := home_position.x + patrol_left
 	var right := home_position.x + patrol_right
-	velocity = Vector2(stats.move_speed * float(facing_direction), 0.0)
+	velocity = Vector2(stats.move_speed * CRAWL_SPEED_MULT * float(facing_direction), 0.0)
 	move_and_slide()
 	if global_position.x <= left:
 		facing_direction = 1
 	elif global_position.x >= right:
 		facing_direction = -1
+	_wobble += delta * 9.0
+	animated_sprite.rotation = sin(_wobble) * 0.1
 	update_facing()
 	play_animation(&"walk")
 
@@ -75,8 +81,9 @@ func _chase(_delta: float) -> void:
 		telegraph.visible = true
 		telegraph.modulate = Color(0.32, 0.72, 0.53, 0.75)
 		return
+	animated_sprite.rotation = 0.0
 	if dist > stats.attack_range * 0.7:
-		velocity = (player.global_position - global_position).normalized() * stats.chase_speed
+		velocity = (player.global_position - global_position).normalized() * stats.chase_speed * CRAWL_SPEED_MULT
 	else:
 		velocity = Vector2.ZERO
 	move_and_slide()
@@ -100,8 +107,8 @@ func _fire_spit() -> void:
 	var projectile := PROJECTILE_SCENE.instantiate()
 	get_parent().add_child(projectile)
 	var aim := player.global_position - global_position + Vector2(0, -8)
-	projectile.launch(global_position + Vector2(0, -12), aim, get_data().attack_damage, &"physical")
-	projectile.knockback = Vector2(80.0 * signf(aim.x), -20.0)
+	var kb := Vector2(80.0 * signf(aim.x), -20.0)
+	projectile.launch(global_position + Vector2(0, -12), aim, get_data().attack_damage, &"physical", kb)
 
 
 func _on_custom_damaged(_amount: int, _source: Node) -> void:
@@ -109,6 +116,7 @@ func _on_custom_damaged(_amount: int, _source: Node) -> void:
 		return
 	_ai_state = &"hit"
 	_timer = 0.25
+	animated_sprite.rotation = 0.0
 	telegraph.visible = false
 
 

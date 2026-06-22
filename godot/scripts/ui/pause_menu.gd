@@ -12,7 +12,24 @@ func _ready() -> void:
 	$Panel/Margin/VBox/LoadButton.pressed.connect(_on_load_pressed)
 	$Panel/Margin/VBox/ResumeButton.pressed.connect(_on_resume_pressed)
 	$Panel/Margin/VBox/QuestButton.pressed.connect(_on_quest_pressed)
+	_add_settings_button()
 	_populate_slots()
+	UiSfx.wire_tree(self)
+
+
+func _add_settings_button() -> void:
+	var vbox: VBoxContainer = $Panel/Margin/VBox
+	var btn := Button.new()
+	btn.text = "Settings"
+	btn.pressed.connect(_on_settings_pressed)
+	vbox.add_child(btn)
+	vbox.move_child(btn, vbox.get_child_count() - 2)
+
+
+func _on_settings_pressed() -> void:
+	var ui := get_parent()
+	if ui.has_method(&"open_settings"):
+		ui.open_settings()
 
 
 func _populate_slots() -> void:

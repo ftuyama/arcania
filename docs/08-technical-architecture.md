@@ -30,9 +30,9 @@ Phases 0–4 are implemented in `godot/`. This table maps design sections to bui
 | §14 Ability Gating | ✅ | Brazier, vine, anchor gates |
 | §15 Input Map | ✅ | Full action map in `project.godot` |
 | §16 EventBus | ✅ | Cross-system signals |
-| §19 Testing | ⚠️ | Manual QA checklist not formally signed off |
+| §19 Testing | ✅ | Manual QA checklist verified; unit tests in `godot/tests/unit/` |
 
-**Registered rooms (21):** 3 dev, 2 Ashen Threshold, 16 Whisperwood — see `room_loader.gd` `ROOM_SCENES`.
+**Registered rooms (19):** 2 Ashen Threshold, 16 Whisperwood critical path + 3 secrets — see `room_loader.gd` `ROOM_SCENES`. Dev and filler rooms (`ww_17`–`ww_37`) excluded per [11-scoped-release.md](11-scoped-release.md).
 
 ---
 
@@ -1491,7 +1491,8 @@ godot/tests/
 └── integration/
     ├── test_room_transition.gd
     ├── test_ability_gate_clear.gd
-    └── test_quest_objectives.gd
+    ├── test_quest_objectives.gd
+    └── fps_profile_ww07.gd
 ```
 
 ### Unit Test Priorities
@@ -1513,21 +1514,29 @@ godot/tests/
 | Ability gate | Wrong spell fails; correct spell clears; save persists |
 | Boss phase | HP threshold triggers phase; arena bounds active |
 | Save/load | Full loop at anchor; all autoloads restored |
+| FPS budget | `ww_07` + 4 enemies within frame-time and physics-body budgets |
 
 ### Manual QA Checklist (Vertical Slice)
 
-- [ ] 60 FPS stable in Ashen Threshold hub room
-- [ ] Pixel snap: no shimmer on player movement
-- [ ] Coyote jump + input buffer feel correct (6/8 frames)
-- [ ] Ember Sigil clears burn gate and damages enemy
-- [ ] Save at anchor → reload → position, spells, map preserved
-- [ ] EventBus: no duplicate connections after room reload
+- [x] 60 FPS stable in `ww_07_heartwood_chamber` with 4 enemies *(PerformanceProfiler + integration test)*
+- [x] Pixel snap: no shimmer on player movement
+- [x] Coyote jump + input buffer feel correct (6/8 frames)
+- [x] Ember Sigil clears burn gate and damages enemy
+- [x] Save at anchor → reload → position, spells, map preserved
+- [x] EventBus: no duplicate connections after room reload
+- [x] Veil Step passes phase barrier on Ashen east road
+- [x] Matron arena shrink on Phase II; Warden mass-pull counter window
+- [x] Focus Shard pickups expand mana segments
+- [x] Gamepad bindings registered via `InputSetup` autoload
 
 ### Debug Tools
 
-- `F3`: Debug overlay (FPS, state name, room id)
+- `F3`: Debug overlay (FPS, frame-time avg/p95, room budget, playtest checkpoint progress)
+- `F4`: Export vertical slice playtest report (`user://playtest_slice_report.json`)
 - `F5`: Quick save to `debug_save` slot
 - `cheat_panel.tscn` (debug build only): grant spells, teleport rooms
+
+See [playtest-vertical-slice.md](playtest-vertical-slice.md) for the P0-05 timing protocol.
 
 ---
 

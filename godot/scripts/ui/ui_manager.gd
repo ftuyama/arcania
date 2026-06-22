@@ -16,11 +16,32 @@ var _ui_open: bool = false
 func _ready() -> void:
 	layer = 20
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group(&"ui_layer")
 	_hide_all_overlays()
+	_ensure_dialogue_box()
+	_ensure_settings_panel()
 	EventBus.relic_acquired.connect(_on_relic_acquired)
 	EventBus.game_paused.connect(_on_game_paused)
 	EventBus.game_resumed.connect(_on_game_resumed)
 	EventBus.game_over_started.connect(_on_game_over_started)
+
+
+func _ensure_dialogue_box() -> void:
+	if has_node("DialogueBox"):
+		return
+	var dialogue := Control.new()
+	dialogue.name = "DialogueBox"
+	dialogue.set_script(load("res://scripts/ui/dialogue_box.gd"))
+	add_child(dialogue)
+
+
+func _ensure_settings_panel() -> void:
+	if has_node("SettingsPanel"):
+		return
+	var settings := Control.new()
+	settings.name = "SettingsPanel"
+	settings.set_script(load("res://scripts/ui/settings_panel.gd"))
+	add_child(settings)
 
 
 func _exit_tree() -> void:
@@ -71,6 +92,14 @@ func _open_pause() -> void:
 	GameManager.state = GameManager.GameState.PAUSED
 	get_tree().paused = true
 	EventBus.game_paused.emit()
+
+
+func open_settings() -> void:
+	var settings: Control = get_node_or_null("SettingsPanel")
+	if settings:
+		settings.visible = true
+		if settings.has_method(&"refresh"):
+			settings.refresh()
 
 
 func _close_pause() -> void:

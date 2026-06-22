@@ -29,5 +29,8 @@ func receive_hit(hitbox: HitboxComponent) -> bool:
 	var knockback := hitbox.knockback_vector
 	if owner_body and owner_body.global_position.x < hitbox.global_position.x:
 		knockback.x *= -1.0
+	_health.apply_poise_damage(hitbox.poise_damage)
 	_health.take_damage(final_damage, hitbox.get_parent(), knockback)
+	if final_damage >= 10:
+		CombatJuice.on_heavy_hit()
 	return true

@@ -58,7 +58,16 @@ func _physics_process(delta: float) -> void:
 	global_position += direction * speed * delta
 	_elapsed += delta
 	if _elapsed >= lifetime:
+		_try_ignite_nearby_gates()
 		deactivate()
+
+
+func _try_ignite_nearby_gates() -> void:
+	if spell_id != &"ember_bolt":
+		return
+	for gate in get_tree().get_nodes_in_group(&"ability_gates"):
+		if gate.has_method(&"on_hit_by_spell") and global_position.distance_to(gate.global_position) <= 96.0:
+			gate.on_hit_by_spell(spell_id, _hitbox)
 
 
 func _on_hitbox_hit(_target: Node, _damage: int) -> void:

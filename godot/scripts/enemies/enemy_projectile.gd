@@ -25,13 +25,15 @@ func _ready() -> void:
 	_hitbox.hit_landed.connect(_on_hit_landed)
 
 
-func launch(from: Vector2, aim: Vector2, projectile_damage: int, type: StringName = &"physical") -> void:
+func launch(from: Vector2, aim: Vector2, projectile_damage: int, type: StringName = &"physical", kb: Vector2 = Vector2.ZERO) -> void:
 	global_position = from
 	direction = aim.normalized() if aim.length_squared() > 0.01 else Vector2.RIGHT
 	damage = projectile_damage
 	damage_type = type
+	knockback = kb
 	_hitbox.damage = damage
 	_hitbox.damage_type = type
+	_hitbox.knockback_vector = knockback
 	_elapsed = 0.0
 	set_physics_process(true)
 

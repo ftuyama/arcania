@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
 [ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
 [ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/bark_wraith.tscn" id="4_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/bark_wraith.tscn" id="4_wraith"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/thornweft_larva.tscn" id="5_larva"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/mothling_swarm.tscn" id="6_mothling"]
 
 [node name="ww_04_branch_crossing" type="Node2D"]
 script = ExtResource("1_room")
@@ -37,8 +39,20 @@ position = Vector2(1052, 676)
 
 [node name="Enemies" type="Node2D" parent="Entities"]
 
-[node name="Enemy0" parent="Entities/Enemies" instance=ExtResource("4_enemy")]
+[node name="Wraith0" parent="Entities/Enemies" instance=ExtResource("4_wraith")]
 position = Vector2(400, 676)
+
+[node name="Larva0" parent="Entities/Enemies" instance=ExtResource("5_larva")]
+position = Vector2(896, 516)
+patrol_left = -48.0
+patrol_right = 48.0
+
+[node name="MothlingOrbit" parent="Entities/Enemies" instance=ExtResource("6_mothling")]
+position = Vector2(512, 324)
+orbit_mode = true
+orbit_radius = 52.0
+orbit_speed = 1.7
+orbit_angle_start = 2.1
 
 [node name="AbilityGates" type="Node2D" parent="."]
 

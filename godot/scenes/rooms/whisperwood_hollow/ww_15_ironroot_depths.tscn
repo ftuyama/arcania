@@ -1,12 +1,12 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
 [ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
 [ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
 [ext_resource type="PackedScene" path="res://scenes/components/anchor_point.tscn" id="4_anchor"]
 [ext_resource type="PackedScene" path="res://scenes/bosses/root_warden.tscn" id="5_warden"]
-
 [ext_resource type="PackedScene" path="res://scenes/components/relic_pickup.tscn" id="6_relic"]
+[ext_resource type="PackedScene" path="res://scenes/world/focus_shard_pickup.tscn" id="7_shard"]
 
 [node name="ww_15_ironroot_depths" type="Node2D"]
 script = ExtResource("1_room")
@@ -70,3 +70,6 @@ position = Vector2(200, 900)
 relic_id = &"iron_grip"
 pickup_id = &"ww_15_iron_grip"
 
+[node name="FocusShard" parent="Entities" instance=ExtResource("7_shard")]
+position = Vector2(384, 412)
+pickup_id = &"ww_15_focus_shard"

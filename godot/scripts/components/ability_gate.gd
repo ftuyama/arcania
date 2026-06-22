@@ -7,6 +7,8 @@ extends Area2D
 @export var gate_type: StringName = &"ember_receptor"
 @export var proximity_radius: float = 96.0
 
+var _cleared: bool = false
+
 @onready var _blocker: StaticBody2D = get_node_or_null("Blocker")
 @onready var _visual: CanvasItem = get_node_or_null("Sprite")
 
@@ -22,26 +24,40 @@ func _exit_tree() -> void:
 
 
 func _on_spell_cast(spell_id: StringName, caster: Node2D) -> void:
-	if spell_id != required_spell:
-		return
-	if not SpellManager.has_spell(required_spell):
+	if _cleared:
 		return
 	if caster == null:
 		return
 	if caster.global_position.distance_to(global_position) > proximity_radius:
 		return
-	_clear_gate()
+	if _spell_matches_gate(spell_id) and SpellManager.has_spell(spell_id):
+		_clear_gate()
+		return
+	GateFailureFeedback.try_emit(spell_id, required_spell, gate_type)
 
 
 func on_hit_by_spell(spell_id: StringName, _hitbox: HitboxComponent) -> void:
-	if spell_id != required_spell:
+	if _cleared:
 		return
-	if not SpellManager.has_spell(required_spell):
+	if _spell_matches_gate(spell_id) and SpellManager.has_spell(spell_id):
+		_clear_gate()
 		return
-	_clear_gate()
+	GateFailureFeedback.try_emit(spell_id, required_spell, gate_type)
+
+
+func _spell_matches_gate(spell_id: StringName) -> bool:
+	if spell_id == required_spell:
+		return true
+	# Ember Bolt ignites distant braziers (dual-purpose exploration).
+	if spell_id == &"ember_bolt" and required_spell == &"ember_sigil":
+		return gate_type == &"ember_receptor"
+	return false
 
 
 func _clear_gate() -> void:
+	if _cleared:
+		return
+	_cleared = true
 	if _blocker:
 		_blocker.queue_free()
 		_blocker = null
