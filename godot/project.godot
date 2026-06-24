@@ -34,10 +34,6 @@ CombatJuice="*res://autoloads/combat_juice.gd"
 InputSetup="*res://autoloads/input_setup.gd"
 PlaytestTracker="*res://autoloads/playtest_tracker.gd"
 
-[audio]
-
-buses/default_bus_layout="res://default_bus_layout.tres"
-
 [display]
 
 window/size/viewport_width=960

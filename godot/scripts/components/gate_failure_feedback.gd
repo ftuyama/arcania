@@ -8,6 +8,14 @@ const COOLDOWN_SEC := 2.5
 static var _last_emit_msec: int = -999999
 
 
+static func _spell_manager() -> Node:
+	return Engine.get_main_loop().root.get_node("SpellManager")
+
+
+static func _event_bus() -> Node:
+	return Engine.get_main_loop().root.get_node("EventBus")
+
+
 static func try_emit(
 	cast_spell_id: StringName,
 	required_spell: StringName,
@@ -16,7 +24,7 @@ static func try_emit(
 ) -> void:
 	if cast_spell_id.is_empty() or cast_spell_id == required_spell:
 		return
-	if not SpellManager.has_spell(cast_spell_id):
+	if not _spell_manager().has_spell(cast_spell_id):
 		return
 	var now := Time.get_ticks_msec()
 	if now - _last_emit_msec < int(COOLDOWN_SEC * 1000.0):
@@ -25,7 +33,7 @@ static func try_emit(
 	if message.is_empty():
 		return
 	_last_emit_msec = now
-	EventBus.ui_toast.emit(message)
+	_event_bus().ui_toast.emit(message)
 
 
 static func build_hint(required_spell: StringName, gate_type: StringName = &"") -> String:
@@ -41,7 +49,7 @@ static func build_hint(required_spell: StringName, gate_type: StringName = &"") 
 		&"veil_step":
 			return "Barrier holds — Veil Step can dash past thin walls"
 		_:
-			var spell := SpellManager.get_spell(required_spell)
+			var spell: SpellData = _spell_manager().get_spell(required_spell)
 			if spell and not spell.display_name.is_empty():
 				return "This barrier needs %s" % spell.display_name
 			return "This spell won't open the way — try another"

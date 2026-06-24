@@ -2,7 +2,7 @@
 
 > Prioritized improvement backlog derived from the **June 2026 Comprehensive Project Review**. Use this document to pick sprint work; scope boundaries live in [11-scoped-release.md](11-scoped-release.md).
 
-**Last updated:** June 22, 2026
+**Last updated:** June 24, 2026
 **Cadence assumption:** ~15 hrs/week solo dev
 **Status legend:** ✅ Done · 🔄 In progress · ⬜ Backlog · 🚫 Deferred (post-1.0)
 **Effort legend:** XS · S · M · L · XL · XXL (T-shirt sizes; relative scope only)
@@ -41,11 +41,11 @@ If this hour is not compelling, more greybox rooms will not save the project.
 
 | Priority | Open Items | Effort range |
 |----------|------------|--------------|
-| **P0 — Critical** | 8 | S–XXL |
+| **P0 — Critical** | 7 | S–XXL |
 | **P1 — High** | 16 | XS–XL |
 | **P2 — Medium** | 14 | XS–XL |
 | **P3 — Low / Polish** | 9 | XS–M |
-| **✅ Done (review pass)** | 22 | — |
+| **✅ Done (review pass)** | 23 | — |
 
 ---
 
@@ -77,6 +77,7 @@ If this hour is not compelling, more greybox rooms will not save the project.
 | REV-22 | README + build status sync | Process |
 | P0-05 | Playtest + time vertical slice | Process / QA |
 | P0-06 | 60 FPS profiling in ww_07 + 4 enemies | Tech / Performance |
+| P0-09 | Expand automated tests (SaveManager, SpellManager, gate save/load) | Tech / QA |
 
 ---
 
@@ -88,7 +89,6 @@ If this hour is not compelling, more greybox rooms will not save the project.
 | P0-04 | **Boss + region audio** — unique tracks, combat stems | Silent or generic audio kills dark-fantasy tone | L | High | ⬜ |
 | P0-07 | **Crystal Bridge spell** (next critical-path unlock) | Gates Sunken Catacombs per [11-scoped-release.md](11-scoped-release.md) | XL | Critical | ⬜ |
 | P0-08 | **Sunken Catacombs region blockout** (critical path only) | First region beyond Whisperwood; proves content pipeline | XL | Critical | ⬜ |
-| P0-09 | **Expand automated tests** — `SaveManager`, `SpellManager`, gate save/load | Regressions compound silently at current test coverage | M | High | ⬜ |
 | P0-10 | **Handcraft 3 Whisperwood landmark rooms** | Generator greybox lacks "wow" moments | L | High | ⬜ |
 | P0-11 | **Complete Ashen Threshold** (5 rooms per world design) | Hub feels empty; weak first 10 minutes | L | High | ⬜ |
 | P0-12 | **External playtest** (5 testers, NPS survey) | No outside validation of fun | M | High | ⬜ |
@@ -238,7 +238,6 @@ Per [11-scoped-release.md](11-scoped-release.md) — do not pull into current sp
 
 - P1-04 Gate failure feedback
 - P1-22 Menu UI SFX wiring
-- P0-09 Begin SaveManager / SpellManager tests
 
 ### Next 1 Month (~60 hrs)
 
@@ -302,3 +301,5 @@ Per [11-scoped-release.md](11-scoped-release.md) — do not pull into current sp
 | 2026-06-22 | P1-04 — GateFailureFeedback helper + wrong-spell UI toasts on all ability gate types |
 | 2026-06-22 | STARTED: P0-06 — 60 FPS profiling in ww_07 |
 | 2026-06-22 | P0-06 — PerformanceProfiler utility, ww_07 enemy baseline, debug overlay budget line, integration fps_profile_ww07 test |
+| 2026-06-24 | STARTED: P0-09 — Expand automated tests (SaveManager, SpellManager, gate save/load) |
+| 2026-06-24 | P0-09 — Unit tests for SpellManager save round-trip, SaveManager JSON round-trip/corrupt/version mismatch, ability-gate cleared state persistence |
