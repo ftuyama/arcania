@@ -144,7 +144,7 @@ echo ""
 echo "Web build ready:"
 echo "  $OUT_DIR"
 echo ""
-echo "Upload the entire folder to itch.io (enable browser play) or any static host."
+echo "itch.io release: ./scripts/release-itch.sh"
 echo "Local test: ./scripts/export-web.sh --serve"
 
 if [[ "$RUN_SERVE" == true ]]; then
