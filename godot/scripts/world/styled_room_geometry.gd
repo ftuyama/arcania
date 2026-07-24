@@ -101,36 +101,18 @@ func _tile_rect(parent: Node2D, size: Vector2, tile_index: int, is_floor: bool) 
 
 func _tile_floor_rect(parent: Node2D, size: Vector2, tile_index: int) -> void:
 	var cols := int(ceil(size.x / float(TILE_SIZE)))
-	# Solid fill for the mass — repeating 64px stamps read as a square grid.
-	var fill := Polygon2D.new()
-	fill.color = Color(0.173, 0.173, 0.204, 1.0) # C_BASE #2C2C34
-	fill.polygon = PackedVector2Array([
-		Vector2(0, 0),
-		Vector2(size.x, 0),
-		Vector2(size.x, size.y),
-		Vector2(0, size.y),
-	])
-	parent.add_child(fill)
+	var rows := int(ceil(size.y / float(TILE_SIZE)))
+	# Mix AI stone variants — no flat Polygon2D slab (reads as a giant grey bar).
+	var variants: Array[int] = [tile_index, 9, 13, 3]
 
-	# One surface row of mixed floor variants for texture (not a full grid).
-	var variants: Array[int] = [tile_index, 9, 13]
-	for col in cols:
-		var variant: int = variants[col % variants.size()]
-		_add_tile_sprite(
-			parent,
-			Rect2(variant * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE),
-			Vector2(col * TILE_SIZE, 0)
-		)
-
-	var lip := Polygon2D.new()
-	lip.color = Color(0.29, 0.305, 0.41, 0.55)
-	lip.polygon = PackedVector2Array([
-		Vector2(0, 0),
-		Vector2(size.x, 0),
-		Vector2(size.x, 2),
-		Vector2(0, 2),
-	])
-	parent.add_child(lip)
+	for row in rows:
+		for col in cols:
+			var variant: int = variants[(row * 7 + col * 3) % variants.size()]
+			_add_tile_sprite(
+				parent,
+				Rect2(variant * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE),
+				Vector2(col * TILE_SIZE, row * TILE_SIZE)
+			)
 
 
 func _add_platform_cap_strip(parent: Node2D, width: float, y_pos: float) -> void:

@@ -76,13 +76,17 @@ func _build_layers() -> void:
 	for layer_data: Dictionary in config.get("layers", []):
 		var layer := ParallaxLayer.new()
 		layer.motion_scale = layer_data.get("scroll", Vector2(0.2, 0.0))
-		layer.motion_mirroring = Vector2(960, 0)
+		# Mirror vertically too — tall rooms (floor y≈700+) otherwise show void.
+		layer.motion_mirroring = Vector2(960, 540)
 
-		var sprite := Sprite2D.new()
 		var tex := load(layer_data["path"]) as Texture2D
-		if tex:
+		if tex == null:
+			continue
+		# Stack copies so art covers a tall room without gaps.
+		for yi in range(-1, 3):
+			var sprite := Sprite2D.new()
 			sprite.texture = tex
 			sprite.centered = false
-			sprite.position = Vector2.ZERO
-		layer.add_child(sprite)
+			sprite.position = Vector2(0, yi * 540)
+			layer.add_child(sprite)
 		add_child(layer)

@@ -163,14 +163,28 @@ def pack_sheet(
 
 
 def assemble_elara(incoming: Path) -> Image.Image | None:
+    """Assemble Elara only from complete per-frame PNGs.
+
+    The staged 1536×1024 elara_core.png is not a valid game atlas (cell bleed /
+    inconsistent pivots). Do not nearest-resize or remap it into production.
+    """
     frames_dir = incoming / "elara_frames"
     if not frames_dir.is_dir():
-        # Accept single full sheet
-        sheet_path = incoming / "elara_core.png"
-        if sheet_path.exists():
-            with Image.open(sheet_path) as im:
-                return nearest_resize(im.convert("RGBA"), (512, 640))
         return None
+
+    # Require majority of named frames before assembling
+    missing = 0
+    total = sum(c for _, c in ELARA_ROWS)
+    for anim, count in ELARA_ROWS:
+        for i in range(count):
+            if not any(
+                (frames_dir / name).exists()
+                for name in (f"{anim}_{i:02d}.png", f"{anim}_{i}.png")
+            ):
+                missing += 1
+    if missing > total // 2:
+        return None
+
     cells: list[Image.Image] = []
     for anim, count in ELARA_ROWS:
         for i in range(count):
@@ -181,12 +195,10 @@ def assemble_elara(incoming: Path) -> Image.Image | None:
             ]
             path = next((p for p in candidates if p.exists()), None)
             if path is None:
-                # Fallback: reuse first available of anim or idle_00
                 fallback = frames_dir / f"{anim}_00.png"
                 if not fallback.exists():
                     fallback = frames_dir / "idle_00.png"
                 if not fallback.exists():
-                    # any png
                     pngs = sorted(frames_dir.glob("*.png"))
                     if not pngs:
                         return None
@@ -195,7 +207,6 @@ def assemble_elara(incoming: Path) -> Image.Image | None:
                     path = fallback
             with Image.open(path) as im:
                 cells.append(fit_on_canvas(im, (64, 64), feet_y=62))
-    # Pad each row to 8 columns (512 wide)
     sheet = Image.new("RGBA", (512, 640), (0, 0, 0, 0))
     idx = 0
     for row_i, (anim, count) in enumerate(ELARA_ROWS):
@@ -312,18 +323,23 @@ def main() -> int:
         size = RESIZE_MAP.get(name)
         copy_resized(src, SPRITES / rel, size, args.dry_run)
 
-    # Direct sheet drops (no frames folder)
+    # Direct sheet drops when not already assembled above
     for name in ("elara_core.png", "e01_sheet.png", "e02_sheet.png", "e03_sheet.png", "e04_sheet.png", "e08_sheet.png"):
         src = incoming / name
         if not src.exists():
             continue
-        if name == "elara_core.png" and (incoming / "elara_frames").is_dir():
+        if name == "elara_core.png" and elara is not None:
             continue
         eid = name[:3]
         if name != "elara_core.png" and (incoming / f"{eid}_frames").is_dir():
             continue
         rel = DEST_MAP[name]
         if name == "elara_core.png":
+            # Never import unaligned 1536×1024 AI sheet via naive resize.
+            with Image.open(src) as im:
+                if im.size != (512, 640):
+                    print(f"  skip {name}: expected 512x640 game atlas, got {im.size}")
+                    continue
             size = (512, 640)
         elif name == "e03_sheet.png":
             size = (384, 128)

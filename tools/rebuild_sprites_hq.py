@@ -52,6 +52,7 @@ def resize_hq(img: Image.Image, size: tuple[int, int], max_colors: int | None = 
 
 def knock_light_bg(img: Image.Image, luma_cut: int = 210, sat_cut: int = 35) -> Image.Image:
     """Make near-white / flat studio backgrounds transparent (parallax layers)."""
+    img = knock_checkerboard(img)
     img = img.convert("RGBA")
     px = img.load()
     w, h = img.size
@@ -129,19 +130,80 @@ def wobble(img: Image.Image, dx: int = 0, dy: int = 0, squash: float = 1.0) -> I
     return canvas
 
 
+def _atlas_alignment_ok(sheet: Image.Image, max_feet_delta: int = 2, max_feet_x_delta: int = 4) -> bool:
+    """Reject atlases that will jitter (inconsistent feet Y / feet contact X).
+
+    Uses the bottom contact row (not full content bbox) so cast VFX / slash arcs
+    do not falsely fail the horizontal check.
+    """
+    import numpy as np
+
+    sheet = sheet.convert("RGBA")
+    if sheet.size != (512, 640):
+        return False
+    arr = np.array(sheet)
+    counts = [8, 8, 6, 4, 6, 6, 6, 6, 6, 4]
+    for ri, count in enumerate(counts):
+        feet_y: list[int] = []
+        feet_x: list[float] = []
+        for c in range(count):
+            cell = arr[ri * 64 : (ri + 1) * 64, c * 64 : (c + 1) * 64]
+            mask = cell[:, :, 3] > 20
+            if not mask.any():
+                return False
+            ys, xs = np.where(mask)
+            # Idle/walk must sit fully inside the cell (no edge crop).
+            if ri <= 1 and (
+                int(ys.min()) <= 0
+                or int(xs.min()) <= 0
+                or int(ys.max()) >= 63
+                or int(xs.max()) >= 63
+            ):
+                return False
+            bottom = int(ys.max())
+            feet_y.append(bottom + 1)
+            contact = xs[ys == bottom]
+            feet_x.append(float(contact.min() + contact.max()) / 2.0)
+        if max(feet_y) - min(feet_y) > max_feet_delta:
+            return False
+        # Strict horizontal lock only for grounded locomotion (idle/walk/fall).
+        # Dash/hit intentionally lean; cast VFX may extend the silhouette.
+        if ri in (0, 1, 3) and max(feet_x) - min(feet_x) > max_feet_x_delta:
+            return False
+    return True
+
+
 def build_elara() -> None:
-    """Prefer adjusted idle + cast heroes; never knock_near_black on robes."""
+    """Prefer adjusted AI idle/cast heroes — never overwrite with PIL placeholders."""
     idle_src = load("elara_idle_stand.png") or load("elara_idle_hero.png") or load("elara_cast_hero.png")
     cast_src = load("elara_cast_hero.png") or idle_src
     if idle_src is None:
-        print("  WARN: missing Elara source art")
+        print("  WARN: missing Elara AI hero art in docs/art-batches/incoming/")
         return
 
     idle_cell = fit_subject(idle_src, body_h=54, key_black=False)
     cast_cell = fit_subject(cast_src, body_h=54, key_black=False)
 
+    # Close tiny alpha holes so dark robes stay solid on dark skies
+    def seal(cell: Image.Image) -> Image.Image:
+        from PIL import ImageFilter
+
+        a = cell.split()[-1].filter(ImageFilter.MaxFilter(3))
+        out = Image.new("RGBA", cell.size, (0, 0, 0, 0))
+        px, ap, op = cell.load(), a.load(), out.load()
+        for y in range(cell.height):
+            for x in range(cell.width):
+                r, g, b, al = px[x, y]
+                if al > 40:
+                    op[x, y] = (r, g, b, 255)
+                elif ap[x, y] > 200:
+                    op[x, y] = (44, 44, 52, 255)
+        return out
+
+    idle_cell = seal(idle_cell)
+    cast_cell = seal(cast_cell)
+
     rows: list[list[Image.Image]] = []
-    # Gentle idle bob — no artificial shredding
     rows.append([wobble(idle_cell, 0, -(i % 2), 1.0) for i in range(8)])
     walk = []
     for i in range(8):
@@ -162,6 +224,7 @@ def build_elara() -> None:
             sheet.paste(cell, (ci * 64, ri * 64), cell)
     save(sheet, "player/elara_core.png")
     save(fit_subject(cast_src, (48, 48), body_h=42, key_black=False), "player/elara_portrait_48.png")
+    print("  elara: AI hero poses → game atlas (no PIL placeholders)")
 
 
 def _matte_purple_bg(img: Image.Image) -> Image.Image:
@@ -169,8 +232,28 @@ def _matte_purple_bg(img: Image.Image) -> Image.Image:
     return img
 
 
+def knock_checkerboard(img: Image.Image) -> Image.Image:
+    """Remove classic editor checkerboard (light/dark gray pairs) left by AI gens."""
+    img = img.convert("RGBA")
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8:
+                continue
+            mx, mn = max(r, g, b), min(r, g, b)
+            # Low-saturation grays in the checker range
+            if (mx - mn) <= 12 and 90 <= mx <= 210:
+                # Keep warm stone/ember (slightly chromatic)
+                if abs(r - b) < 8 and abs(r - g) < 8:
+                    px[x, y] = (0, 0, 0, 0)
+    return img
+
+
 def knock_flat_backdrop(img: Image.Image, tol: int = 18) -> Image.Image:
     """Make flat studio/sky fill transparent using corner sample (parallax mid layers)."""
+    img = knock_checkerboard(img)
     img = img.convert("RGBA")
     px = img.load()
     w, h = img.size
@@ -191,19 +274,39 @@ def knock_flat_backdrop(img: Image.Image, tol: int = 18) -> Image.Image:
     return img
 
 
+def _strip_bottom_ground_bar(img: Image.Image, keep_bottom_frac: float = 0.62) -> Image.Image:
+    """Remove full-width floating ground slabs AI often bakes into mid parallax."""
+    img = img.convert("RGBA")
+    w, h = img.size
+    cut = int(h * keep_bottom_frac)
+    px = img.load()
+    # Clear everything below cut, then also clear near-full-width opaque rows above cut
+    for y in range(cut, h):
+        for x in range(w):
+            px[x, y] = (0, 0, 0, 0)
+    for y in range(max(0, cut - 40), cut):
+        opaque = sum(1 for x in range(0, w, 4) if px[x, y][3] > 40)
+        if opaque > (w // 4) * 0.72:
+            for x in range(w):
+                r, g, b, a = px[x, y]
+                if a > 0 and not (r > 140 and g < 120):
+                    px[x, y] = (0, 0, 0, 0)
+    return img
+
+
 def build_parallax() -> None:
     layers = [
-        ("parallax_0_sky.png", "tilesets/01_ashen_threshold/parallax_0_sky.png", False, 128),
-        ("parallax_1_far_ruins.png", "tilesets/01_ashen_threshold/parallax_1_far_ruins.png", True, 96),
-        ("parallax_2_mid_architecture.png", "tilesets/01_ashen_threshold/parallax_2_mid_architecture.png", True, 96),
-        ("parallax_3_mid_fog.png", "tilesets/01_ashen_threshold/parallax_3_mid_fog.png", True, 64),
-        ("parallax_4_near_occluders.png", "tilesets/01_ashen_threshold/parallax_4_near_occluders.png", True, 96),
-        ("ww_parallax_0_sky.png", "tilesets/02_whisperwood_hollow/parallax_0_sky.png", False, 128),
-        ("ww_parallax_1_far_trees.png", "tilesets/02_whisperwood_hollow/parallax_1_far_trees.png", True, 96),
-        ("ww_parallax_2_mid_canopy.png", "tilesets/02_whisperwood_hollow/parallax_2_mid_canopy.png", True, 96),
-        ("ww_parallax_3_spore_fog.png", "tilesets/02_whisperwood_hollow/parallax_3_spore_fog.png", True, 64),
+        ("parallax_0_sky.png", "tilesets/01_ashen_threshold/parallax_0_sky.png", False, 128, False),
+        ("parallax_1_far_ruins.png", "tilesets/01_ashen_threshold/parallax_1_far_ruins.png", True, 96, True),
+        ("parallax_2_mid_architecture.png", "tilesets/01_ashen_threshold/parallax_2_mid_architecture.png", True, 96, True),
+        ("parallax_3_mid_fog.png", "tilesets/01_ashen_threshold/parallax_3_mid_fog.png", True, 64, False),
+        ("parallax_4_near_occluders.png", "tilesets/01_ashen_threshold/parallax_4_near_occluders.png", True, 96, True),
+        ("ww_parallax_0_sky.png", "tilesets/02_whisperwood_hollow/parallax_0_sky.png", False, 128, False),
+        ("ww_parallax_1_far_trees.png", "tilesets/02_whisperwood_hollow/parallax_1_far_trees.png", True, 96, False),
+        ("ww_parallax_2_mid_canopy.png", "tilesets/02_whisperwood_hollow/parallax_2_mid_canopy.png", True, 96, False),
+        ("ww_parallax_3_spore_fog.png", "tilesets/02_whisperwood_hollow/parallax_3_spore_fog.png", True, 64, False),
     ]
-    for src, dest, key_bg, colors in layers:
+    for src, dest, key_bg, colors, strip_ground in layers:
         img = load(src)
         if img is None:
             print(f"  skip {src}")
@@ -211,10 +314,11 @@ def build_parallax() -> None:
         if key_bg:
             img = knock_light_bg(img, luma_cut=200, sat_cut=40)
             img = knock_flat_backdrop(img, tol=22)
+        if strip_ground:
+            img = _strip_bottom_ground_bar(img, keep_bottom_frac=0.50)
         out = resize_hq(img, (960, 540), max_colors=colors)
         if "fog" in src or "spore" in src:
             out = _soft_fog_alpha(out)
-        # Sky must stay fully opaque
         if not key_bg:
             out = out.convert("RGBA")
             px = out.load()
@@ -245,39 +349,36 @@ def _soft_fog_alpha(img: Image.Image) -> Image.Image:
 
 
 def build_tileset_from_screenshot() -> None:
-    """Prefer AI stone texture; fall back to screenshot ledge samples."""
-    stone = load("tileset_clean.png") or load("tileset_stone_adjusted.png") or load("tileset_v2.png")
+    """Build 64×64 tiles from AI ledge + screenshot ledge samples for variety."""
     tileset = Image.new("RGBA", (1024, 64), (0, 0, 0, 0))
-    if stone is not None:
-        # Slice overlapping 64px windows from the AI stone strip
-        stone = stone.convert("RGBA")
-        sh = min(stone.height, max(64, stone.height // 2))
-        band = stone.crop((0, stone.height - sh, stone.width, stone.height))
-        for i in range(16):
-            x0 = int(i * max(1, band.width - 64) / 15)
-            patch = band.crop((x0, 0, min(band.width, x0 + max(64, band.width // 8)), band.height))
-            tile = resize_hq(patch, (64, 64), max_colors=72)
-            tileset.paste(tile, (i * 64, 0))
-        save(tileset, "tilesets/01_ashen_threshold/tileset.png")
-    else:
-        shot = Image.open(SHOT).convert("RGBA")
-        w, h = shot.size
-        y0, y1 = int(h * 0.70), int(h * 0.80)
-        ledge = shot.crop((0, y0, w, y1))
-        for i in range(16):
-            x0 = int(i * (ledge.width - 70) / 15)
-            patch = ledge.crop((x0, 0, x0 + 70, ledge.height))
-            tile = resize_hq(patch.resize((64, 64), Image.Resampling.LANCZOS), (64, 64), max_colors=64)
-            tileset.paste(tile, (i * 64, 0))
-        save(tileset, "tilesets/01_ashen_threshold/tileset.png")
+    sources: list[Image.Image] = []
+    for name in ("ledge_stone_hq.png", "tileset_clean.png", "tileset_v2.png"):
+        img = load(name)
+        if img is not None:
+            sources.append(img.convert("RGBA"))
+    # Screenshot lit walkable ledge (0.60–0.70 — below that is dark underside/void)
+    shot = Image.open(SHOT).convert("RGBA")
+    sw, sh = shot.size
+    ledge = shot.crop((int(sw * 0.08), int(sh * 0.60), int(sw * 0.92), int(sh * 0.70)))
+    sources.insert(0, ledge)
+
+    for i in range(16):
+        src = sources[i % len(sources)]
+        # Prefer UPPER walkable surface — lower band is often near-black underside
+        band_h = min(src.height, max(72, src.height // 3))
+        y0 = max(0, src.height // 4)
+        band = src.crop((0, y0, src.width, min(src.height, y0 + band_h)))
+        x0 = int((i * 17 % max(1, band.width - 64)))
+        patch = band.crop((x0, 0, min(band.width, x0 + max(80, band.width // 6)), band.height))
+        tile = resize_hq(patch, (64, 64), max_colors=80)
+        tileset.paste(tile, (i * 64, 0))
+    save(tileset, "tilesets/01_ashen_threshold/tileset.png")
 
     props = load("props.png")
     if props is not None:
         save(resize_hq(knock_light_bg(props), (192, 64), max_colors=72), "tilesets/01_ashen_threshold/props.png")
     else:
-        shot = Image.open(SHOT).convert("RGBA")
-        w, h = shot.size
-        props = shot.crop((int(w * 0.01), int(h * 0.30), int(w * 0.24), int(h * 0.78)))
+        props = shot.crop((int(sw * 0.01), int(sh * 0.30), int(sw * 0.24), int(sh * 0.78)))
         save(resize_hq(props, (192, 64), max_colors=64), "tilesets/01_ashen_threshold/props.png")
 
 
@@ -294,10 +395,31 @@ def build_enemies() -> None:
         if img is None:
             continue
         img = knock_light_bg(img)
-        # Soft key only for pure black studio voids — keep dark enemy bodies
+        # Single-subject sheets: duplicate with gentle motion instead of bad H-slices
+        opaque_ratio = sum(1 for p in img.getdata() if p[3] > 20) / max(1, img.width * img.height)
+        looks_like_strip = img.width > img.height * 1.6 and opaque_ratio > 0.05
+        out = Image.new("RGBA", (frames * 64, rows * 64), (0, 0, 0, 0))
+        if not looks_like_strip or "e03" in src or "e08" in src or "e01" in src:
+            # Treat as hero pose(s) — pack animation via wobble
+            if looks_like_strip and "e01" in src:
+                # Horizontal multi-wisp: slice equal frames
+                fw = img.width // max(frames, 1)
+                for i in range(frames):
+                    frame = img.crop((i * fw, 0, (i + 1) * fw, img.height))
+                    cell = fit_subject(frame, body_h=48, key_black=False)
+                    out.paste(cell, (i * 64, 0), cell)
+            else:
+                base = fit_subject(img, body_h=52 if "e08" in src else 50, key_black=False)
+                counts = [4, 6] if rows == 2 else [frames]
+                for ri, count in enumerate(counts):
+                    for i in range(count):
+                        phase = math.sin(i / max(count, 1) * math.pi * 2)
+                        cell = wobble(base, int(phase * 2), -int(abs(phase)), 1.0)
+                        out.paste(cell, (i * 64, ri * 64), cell)
+            save(out, dest)
+            continue
+
         img = knock_near_black(img, thresh=8)
-        max_cols = frames
-        out = Image.new("RGBA", (max_cols * 64, rows * 64), (0, 0, 0, 0))
         counts = [4, 6] if rows == 2 else [frames]
         for ri, count in enumerate(counts):
             rh = img.height // rows
