@@ -138,6 +138,15 @@ export PATH="$PWD/tools/bin:$PATH"
 godot --version
 ```
 
+### Godot MCP (Cursor Agent)
+
+Project MCP config: [`.cursor/mcp.json`](.cursor/mcp.json) — [Coding-Solo/godot-mcp](https://github.com/Coding-Solo/godot-mcp) via `npx @coding-solo/godot-mcp`.
+
+- Sets `GODOT_PATH` to the binary from `./tools/godot.sh --print-path` (update that path if Godot lives elsewhere).
+- After adding/changing the config, reload MCP in Cursor (**Settings → MCP**) so tools appear.
+- Useful tools: `get_godot_version`, `get_project_info` (path `godot/`), `run_project` / `get_debug_output` / `stop_project`, plus scene helpers (`create_scene`, `add_node`, …).
+- Prefer this repo’s CLI helpers (`./tools/godot.sh`, `./tools/capture_scene_screenshot.sh`) for headless tests and visual QA; use MCP when the agent needs to launch/run Godot and read debug output in-session.
+
 ### Scene screenshots
 
 Capture a room/scene to PNG (opens a brief borderless window — not headless, so rendering works):
