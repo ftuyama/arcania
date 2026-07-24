@@ -40,36 +40,7 @@ for arg in "$@"; do
 	esac
 done
 
-resolve_godot() {
-	if [[ -n "${GODOT_BIN:-}" ]]; then
-		echo "$GODOT_BIN"
-		return
-	fi
-	if command -v godot >/dev/null 2>&1; then
-		command -v godot
-		return
-	fi
-	if command -v godot4 >/dev/null 2>&1; then
-		command -v godot4
-		return
-	fi
-	local mac_app
-	for mac_app in \
-		"/Applications/Godot.app/Contents/MacOS/Godot" \
-		"/Applications/Godot 4.app/Contents/MacOS/Godot" \
-		"$HOME/Applications/Godot.app/Contents/MacOS/Godot" \
-		"$HOME/Applications/Godot 4.app/Contents/MacOS/Godot"; do
-		if [[ -x "$mac_app" ]]; then
-			echo "$mac_app"
-			return
-		fi
-	done
-	echo "ERROR: Godot 4 not found. Install Godot 4.3+ and Web export templates," >&2
-	echo "       or set GODOT_BIN to your Godot executable." >&2
-	exit 1
-}
-
-GODOT="$(resolve_godot)"
+GODOT="$("$ROOT/tools/godot.sh" --print-path)"
 echo "Using Godot: $GODOT"
 GODOT_VERSION="$("$GODOT" --version)"
 echo "$GODOT_VERSION"

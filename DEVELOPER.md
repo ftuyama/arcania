@@ -122,10 +122,36 @@ combat_test_arena ──► test_room_02 ◄──► test_room_01
 
 Press **F3** to toggle an on-screen overlay showing FPS, frame-time averages, room physics budget, current room/region, and a quick control reference.
 
-Run the automated ww_07 profile from the Godot project folder:
+### Godot CLI helper
+
+`tools/godot.sh` finds Godot 4 (`GODOT_BIN` → `godot`/`godot4` on PATH → `/Applications/Godot.app/...`) and forwards args:
 
 ```bash
-godot --headless --path godot --script res://tests/integration/fps_profile_ww07.gd
+./tools/godot.sh --print-path
+./tools/godot.sh --headless --path godot --script res://tests/unit/test_runner.gd
+```
+
+Optional PATH shim (so plain `godot` works in this repo):
+
+```bash
+export PATH="$PWD/tools/bin:$PATH"
+godot --version
+```
+
+### Scene screenshots
+
+Capture a room/scene to PNG (opens a brief borderless window — not headless, so rendering works):
+
+```bash
+./tools/capture_scene_screenshot.sh                          # at_01_threshold_hub → tmp/scene_captures/
+./tools/capture_scene_screenshot.sh ww_07_heartwood_chamber
+./tools/capture_scene_screenshot.sh at_01_threshold_hub /tmp/hub.png
+```
+
+Run the automated ww_07 profile:
+
+```bash
+./tools/godot.sh --headless --path godot --script res://tests/integration/fps_profile_ww07.gd
 ```
 
 ### Known Limitations (Phase 5+)

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# PATH shim — prefer: export PATH="/path/to/arcania/tools/bin:$PATH"
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+exec "$ROOT/tools/godot.sh" "$@"

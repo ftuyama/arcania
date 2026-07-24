@@ -1535,6 +1535,8 @@ godot/tests/
 - `F4`: Export vertical slice playtest report (`user://playtest_slice_report.json`)
 - `F5`: Quick save to `debug_save` slot
 - `cheat_panel.tscn` (debug build only): grant spells, teleport rooms
+- `tools/godot.sh`: resolve Godot 4 binary + forward CLI args (`--print-path`, headless tests)
+- `tools/capture_scene_screenshot.sh`: boot a room/scene and write PNG under `tmp/scene_captures/`
 
 See [playtest-vertical-slice.md](playtest-vertical-slice.md) for the P0-05 timing protocol.
 
