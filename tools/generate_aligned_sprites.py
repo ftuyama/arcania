@@ -131,23 +131,15 @@ def ensure_dirs() -> None:
 
 
 def _draw_ember_sigil(img: Image.Image, cx: int, cy: int, pulse: float) -> None:
-    r_outer = 7
+    """Filled ember wheel — single solid glyph (not a sparse wireframe)."""
     glow = tuple(int(c * (0.55 + 0.45 * pulse)) for c in C_ACCENT[:3]) + (255,)
-    for angle in range(0, 360, 45):
-        rad = math.radians(angle)
-        x1 = cx + int(math.cos(rad) * (r_outer - 2))
-        y1 = cy + int(math.sin(rad) * (r_outer - 2))
-        x2 = cx + int(math.cos(rad) * r_outer)
-        y2 = cy + int(math.sin(rad) * r_outer)
-        draw = ImageDraw.Draw(img)
-        draw.line((x1, y1, x2, y2), fill=glow, width=1)
     draw = ImageDraw.Draw(img)
-    draw.ellipse((cx - r_outer, cy - r_outer, cx + r_outer, cy + r_outer), outline=glow, width=1)
-    draw.ellipse((cx - 4, cy - 4, cx + 4, cy + 4), outline=C_WARM, width=1)
-    draw.ellipse((cx - 1, cy - 1, cx + 1, cy + 1), fill=(*C_ACCENT[:3], 255))
-    # Cross rune
-    draw.line((cx - 3, cy, cx + 3, cy), fill=C_TRIM, width=1)
-    draw.line((cx, cy - 3, cx, cy + 3), fill=C_TRIM, width=1)
+    r = 8
+    draw.ellipse((cx - r - 2, cy - r - 2, cx + r + 2, cy + r + 2), fill=(*C_ACCENT[:3], 55))
+    draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*C_WARM[:3], 220), outline=glow, width=2)
+    draw.ellipse((cx - 4, cy - 4, cx + 4, cy + 4), fill=C_ACCENT, outline=C_WARM, width=1)
+    draw.line((cx - 5, cy, cx + 5, cy), fill=C_TRIM, width=1)
+    draw.line((cx, cy - 5, cx, cy + 5), fill=C_TRIM, width=1)
 
 
 def draw_elara_frame(frame_img: Image.Image, frame: int, anim: str) -> None:
@@ -197,77 +189,80 @@ def draw_elara_frame(frame_img: Image.Image, frame: int, anim: str) -> None:
         arm_swing = [3, 5, 1, 0][min(frame, 3)]
         glow_pulse = 0.35
 
-    body_h = int(28 * squash)
-    body_top = oy - body_h - 6 - bob
+    body_h = int(30 * squash)
+    body_top = oy - body_h - 4 - bob
     dx = ox + lean
-    hem_y = oy - 12 - bob
+    hood_tip = body_top - 10
+    hem_y = oy - 8 - bob
 
-    draw.rectangle((dx - 9 + leg_l, oy - 5, dx - 2 + leg_l, oy), fill=C_SHADOW, outline=C_MID)
-    draw.rectangle((dx + 2 + leg_r, oy - 5, dx + 9 + leg_r, oy), fill=C_SHADOW, outline=C_MID)
+    # Readability first: mid-tone robe + light rim (shadow≈sky made her look hollow).
+    rim = (0x6E, 0x72, 0x8C, 255)
+    robe = C_MID
+    fold = C_BASE
 
     draw.polygon(
         [
-            (dx - 12 - robe_flare, hem_y),
-            (dx + 12 + robe_flare, hem_y),
-            (dx + 10 + leg_r, oy - 4),
-            (dx - 10 + leg_l, oy - 4),
+            (dx - 2, hood_tip),
+            (dx + 2, hood_tip),
+            (dx + 12, body_top + 8),
+            (dx + 13 + robe_flare, hem_y),
+            (dx + 11 + robe_flare, oy),
+            (dx - 11 - robe_flare, oy),
+            (dx - 13 - robe_flare, hem_y),
+            (dx - 12, body_top + 8),
         ],
-        fill=C_BASE,
-        outline=C_SHADOW,
+        fill=robe,
+        outline=rim,
+    )
+    # Soft folds — still mid-dark, not sky-matched shadow
+    draw.polygon(
+        [
+            (dx - 7, body_top + 12),
+            (dx - 2, body_top + 12),
+            (dx - 2, oy - 4),
+            (dx - 9, oy - 4),
+        ],
+        fill=fold,
     )
     draw.polygon(
         [
-            (dx - 9, hem_y + 3),
-            (dx + 9, hem_y + 3),
-            (dx + 7 + leg_r, oy - 6),
-            (dx - 7 + leg_l, oy - 6),
+            (dx + 2, body_top + 12),
+            (dx + 7, body_top + 12),
+            (dx + 9, oy - 4),
+            (dx + 2, oy - 4),
         ],
-        fill=C_TRIM,
+        fill=(0x58, 0x5C, 0x78, 255),
     )
-
-    draw.rectangle((dx - 11, body_top + 12, dx + 11, hem_y), fill=C_BASE, outline=C_SHADOW)
-    draw.rectangle((dx - 8, body_top + 14, dx - 1, hem_y - 2), fill=C_SHADOW)
-    draw.rectangle((dx + 1, body_top + 14, dx + 8, hem_y - 2), fill=(*C_MID[:3], 200))
-    draw.line((dx - 10, body_top + 18, dx + 10, body_top + 18), fill=C_WARM, width=1)
-    draw.line((dx - 10, hem_y - 4, dx + 10, hem_y - 3), fill=C_WARM, width=1)
-
-    head_cy = body_top + 8
+    # Narrow sash (not a body-cutting stripe)
+    draw.rectangle((dx - 8, body_top + 17, dx + 8, body_top + 19), fill=C_WARM)
+    # Boots — darker than robe but lighter than sky
+    draw.rectangle((dx - 10 + leg_l, oy - 5, dx - 2 + leg_l, oy), fill=fold, outline=rim)
+    draw.rectangle((dx + 2 + leg_r, oy - 5, dx + 10 + leg_r, oy), fill=fold, outline=rim)
+    # Face recess — charcoal, not sky twin
     draw.polygon(
-        [
-            (dx - 11, head_cy + 4),
-            (dx - 3, head_cy - 16),
-            (dx + 3, head_cy - 16),
-            (dx + 11, head_cy + 4),
-            (dx + 9, head_cy + 10),
-            (dx - 9, head_cy + 10),
-        ],
-        fill=C_SHADOW,
-        outline=C_MID,
+        [(dx - 5, body_top + 6), (dx, body_top - 2), (dx + 5, body_top + 6)],
+        fill=(0x22, 0x22, 0x32, 255),
     )
-    draw.polygon([(dx - 7, head_cy + 2), (dx, head_cy - 8), (dx + 7, head_cy + 2)], fill=(0x10, 0x10, 0x1C, 255))
-    draw.point((dx - 2, head_cy), fill=C_MID)
-    draw.point((dx + 3, head_cy), fill=C_MID)
+    draw.point((dx - 2, body_top + 3), fill=rim)
+    draw.point((dx + 2, body_top + 3), fill=rim)
 
     palm_x = dx - 16 - arm_swing - sigil_forward
-    palm_y = body_top + 20
-    draw.line((dx - 8, body_top + 16, palm_x + 4, palm_y), fill=C_MID, width=2)
+    palm_y = body_top + 18
+    draw.line((dx - 8, body_top + 14, palm_x + 4, palm_y), fill=C_MID, width=2)
     draw.ellipse((palm_x, palm_y - 2, palm_x + 6, palm_y + 4), fill=C_BASE, outline=C_MID)
     _draw_ember_sigil(frame_img, palm_x + 2, palm_y + 1, glow_pulse)
-    if glow_pulse > 0.6:
-        for i, (mx, my) in enumerate(((palm_x - 6, palm_y - 4), (palm_x + 10, palm_y), (palm_x, palm_y + 8))):
-            px(frame_img, mx, my, (*C_ACCENT[:3], 180 - i * 40))
 
     right_x = dx + 14 + arm_swing
-    right_y = body_top + 22
+    right_y = body_top + 20
     if anim == "cast" and frame >= 2:
         right_x = dx + 18 + arm_swing
-        right_y = body_top + 16
-    draw.line((dx + 8, body_top + 16, right_x, right_y), fill=C_MID, width=2)
+        right_y = body_top + 14
+    draw.line((dx + 8, body_top + 14, right_x, right_y), fill=C_MID, width=2)
 
     if anim == "dash":
         for streak in range(4):
             sx = dx - 10 - streak * 8 - frame * 3
-            sy = body_top + 16 + streak
+            sy = body_top + 14 + streak
             draw.line((sx, sy, sx + 16, sy), fill=(*C_MID[:3], 100 - streak * 20), width=2)
 
 
@@ -430,17 +425,33 @@ def _draw_threshold_shade(draw: ImageDraw.ImageDraw, frame: int, img: Image.Imag
 
 
 def _draw_bramble_stalker(draw: ImageDraw.ImageDraw, frame: int, img: Image.Image) -> None:
+    """Walk cycle with plant-leg strides — avoids static-blob jitter."""
     ox, oy = 32, 60
-    bob = int(math.sin(frame * 0.9) * 1.5)
-    body_top = oy - 26 - bob
+    phase = frame * (math.pi / 3.0)
+    bob = int(math.sin(phase) * 1)
+    body_top = oy - 28 - bob
+    # Body mass
     draw.polygon(
-        [(ox - 12, body_top + 12), (ox + 10, body_top + 8), (ox + 12, oy - 8), (ox - 6, oy - 6)],
+        [
+            (ox - 10, body_top + 10),
+            (ox + 8, body_top + 6),
+            (ox + 12, oy - 14),
+            (ox - 8, oy - 12),
+        ],
         fill=C_LEAF,
         outline=C_THORN,
     )
-    draw.ellipse((ox + 4, body_top + 6, ox + 18, body_top + 18), fill=C_THORN, outline=C_LEAF)
-    draw.point((ox + 10, body_top + 10), fill=C_ACCENT)
-    draw.point((ox + 14, body_top + 10), fill=C_ACCENT)
+    # Head
+    draw.ellipse((ox + 4, body_top + 4, ox + 18, body_top + 16), fill=C_THORN, outline=C_LEAF)
+    draw.point((ox + 10, body_top + 8), fill=C_ACCENT)
+    draw.point((ox + 14, body_top + 8), fill=C_ACCENT)
+    # Three plant legs with stride offset
+    for i, base_x in enumerate((ox - 8, ox, ox + 8)):
+        swing = int(math.sin(phase + i * 2.1) * 5)
+        foot_x = base_x + swing
+        hip_y = oy - 12
+        draw.line((base_x, hip_y, foot_x, oy - 1), fill=C_THORN, width=2)
+        draw.ellipse((foot_x - 2, oy - 3, foot_x + 2, oy), fill=C_LEAF)
 
 
 def _save_enemy(
@@ -474,7 +485,7 @@ def build_enemies() -> list[Path]:
             "e01_sheet",
             sheet,
             {"idle": rects},
-            {"idle": 10.0},
+            {"idle": 6.0},
         )
     )
 
@@ -485,7 +496,7 @@ def build_enemies() -> list[Path]:
             "e02_sheet",
             sheet,
             {"walk": rects},
-            {"walk": 10.0},
+            {"walk": 6.0},
             loop_anims={"walk"},
         )
     )
@@ -508,7 +519,7 @@ def build_enemies() -> list[Path]:
             "e03_sheet",
             sheet,
             regions,
-            {"idle": 8.0, "walk": 10.0},
+            {"idle": 6.0, "walk": 6.0},
         )
     )
 
@@ -519,7 +530,7 @@ def build_enemies() -> list[Path]:
             "e04_sheet",
             sheet,
             {"idle": rects},
-            {"idle": 10.0},
+            {"idle": 6.0},
         )
     )
 
@@ -530,7 +541,7 @@ def build_enemies() -> list[Path]:
             "e08_sheet",
             sheet,
             {"idle": rects},
-            {"idle": 8.0},
+            {"idle": 5.0},
         )
     )
 
@@ -730,31 +741,59 @@ def build_parallax() -> list[Path]:
     return outputs
 
 
-def _draw_floor_tile(img: Image.Image) -> None:
-    dither_fill(img, 0, 0, 64, 64, C_BASE, C_SHADOW)
+def _draw_floor_tile(img: Image.Image, variant: int = 0) -> None:
+    """Seamless stone fill — variant blotches so tiling doesn't form a lattice."""
     draw = ImageDraw.Draw(img)
-    for y in range(10, 64, 14):
-        draw.line((0, y, 63, y), fill=(*C_MID[:3], 80), width=1)
-    for x in range(6, 64, 18):
-        draw.line((x, 0, x, 63), fill=(*C_MID[:3], 50), width=1)
+    draw.rectangle((0, 0, 63, 63), fill=C_BASE)
+    layouts = (
+        ((8, 12), (18, 40), (34, 22), (48, 50), (56, 8), (28, 56)),
+        ((14, 28), (40, 10), (52, 36), (8, 48), (30, 18), (60, 54)),
+        ((22, 6), (6, 34), (44, 44), (58, 20), (18, 58), (36, 30)),
+    )
+    blotches = layouts[variant % len(layouts)]
+    for i, (y, x) in enumerate(blotches):
+        c = C_SHADOW if i % 2 == 0 else (*C_MID[:3], 160)
+        draw.ellipse((x - 5, y - 3, x + 5, y + 3), fill=c)
+    cracks = (
+        ((4, 18, 22, 20), (28, 40, 50, 38), (12, 52, 18, 60)),
+        ((10, 8, 30, 14), (40, 28, 58, 34), (6, 44, 24, 50)),
+        ((20, 24, 36, 20), (8, 36, 20, 48), (44, 52, 60, 46)),
+    )
+    for x0, y0, x1, y1 in cracks[variant % len(cracks)]:
+        draw.line((x0, y0, x1, y1), fill=(*C_MID[:3], 55), width=1)
 
+
+def _draw_floor_tile_v0(img: Image.Image) -> None:
+    _draw_floor_tile(img, 0)
+
+
+def _draw_floor_tile_v1(img: Image.Image) -> None:
+    _draw_floor_tile(img, 1)
+
+
+def _draw_floor_tile_v2(img: Image.Image) -> None:
+    _draw_floor_tile(img, 2)
 
 def _draw_wall_tile(img: Image.Image) -> None:
-    dither_fill(img, 0, 0, 64, 64, C_SHADOW, C_BASE)
     draw = ImageDraw.Draw(img)
-    for y in range(0, 64, 16):
-        draw.rectangle((2, y + 2, 61, y + 13), outline=(*C_MID[:3], 100), width=1)
+    draw.rectangle((0, 0, 63, 63), fill=C_SHADOW)
+    for y, x in ((10, 18), (28, 44), (50, 20)):
+        draw.ellipse((x - 8, y - 5, x + 8, y + 5), fill=(*C_BASE[:3], 200))
+    draw.line((3, 22, 60, 24), fill=(*C_MID[:3], 35), width=1)
+    draw.line((5, 44, 58, 41), fill=(*C_MID[:3], 28), width=1)
 
 
 def _draw_platform_tile(img: Image.Image) -> None:
-    dither_fill(img, 0, 20, 64, 64, C_BASE, C_SHADOW)
     draw = ImageDraw.Draw(img)
-    draw.rectangle((0, 14, 63, 22), fill=C_MID, outline=C_WARM)
-    for x in range(4, 64, 10):
-        draw.point((x, 17), fill=C_ACCENT)
-    # Crumbling edge
-    for x in range(0, 64, 8):
-        if x % 16 == 0:
+    draw.rectangle((0, 20, 63, 63), fill=C_BASE)
+    draw.ellipse((12, 36, 28, 52), fill=C_SHADOW)
+    draw.ellipse((40, 30, 56, 46), fill=(*C_MID[:3], 180))
+    # Cap without dotted grid (dots read as tile squares in-room)
+    draw.rectangle((0, 14, 63, 22), fill=C_MID)
+    draw.line((0, 14, 63, 14), fill=C_WARM, width=1)
+    draw.line((0, 21, 63, 21), fill=(*C_SHADOW[:3], 180), width=1)
+    for x in range(0, 64, 16):
+        if x % 32 == 0:
             draw.line((x, 14, x + 3, 10), fill=(*C_MID[:3], 180), width=1)
 
 
@@ -771,8 +810,9 @@ def _draw_platform_right_tile(img: Image.Image) -> None:
 
 
 def _draw_rune_tile(img: Image.Image) -> None:
-    dither_fill(img, 0, 0, 64, 64, C_SHADOW, C_BASE)
     draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, 63, 63), fill=C_SHADOW)
+    draw.ellipse((18, 22, 46, 42), fill=(*C_BASE[:3], 200))
     cx, cy = 32, 32
     draw.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(*C_ACCENT[:3], 140), width=1)
     draw.line((cx, cy - 10, cx, cy + 10), fill=(*C_ACCENT[:3], 100))
@@ -780,8 +820,9 @@ def _draw_rune_tile(img: Image.Image) -> None:
 
 
 def _draw_brazier_tile(img: Image.Image) -> None:
-    dither_fill(img, 0, 32, 64, 64, C_BASE, C_SHADOW)
     draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 32, 63, 63), fill=C_BASE)
+    draw.ellipse((8, 40, 28, 56), fill=C_SHADOW)
     _draw_brazier(draw, 32, 62)
 
 
@@ -800,7 +841,7 @@ def _draw_grass_tuft_tile(img: Image.Image) -> None:
 
 def build_tileset() -> Path:
     tile_fns = [
-        _draw_floor_tile,
+        _draw_floor_tile_v0,
         _draw_wall_tile,
         _draw_platform_tile,
         _draw_rune_tile,
@@ -809,11 +850,11 @@ def build_tileset() -> Path:
         _draw_brazier_tile,
         _draw_vine_tile,
         _draw_grass_tuft_tile,
-        _draw_floor_tile,
+        _draw_floor_tile_v1,
         _draw_wall_tile,
         _draw_platform_tile,
         _draw_rune_tile,
-        _draw_floor_tile,
+        _draw_floor_tile_v2,
         _draw_wall_tile,
         _draw_platform_tile,
     ]
@@ -845,38 +886,63 @@ def build_props() -> Path:
 
 
 def _draw_ember_sigil_vfx(frame: int, total: int) -> Image.Image:
+    """Single filled sigil disc — one entity per frame."""
     cell = Image.new("RGBA", (128, 128), C_TRANSPARENT)
     draw = ImageDraw.Draw(cell)
     cx, cy = 64, 64
-    t = frame / max(total - 1, 1)
     pulse = 0.5 + 0.5 * math.sin(frame * 0.9)
-    r = int(12 + t * 28 + pulse * 4)
-    for ring in range(3):
-        rr = r - ring * 8
-        if rr < 4:
-            continue
-        alpha = int(180 - ring * 50 - t * 40)
-        draw.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), outline=(*C_ACCENT[:3], max(20, alpha)), width=2)
-    # Rune spokes
-    for angle in range(0, 360, 45):
-        rad = math.radians(angle + frame * 8)
-        x2 = cx + int(math.cos(rad) * r)
-        y2 = cy + int(math.sin(rad) * r)
-        draw.line((cx, cy, x2, y2), fill=(*C_WARM[:3], int(160 * (1 - t * 0.5))), width=1)
-    draw.ellipse((cx - 4, cy - 4, cx + 4, cy + 4), fill=(*C_ACCENT[:3], 255))
+    r = int(22 + pulse * 5)
+    draw.ellipse((cx - r - 6, cy - r - 6, cx + r + 6, cy + r + 6), fill=(*C_ACCENT[:3], 35))
+    draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*C_WARM[:3], 200), outline=C_ACCENT, width=3)
+    draw.ellipse((cx - r + 8, cy - r + 8, cx + r - 8, cy + r - 8), fill=(*C_ACCENT[:3], 160), outline=C_WARM, width=2)
+    draw.ellipse((cx - 8, cy - 8, cx + 8, cy + 8), fill=C_ACCENT)
+    draw.line((cx - 14, cy, cx + 14, cy), fill=C_TRIM, width=2)
+    draw.line((cx, cy - 14, cx, cy + 14), fill=C_TRIM, width=2)
     return cell
 
 
 def _draw_ember_bolt_vfx(frame: int, total: int) -> Image.Image:
+    """Single filled ember bolt — one projectile silhouette per frame."""
     cell = Image.new("RGBA", (128, 128), C_TRANSPARENT)
     draw = ImageDraw.Draw(cell)
     t = frame / max(total - 1, 1)
-    length = int(20 + t * 70)
-    cx, cy = 40, 64
-    draw.line((cx, cy, cx + length, cy - int(length * 0.15)), fill=C_ACCENT, width=4)
-    draw.line((cx + length - 8, cy - int(length * 0.15) - 4, cx + length, cy - int(length * 0.15)), fill=C_WARM, width=2)
-    for i in range(4):
-        px(cell, cx + length // 2 + i * 6, cy - 4 + i, (*C_ACCENT[:3], 200 - i * 40))
+    length = int(36 + t * 40)
+    x0, y0 = 28, 64
+    x1 = x0 + length
+    y1 = y0 - int(length * 0.12)
+    # Filled shaft as a thick diamond/capsule (not a spray of dots)
+    dx = x1 - x0
+    dy = y1 - y0
+    # Perpendicular for thickness
+    nx, ny = -dy, dx
+    length_n = max(math.hypot(nx, ny), 1.0)
+    nx, ny = nx / length_n * 5, ny / length_n * 5
+    draw.polygon(
+        [
+            (x0 - nx, y0 - ny),
+            (x0 + nx, y0 + ny),
+            (x1 + nx * 0.4, y1 + ny * 0.4),
+            (x1 - nx * 0.4, y1 - ny * 0.4),
+        ],
+        fill=C_ACCENT,
+    )
+    draw.polygon(
+        [
+            (x0 - nx * 0.45, y0 - ny * 0.45),
+            (x0 + nx * 0.45, y0 + ny * 0.45),
+            (x1 + nx * 0.2, y1 + ny * 0.2),
+            (x1 - nx * 0.2, y1 - ny * 0.2),
+        ],
+        fill=C_WARM,
+    )
+    draw.polygon(
+        [
+            (x1, y1),
+            (x1 - 12, y1 - 7),
+            (x1 - 10, y1 + 6),
+        ],
+        fill=C_ACCENT,
+    )
     return cell
 
 
@@ -909,9 +975,28 @@ def build_vfx() -> list[Path]:
 
 
 def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Write PIL placeholder sprites (emergency / CI). Does not overwrite production AI art unless forced."
+    )
+    parser.add_argument(
+        "--force-placeholders",
+        action="store_true",
+        help="Required to overwrite godot/assets/sprites with PIL placeholders.",
+    )
+    args = parser.parse_args()
+    if not args.force_placeholders:
+        print(
+            "Refusing to overwrite production sprites.\n"
+            "Use Cursor AI generation + tools/normalize_ai_sprites.py for art.\n"
+            "Pass --force-placeholders only for emergency PIL stubs."
+        )
+        return 2
+
     random.seed(42)
     ensure_dirs()
-    print("Generating screenshot-aligned Wave 1 sprites...")
+    print("Generating screenshot-aligned Wave 1 PIL placeholders (--force-placeholders)...")
     build_elara_sheet()
     build_elara_portrait()
     build_enemies()
@@ -919,7 +1004,7 @@ def main() -> int:
     build_props()
     build_parallax()
     build_vfx()
-    print("Done — run: python3 tools/validate_sprite_imports.py")
+    print("Done — run: python3.11 tools/validate_sprite_imports.py")
     return 0
 
 

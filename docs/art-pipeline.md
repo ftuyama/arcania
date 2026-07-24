@@ -9,12 +9,13 @@
 ## 1. Workflow (Every Batch)
 
 ```
-1. Generate   → AI (Flux / Midjourney / etc.) with style-lock prompts
-2. Normalize  → Aseprite: grid, pivot, gutter, palette quantize
-3. Validate   → python3 tools/validate_sprite_imports.py
-4. Import     → Godot: nearest + lossless; co-locate .tres
-5. Wire       → Update SpriteFrames / scene refs if rects change
-6. Verify     → Side-by-side vs docs/images/screenshot.png (Ashen)
+1. Generate   → Cursor AI image generation with style-lock prompts + screenshot reference
+2. Stage      → docs/art-batches/incoming/ (auto-synced from Cursor assets)
+3. Normalize  → python3.11 tools/build_ai_sprite_batch.py
+4. Validate   → python3.11 tools/validate_sprite_imports.py [--strict]
+5. Import     → Godot: nearest + lossless; co-locate .tres
+6. Wire       → Update SpriteFrames / scene refs if rects change
+7. Verify     → Side-by-side vs docs/images/screenshot.png (Ashen)
 ```
 
 ### Generate
@@ -60,7 +61,9 @@ process/fix_alpha_border=true
 ### Deprecation
 
 `tools/generate_phase0_assets.py` is **emergency fallback / CI stub only**.
-New production art goes through this pipeline (or `tools/generate_aligned_sprites.py` for interim hi-bit placeholders until AI batches land).
+`tools/generate_aligned_sprites.py` writes **PIL placeholders only** and requires `--force-placeholders` so it cannot overwrite production AI art by accident.
+New production art: Cursor AI image generation → stage in `docs/art-batches/incoming/` → **`python3.11 tools/rebuild_sprites_hq.py`** (preserves color fidelity; do not use the old 10-color crush path) → `tools/validate_sprite_imports.py` → Godot.
+`tools/build_ai_sprite_batch.py` / `normalize_ai_sprites.py` are legacy helpers; prefer `rebuild_sprites_hq.py`.
 
 ---
 
@@ -69,7 +72,7 @@ New production art goes through this pipeline (or `tools/generate_aligned_sprite
 ### Global prefix
 
 ```
-hand-drawn 2D game art, dark fantasy metroidvania, hollow knight inspired, strong silhouette, limited color palette, clean lines, no photorealism, transparent background, sprite sheet friendly, hi-bit pixel art, 64px tile grid
+hi-bit pixel art 2D game sprite, dark fantasy metroidvania, screenshot-locked Ashen Threshold style, strong readable silhouette, textured stone and fabric detail, limited color palette, cool shadows warm ember accents, no photorealism, transparent background, sprite sheet friendly, 64px tile grid
 ```
 
 ### Elara (Ashen)

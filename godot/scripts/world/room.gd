@@ -24,6 +24,8 @@ func _ensure_backdrop() -> void:
 	if not RegionBackdrop.region_has_backdrop(region_id):
 		return
 
+	# Parallax layer 0 (sky) is the opaque void fill — do not add a covering ColorRect/Polygon2D
+	# on the room canvas (it would hide every parallax layer behind it).
 	var backdrop := ParallaxBackground.new()
 	backdrop.name = &"Backdrop"
 	backdrop.set_script(REGION_BACKDROP_SCRIPT)

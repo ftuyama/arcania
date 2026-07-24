@@ -57,8 +57,8 @@ func _patrol(delta: float) -> void:
 		facing_direction = 1
 	elif global_position.x >= right:
 		facing_direction = -1
-	_wobble += delta * 9.0
-	animated_sprite.rotation = sin(_wobble) * 0.1
+	_wobble += delta * 4.0
+	animated_sprite.rotation = sin(_wobble) * 0.04
 	update_facing()
 	play_animation(&"walk")
 

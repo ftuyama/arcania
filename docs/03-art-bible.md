@@ -36,7 +36,7 @@ This document is the single source of truth for Arcania's visual identity: style
 
 ### Core Aesthetic
 
-Arcania reads as **hand-drawn 2D dark fantasy** at **64px tile scale**, with player characters at **48–64px** height. The reference touchstone is **Hollow Knight**: strong silhouettes, limited palettes, clean ink-like lines, and combat readability over ornamental detail. Every frame must communicate **threat, mood, and interactability** before beauty.
+Arcania reads as **hi-bit pixel-art dark fantasy** at **64px tile scale**, with player characters at **48–64px** height. The visual north star is [`docs/images/screenshot.png`](images/screenshot.png) (Ashen Threshold hub): textured stone, fabric folds, atmospheric fog, and warm ember accents — with **Hollow Knight–level silhouette readability** preserved so combat stays clear. Every frame must communicate **threat, mood, and interactability** before beauty.
 
 ### Six Style Pillars
 
@@ -75,7 +75,7 @@ Regions may omit Layer 0 (interior) or add a Layer 6 (full-screen weather overla
 **Reuse this prefix on every AI generation prompt in this document and in production:**
 
 ```
-hand-drawn 2D game art, dark fantasy metroidvania, hollow knight inspired, strong silhouette, limited color palette, clean lines, no photorealism, transparent background, sprite sheet friendly
+hi-bit pixel art 2D game sprite, dark fantasy metroidvania, screenshot-locked Ashen Threshold style, strong readable silhouette, textured stone and fabric detail, limited color palette, cool shadows warm ember accents, no photorealism, transparent background, sprite sheet friendly
 ```
 
 ### Prompt Suffix Variants

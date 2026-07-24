@@ -30,13 +30,13 @@
 Prepend the global token from [03-art-bible.md §2](03-art-bible.md):
 
 ```
-hand-drawn 2D game art, dark fantasy metroidvania, hollow knight inspired, strong silhouette, limited color palette, clean lines, no photorealism, transparent background, sprite sheet friendly
+hi-bit pixel art 2D game sprite, dark fantasy metroidvania, screenshot-locked Ashen Threshold style, strong readable silhouette, textured stone and fabric detail, limited color palette, cool shadows warm ember accents, no photorealism, transparent background, sprite sheet friendly
 ```
 
 **Append for all new batches:**
 
 ```
-, hi-bit pixel art, 64px tile grid, limited 5-color palette {REGION_HEX_LIST}, side view facing right, transparent background, no text watermark
+, 64px tile grid, limited 5-color palette {REGION_HEX_LIST}, side view facing right, transparent background, no text watermark, match docs/images/screenshot.png fidelity
 ```
 
 **Negative (universal):**

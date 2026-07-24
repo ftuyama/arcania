@@ -152,9 +152,9 @@ Project MCP config: [`.cursor/mcp.json`](.cursor/mcp.json) — [Coding-Solo/godo
 Capture a room/scene to PNG (opens a brief borderless window — not headless, so rendering works):
 
 ```bash
-./tools/capture_scene_screenshot.sh                          # at_01_threshold_hub → tmp/scene_captures/
-./tools/capture_scene_screenshot.sh ww_07_heartwood_chamber
-./tools/capture_scene_screenshot.sh at_01_threshold_hub /tmp/hub.png
+./tools/capture_scene_screenshot.sh                          # game_world (HUD+player) → tmp/scene_captures/
+./tools/capture_scene_screenshot.sh at_01_threshold_hub      # room only
+./tools/capture_scene_screenshot.sh game_world /tmp/hub.png
 ```
 
 Run the automated ww_07 profile:

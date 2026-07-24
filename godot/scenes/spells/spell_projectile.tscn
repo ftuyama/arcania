@@ -13,7 +13,7 @@ script = ExtResource("1_proj")
 [node name="Visual" type="AnimatedSprite2D" parent="."]
 sprite_frames = ExtResource("3_vfx")
 animation = &"effect"
-autoplay = "effect"
+centered = true
 
 [node name="HitboxComponent" type="Area2D" parent="."]
 collision_layer = 8
