@@ -3,6 +3,12 @@ extends Node
 
 
 const STARTER_SPELLS: Array[StringName] = [&"ember_sigil", &"ember_bolt"]
+const CANONICAL_QUICK_SLOTS: Array[StringName] = [
+	&"ember_sigil",
+	&"ember_bolt",
+	&"veil_step",
+	&"rootbind",
+]
 const WHEEL_SIZE := 8
 const QUICK_SLOT_COUNT := 4
 
@@ -37,10 +43,9 @@ func _ready() -> void:
 
 
 func _init_default_loadout() -> void:
-	var defaults: Array[StringName] = [&"ember_sigil", &"ember_bolt", &"rootbind", &"veil_step"]
 	for i in QUICK_SLOT_COUNT:
-		if i < defaults.size() and has_spell(defaults[i]):
-			_quick_slots[i] = defaults[i]
+		if i < CANONICAL_QUICK_SLOTS.size() and has_spell(CANONICAL_QUICK_SLOTS[i]):
+			_quick_slots[i] = CANONICAL_QUICK_SLOTS[i]
 		else:
 			_quick_slots[i] = &""
 	for i in WHEEL_SIZE:
@@ -78,6 +83,9 @@ func acquire_spell(spell_id: StringName) -> void:
 			break
 	if spell_id == &"veil_step" and _quick_slots[2].is_empty():
 		_quick_slots[2] = spell_id
+	if spell_id == &"rootbind" and _quick_slots[3].is_empty():
+		_quick_slots[3] = spell_id
+	_repair_legacy_quick_slots()
 	EventBus.spell_acquired.emit(spell_id)
 
 
@@ -134,7 +142,7 @@ func can_cast(spell_id: StringName, caster_mana: float) -> bool:
 	if spell == null:
 		return false
 	var cost := get_effective_cost(spell_id)
-	return caster_mana >= float(cost) or spell.can_overcast
+	return caster_mana >= float(cost)
 
 
 func get_effective_cost(spell_id: StringName) -> int:
@@ -194,6 +202,7 @@ func apply_save_data(data: Dictionary) -> void:
 		_quick_slots.append(StringName(spell_str))
 	while _quick_slots.size() < QUICK_SLOT_COUNT:
 		_quick_slots.append(&"")
+	_repair_legacy_quick_slots()
 	if _wheel[0].is_empty() and not _acquired.is_empty():
 		_init_default_loadout()
 
@@ -206,3 +215,10 @@ func reset_to_defaults() -> void:
 			_acquired.append(spell_id)
 			_cooldowns[spell_id] = 0.0
 	_init_default_loadout()
+
+
+func _repair_legacy_quick_slots() -> void:
+	# Older builds mapped Rootbind to key 3 and Veil Step to key 4.
+	if _quick_slots[2] == &"rootbind" and _quick_slots[3] == &"veil_step":
+		_quick_slots[2] = &"veil_step"
+		_quick_slots[3] = &"rootbind"

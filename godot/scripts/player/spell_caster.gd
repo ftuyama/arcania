@@ -2,6 +2,8 @@ extends Node
 ## Resolves spell casting for the player.
 
 
+const CAST_FAIL_SFX := "res://assets/audio/sfx/ui/ui_menu_select.wav"
+
 @onready var projectile_pool: Node = $ProjectilePool
 @onready var melee_hitbox: HitboxComponent = $"../MeleeHitbox"
 
@@ -10,10 +12,15 @@ func try_cast(spell_id: StringName, player: Player) -> bool:
 	var spell := SpellManager.get_spell(spell_id)
 	if spell == null:
 		return false
-	if not SpellManager.can_cast(spell_id, player.mana_component.current_mana):
+	if not SpellManager.has_spell(spell_id):
+		return false
+	if SpellManager.is_on_cooldown(spell_id):
 		return false
 	var cost := SpellManager.get_effective_cost(spell_id)
-	if not player.mana_component.try_spend(cost, player.health_component):
+	if not player.mana_component.can_afford(cost):
+		play_cast_fail_sfx(player.global_position)
+		return false
+	if not player.mana_component.spend_mana(cost):
 		return false
 	SpellManager.start_cooldown(spell_id)
 	play_cast_sfx(spell, player.global_position)
@@ -27,14 +34,14 @@ func resolve_cast(spell_id: StringName, player: Player) -> void:
 		return
 	var mods := InventorySystem.get_aggregated_modifiers()
 	match spell_id:
-		&"ember_sigil":
-			_fire_sigil_hitbox(player, spell, mods)
-			play_impact_sfx(spell, player.global_position + Vector2(28.0 * float(player.facing_direction), -8.0))
-		&"ember_bolt":
+		&"ember_sigil", &"ember_bolt":
+			var aim := player.get_aim_direction()
+			_update_facing_from_aim(player, aim)
 			projectile_pool.spawn(
 				player.global_position + Vector2(0, -8),
-				player.get_aim_direction(),
-				spell
+				aim,
+				spell,
+				player
 			)
 		&"veil_step":
 			pass
@@ -50,6 +57,10 @@ func resolve_cast(spell_id: StringName, player: Player) -> void:
 func play_cast_sfx(spell: SpellData, position: Vector2) -> void:
 	if spell.cast_sfx:
 		AudioManager.play_sfx_stream(spell.cast_sfx, position)
+
+
+func play_cast_fail_sfx(position: Vector2) -> void:
+	AudioManager.play_sfx(CAST_FAIL_SFX, position)
 
 
 func play_impact_sfx(spell: SpellData, position: Vector2) -> void:
@@ -120,19 +131,11 @@ func _spawn_vine_platform(player: Player) -> void:
 	player.get_parent().add_child(body)
 
 
-func _fire_sigil_hitbox(player: Player, spell: SpellData, mods: Dictionary) -> void:
-	var damage := spell.base_damage
-	if mods.has("burn_damage_mult"):
-		damage = int(float(damage) * float(mods["burn_damage_mult"]))
-	melee_hitbox.configure_melee(player.facing_direction, Vector2(12.0, -8.0))
-	melee_hitbox.damage = damage
-	melee_hitbox.damage_type = &"fire"
-	melee_hitbox.knockback_vector = Vector2(100.0 * float(player.facing_direction), -40.0)
-	melee_hitbox.enable_hitbox()
-	player.get_tree().create_timer(0.12).timeout.connect(func() -> void:
-		melee_hitbox.disable_hitbox()
-	)
-	_notify_nearby_gates(player, spell.id)
+func _update_facing_from_aim(player: Player, aim: Vector2) -> void:
+	if absf(aim.x) <= 0.1:
+		return
+	player.facing_direction = 1 if aim.x > 0.0 else -1
+	player.animated_sprite.flip_h = player.facing_direction < 0
 
 
 func _notify_nearby_gates(player: Player, spell_id: StringName) -> void:

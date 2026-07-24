@@ -14,12 +14,17 @@ const LAYERS: Array[Dictionary] = [
 		"modulate": Color(0.95, 0.92, 0.88, 1.0),
 	},
 	{
-		"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_2_mid_fog.png",
+		"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_2_mid_architecture.png",
+		"drift": Vector2(-3.0, 0.0),
+		"modulate": Color(0.92, 0.9, 0.88, 0.95),
+	},
+	{
+		"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_3_mid_fog.png",
 		"drift": Vector2(-4.0, 0.0),
 		"modulate": Color(0.9, 0.9, 0.95, 0.85),
 	},
 	{
-		"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_3_near_occluders.png",
+		"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_4_near_occluders.png",
 		"drift": Vector2(10.0, 0.0),
 		"modulate": Color(0.82, 0.8, 0.78, 0.75),
 	},

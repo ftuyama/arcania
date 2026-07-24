@@ -28,6 +28,9 @@ size = Vector2(14, 28)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
 size = Vector2(16, 30)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_melee"]
+size = Vector2(24, 28)
+
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 1
@@ -71,8 +74,8 @@ collision_mask = 64
 script = ExtResource("14_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeHitbox"]
-position = Vector2(16, 0)
-shape = SubResource("RectangleShape2D_hurt")
+position = Vector2(34, 0)
+shape = SubResource("RectangleShape2D_melee")
 
 [node name="SpellCaster" type="Node" parent="."]
 script = ExtResource("16_caster")

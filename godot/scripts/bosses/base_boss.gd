@@ -12,6 +12,7 @@ extends CharacterBody2D
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var telegraph: ColorRect = $Telegraph
 @onready var arena_boundary: StaticBody2D = $ArenaBoundary
+@onready var hit_flash: Node = $HitFlash
 
 var player: Player
 var _fight_active: bool = false
@@ -34,6 +35,7 @@ func _ready() -> void:
 	phase_manager.phase_changed.connect(_on_phase_changed)
 	phase_manager.boss_defeated.connect(_on_boss_defeated)
 	health_component.damaged.connect(_on_damaged)
+	hit_flash.setup(animated_sprite)
 	if arena_boundary:
 		arena_boundary.set_deferred(&"collision_layer", 0)
 	await get_tree().process_frame
@@ -59,7 +61,27 @@ func start_fight() -> void:
 	EventBus.boss_fight_started.emit(data.id if data else &"")
 
 
-func _on_damaged(_amount: int, _source: Node) -> void:
+func play_hit_feedback(_amount: int, source: Node) -> void:
+	hit_flash.flash()
+	_spawn_hit_vfx(source)
+
+
+func _spawn_hit_vfx(source: Node) -> void:
+	var world := get_parent()
+	if world == null:
+		return
+	var impact_pos := global_position + Vector2(0, -24)
+	var away_dir := Vector2.RIGHT
+	if source is Node2D:
+		var src_pos := (source as Node2D).global_position
+		impact_pos = impact_pos.lerp(src_pos, 0.3)
+		away_dir = (global_position - src_pos).normalized()
+	var damage_type := EnemyHitVFX.resolve_damage_type(source)
+	EnemyHitVFX.spawn(world, impact_pos, away_dir, damage_type)
+
+
+func _on_damaged(amount: int, source: Node) -> void:
+	play_hit_feedback(amount, source)
 	if not _fight_active and health_component.current_hp < health_component.max_hp:
 		start_fight()
 	face_player()

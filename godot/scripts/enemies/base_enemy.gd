@@ -14,6 +14,7 @@ extends CharacterBody2D
 @onready var detection_area: Area2D = $DetectionArea
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var telegraph: ColorRect = $Telegraph
+@onready var hit_flash: Node = $HitFlash
 
 var player: Player
 var facing_direction: int = -1
@@ -32,6 +33,7 @@ func _ready() -> void:
 	health_component.damaged.connect(_on_damaged)
 	health_component.died.connect(_on_died)
 	health_component.poise_broken.connect(_on_poise_broken)
+	hit_flash.setup(animated_sprite)
 	play_animation(&"idle")
 	await get_tree().process_frame
 	player = get_tree().get_first_node_in_group(&"player") as Player
@@ -86,7 +88,27 @@ func finalize_custom_defeat() -> void:
 	queue_free()
 
 
-func _on_damaged(_amount: int, _source: Node) -> void:
+func play_hit_feedback(_amount: int, source: Node) -> void:
+	hit_flash.flash()
+	_spawn_hit_vfx(source)
+
+
+func _spawn_hit_vfx(source: Node) -> void:
+	var world := get_parent()
+	if world == null:
+		return
+	var impact_pos := global_position + Vector2(0, -12)
+	var away_dir := Vector2(float(facing_direction), -0.2)
+	if source is Node2D:
+		var src_pos := (source as Node2D).global_position
+		impact_pos = impact_pos.lerp(src_pos, 0.35)
+		away_dir = (global_position - src_pos).normalized()
+	var damage_type := EnemyHitVFX.resolve_damage_type(source)
+	EnemyHitVFX.spawn(world, impact_pos, away_dir, damage_type)
+
+
+func _on_damaged(amount: int, source: Node) -> void:
+	play_hit_feedback(amount, source)
 	if health_component.current_hp > 0:
 		var current := state_machine.current_state
 		if current and current.name != &"Hit" and current.name != &"Dead":

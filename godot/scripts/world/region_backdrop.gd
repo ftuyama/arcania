@@ -9,16 +9,18 @@ const REGION_PARALLAX: Dictionary = {
 		"layers": [
 			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_0_sky.png", "scroll": Vector2(0.1, 0.0)},
 			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_1_far_ruins.png", "scroll": Vector2(0.25, 0.0)},
-			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_2_mid_fog.png", "scroll": Vector2(0.45, 0.0)},
-			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_3_near_occluders.png", "scroll": Vector2(0.7, 0.0)},
+			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_2_mid_architecture.png", "scroll": Vector2(0.4, 0.0)},
+			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_3_mid_fog.png", "scroll": Vector2(0.55, 0.0)},
+			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_4_near_occluders.png", "scroll": Vector2(0.7, 0.0)},
 		],
 	},
 	&"dev": {
 		"layers": [
 			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_0_sky.png", "scroll": Vector2(0.1, 0.0)},
 			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_1_far_ruins.png", "scroll": Vector2(0.25, 0.0)},
-			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_2_mid_fog.png", "scroll": Vector2(0.45, 0.0)},
-			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_3_near_occluders.png", "scroll": Vector2(0.7, 0.0)},
+			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_2_mid_architecture.png", "scroll": Vector2(0.4, 0.0)},
+			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_3_mid_fog.png", "scroll": Vector2(0.55, 0.0)},
+			{"path": "res://assets/sprites/tilesets/01_ashen_threshold/parallax_4_near_occluders.png", "scroll": Vector2(0.7, 0.0)},
 		],
 	},
 	&"whisperwood_hollow": {

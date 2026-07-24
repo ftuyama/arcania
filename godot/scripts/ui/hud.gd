@@ -1,25 +1,19 @@
 extends CanvasLayer
-## HP bar, mana bar, essence counter, and boss health bar.
+## In-game HUD — corner clusters matching screenshot aesthetics + GDD §9.1 layout.
 
 
-const COLOR_HP_FILL := Color(1.0, 0.867, 0.824, 1.0)
-const COLOR_HP_LOW := Color(0.898, 0.22, 0.231, 1.0)
-const COLOR_MANA_FILL := Color(0.0, 1.0, 1.0, 1.0)
-const COLOR_BAR_BG := Color(0.102, 0.102, 0.18, 0.85)
-const COLOR_BAR_BORDER := Color(0.173, 0.173, 0.204, 1.0)
-const COLOR_BAR_BORDER_GOLD := Color(0.55, 0.38, 0.14, 0.75)
 const COLOR_BOSS_FILL := Color(0.898, 0.22, 0.231, 1.0)
 
-const BAR_HEIGHT := 12
-const BAR_FILL_INSET := 2
-const BAR_CORNER := 2
-const TWEEN_DURATION := 0.18
-
-@onready var hp_bar: ProgressBar = $MarginContainer/VBox/HPRow/HPBar
-@onready var mana_bar: ProgressBar = $MarginContainer/VBox/ManaRow/ManaBarWrap/ManaBar
-@onready var overcast_bleed: ColorRect = $MarginContainer/VBox/ManaRow/ManaBarWrap/OvercastBleed
-@onready var essence_label: Label = $MarginContainer/VBox/EssenceLabel
-@onready var overcast_label: Label = $MarginContainer/VBox/OvercastLabel
+@onready var character_name: Label = $PlayerStatusCluster/InfoColumn/CharacterName
+@onready var health_pips: HBoxContainer = $PlayerStatusCluster/InfoColumn/HealthPipRow
+@onready var mana_segments: Control = $PlayerStatusCluster/InfoColumn/ManaSegmentBar
+@onready var shard_count_label: Label = $PlayerStatusCluster/InfoColumn/ShardCounter/ShardCount
+@onready var overcast_label: Label = $PlayerStatusCluster/InfoColumn/OvercastLabel
+@onready var region_label: Label = $NavigationCluster/RegionRow/RegionLabel
+@onready var minimap: Control = $NavigationCluster/MinimapWidget
+@onready var quick_spell_bar: HBoxContainer = $SpellCluster/QuickSpellBar
+@onready var spell_name_fade: Label = $SpellCluster/SpellNameFade
+@onready var currency_bar: PanelContainer = $CurrencyBar
 @onready var quest_label: Label = $QuestTracker/QuestLabel
 @onready var boss_bar: ProgressBar = $BossBarContainer/BossHealthBar
 @onready var boss_name_label: Label = $BossBarContainer/BossNameLabel
@@ -27,24 +21,20 @@ const TWEEN_DURATION := 0.18
 @onready var spell_toast: Control = $SpellToast
 @onready var spell_icon: TextureRect = $SpellToast/SpellIcon
 @onready var spell_name_label: Label = $SpellToast/SpellNameLabel
+@onready var sigil_icon: TextureRect = $PlayerStatusCluster/SigilColumn/PortraitStack/SigilIcon
 
 var _player: Player
 var _active_boss: BaseBoss = null
-var _hp_tween: Tween
-var _mana_tween: Tween
-var _hp_fill_style: StyleBoxFlat
-var _mana_fill_style: StyleBoxFlat
-var _shard_row: HBoxContainer
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 10
-	_style_hud_bars()
-	_build_shard_row()
+	_style_static_labels()
+	_style_boss_bar()
+	_load_sigil_icon()
 	EventBus.player_spawned.connect(_on_player_spawned)
 	EventBus.region_entered.connect(_on_region_entered)
-	EventBus.enemy_defeated.connect(_on_enemy_defeated)
 	EventBus.boss_fight_started.connect(_on_boss_fight_started)
 	EventBus.boss_defeated.connect(_on_boss_defeated)
 	EventBus.game_paused.connect(_on_game_paused)
@@ -59,33 +49,25 @@ func _ready() -> void:
 		_bind_player(_player)
 	_hide_boss_bar()
 	_update_quest_tracker()
+	_refresh_region_label(GameManager.current_region_id)
+	if currency_bar and currency_bar.has_method(&"refresh"):
+		currency_bar.refresh()
+	if minimap and minimap.has_method(&"refresh"):
+		minimap.refresh()
 
 
 func _exit_tree() -> void:
-	if EventBus.player_spawned.is_connected(_on_player_spawned):
-		EventBus.player_spawned.disconnect(_on_player_spawned)
-	if EventBus.enemy_defeated.is_connected(_on_enemy_defeated):
-		EventBus.enemy_defeated.disconnect(_on_enemy_defeated)
-	if EventBus.boss_fight_started.is_connected(_on_boss_fight_started):
-		EventBus.boss_fight_started.disconnect(_on_boss_fight_started)
-	if EventBus.boss_defeated.is_connected(_on_boss_defeated):
-		EventBus.boss_defeated.disconnect(_on_boss_defeated)
-	if EventBus.game_paused.is_connected(_on_game_paused):
-		EventBus.game_paused.disconnect(_on_game_paused)
-	if EventBus.game_resumed.is_connected(_on_game_resumed):
-		EventBus.game_resumed.disconnect(_on_game_resumed)
-	if EventBus.ui_toast.is_connected(_on_ui_toast):
-		EventBus.ui_toast.disconnect(_on_ui_toast)
-	if EventBus.spell_acquired.is_connected(_on_spell_acquired):
-		EventBus.spell_acquired.disconnect(_on_spell_acquired)
-	if EventBus.quest_started.is_connected(_on_quest_changed):
-		EventBus.quest_started.disconnect(_on_quest_changed)
-	if EventBus.quest_updated.is_connected(_on_quest_changed):
-		EventBus.quest_updated.disconnect(_on_quest_changed)
-	if EventBus.quest_completed.is_connected(_on_quest_changed):
-		EventBus.quest_completed.disconnect(_on_quest_changed)
-	if EventBus.region_entered.is_connected(_on_region_entered):
-		EventBus.region_entered.disconnect(_on_region_entered)
+	_disconnect_if(EventBus.player_spawned, _on_player_spawned)
+	_disconnect_if(EventBus.region_entered, _on_region_entered)
+	_disconnect_if(EventBus.boss_fight_started, _on_boss_fight_started)
+	_disconnect_if(EventBus.boss_defeated, _on_boss_defeated)
+	_disconnect_if(EventBus.game_paused, _on_game_paused)
+	_disconnect_if(EventBus.game_resumed, _on_game_resumed)
+	_disconnect_if(EventBus.ui_toast, _on_ui_toast)
+	_disconnect_if(EventBus.spell_acquired, _on_spell_acquired)
+	_disconnect_if(EventBus.quest_started, _on_quest_changed)
+	_disconnect_if(EventBus.quest_updated, _on_quest_changed)
+	_disconnect_if(EventBus.quest_completed, _on_quest_changed)
 
 
 func _process(_delta: float) -> void:
@@ -95,39 +77,43 @@ func _process(_delta: float) -> void:
 		boss_bar.value = float(hp.current_hp)
 
 
-func _style_hud_bars() -> void:
-	_hp_fill_style = _make_fill_style(COLOR_HP_FILL)
-	_mana_fill_style = _make_fill_style(COLOR_MANA_FILL)
-	_apply_bar_theme(hp_bar, _hp_fill_style, COLOR_BAR_BORDER_GOLD)
-	_apply_bar_theme(mana_bar, _mana_fill_style, COLOR_BAR_BORDER)
-	_apply_bar_theme(boss_bar, _make_fill_style(COLOR_BOSS_FILL), COLOR_BAR_BORDER_GOLD)
+func _disconnect_if(sig: Signal, callable: Callable) -> void:
+	if sig.is_connected(callable):
+		sig.disconnect(callable)
 
 
-func _make_bg_style() -> StyleBoxFlat:
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = COLOR_BAR_BG
-	bg.border_color = COLOR_BAR_BORDER
-	bg.set_border_width_all(1)
-	bg.set_corner_radius_all(BAR_CORNER)
-	bg.content_margin_left = BAR_FILL_INSET
-	bg.content_margin_top = BAR_FILL_INSET
-	bg.content_margin_right = BAR_FILL_INSET
-	bg.content_margin_bottom = BAR_FILL_INSET
-	return bg
+func _style_static_labels() -> void:
+	HudStyle.apply_hud_font(character_name, 12, &"semibold")
+	character_name.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
+	HudStyle.apply_hud_font(shard_count_label, 11)
+	shard_count_label.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
+	HudStyle.apply_hud_font(overcast_label, 10)
+	overcast_label.add_theme_color_override(&"font_color", HudStyle.COLOR_HP_LOW)
+	HudStyle.apply_hud_font(region_label, 11)
+	region_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
+	HudStyle.apply_hud_font(quest_label, 10)
+	quest_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
+	HudStyle.apply_hud_font(boss_name_label, 13, &"semibold")
+	boss_name_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
+	HudStyle.apply_hud_font(spell_name_label, 14)
+	spell_name_label.add_theme_color_override(&"font_color", Color(0.78, 0.62, 0.95, 1))
+	HudStyle.apply_hud_font(spell_name_fade, 12)
+	spell_name_fade.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
+	var toast: Label = $ToastLabel
+	HudStyle.apply_hud_font(toast, 12)
 
 
-func _make_fill_style(fill_color: Color) -> StyleBoxFlat:
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = fill_color
-	fill.set_corner_radius_all(1)
-	return fill
+func _style_boss_bar() -> void:
+	var bg := HudStyle.make_bar_bg()
+	bg.border_color = HudStyle.COLOR_BORDER_GOLD
+	boss_bar.add_theme_stylebox_override(&"background", bg)
+	boss_bar.add_theme_stylebox_override(&"fill", HudStyle.make_fill_style(COLOR_BOSS_FILL))
 
 
-func _apply_bar_theme(bar: ProgressBar, fill_style: StyleBoxFlat, border_color: Color) -> void:
-	var bg := _make_bg_style()
-	bg.border_color = border_color
-	bar.add_theme_stylebox_override(&"background", bg)
-	bar.add_theme_stylebox_override(&"fill", fill_style.duplicate())
+func _load_sigil_icon() -> void:
+	var tex := load("res://assets/sprites/ui/icons/ui_spell_icon_ember_sigil.png") as Texture2D
+	if tex and sigil_icon:
+		sigil_icon.texture = tex
 
 
 func _on_player_spawned(player: Node2D) -> void:
@@ -135,81 +121,64 @@ func _on_player_spawned(player: Node2D) -> void:
 		_bind_player(player)
 
 
-func _on_enemy_defeated(_enemy_id: StringName, _position: Vector2) -> void:
-	_update_essence()
-
-
 func _bind_player(player: Player) -> void:
 	_player = player
-	player.health_component.damaged.connect(_on_hp_changed)
-	player.health_component.healed.connect(_on_hp_changed)
-	player.mana_component.mana_changed.connect(_on_mana_changed)
-	player.mana_component.overcast_used.connect(_on_overcast_used)
-	player.mana_component.focus_shards_changed.connect(_on_focus_shards_changed)
+	if not player.health_component.damaged.is_connected(_on_hp_changed):
+		player.health_component.damaged.connect(_on_hp_changed)
+	if not player.health_component.healed.is_connected(_on_hp_changed):
+		player.health_component.healed.connect(_on_hp_changed)
+	if not player.mana_component.mana_changed.is_connected(_on_mana_changed):
+		player.mana_component.mana_changed.connect(_on_mana_changed)
+	if not player.mana_component.overcast_used.is_connected(_on_overcast_used):
+		player.mana_component.overcast_used.connect(_on_overcast_used)
+	if not player.mana_component.focus_shards_changed.is_connected(_on_focus_shards_changed):
+		player.mana_component.focus_shards_changed.connect(_on_focus_shards_changed)
 	_on_hp_changed(0, null)
 	_on_mana_changed(player.mana_component.current_mana, float(player.mana_component.max_mana))
 	_on_focus_shards_changed(player.mana_component.focus_shard_count, ManaComponent.MAX_SHARDS)
-	_update_essence()
 
 
 func _on_hp_changed(amount: int = 0, _source: Node = null) -> void:
-	if _player == null:
+	if _player == null or health_pips == null:
 		return
 	var hp := _player.health_component
-	hp_bar.max_value = float(hp.max_hp)
-	_tween_bar(hp_bar, float(hp.current_hp), _hp_tween, &"_hp_tween")
-	_update_hp_fill_color(hp.current_hp, hp.max_hp)
-	if amount > 0:
-		_flash_bar(hp_bar, COLOR_HP_LOW)
+	if health_pips.has_method(&"update_health"):
+		health_pips.update_health(hp.current_hp, hp.max_hp)
+	if amount > 0 and health_pips.has_method(&"flash_damage"):
+		health_pips.flash_damage()
 
 
 func _on_mana_changed(current: float, maximum: float) -> void:
-	mana_bar.max_value = maximum
-	_tween_bar(mana_bar, current, _mana_tween, &"_mana_tween")
+	if _player == null or mana_segments == null:
+		return
+	if mana_segments.has_method(&"update_mana"):
+		mana_segments.update_mana(current, maximum, _player.mana_component.focus_shard_count)
 
 
-func _tween_bar(bar: ProgressBar, target: float, tween_ref: Tween, tween_name: StringName) -> void:
-	if tween_ref and tween_ref.is_valid():
-		tween_ref.kill()
-	var tween := create_tween()
-	set(tween_name, tween)
-	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(bar, "value", target, TWEEN_DURATION)
-
-
-func _update_hp_fill_color(current_hp: int, max_hp: int) -> void:
-	var ratio := float(current_hp) / float(maxi(max_hp, 1))
-	var fill_color := COLOR_HP_FILL.lerp(COLOR_HP_LOW, 1.0 - clampf(ratio * 2.0, 0.0, 1.0))
-	_hp_fill_style.bg_color = fill_color
-	hp_bar.add_theme_stylebox_override(&"fill", _hp_fill_style)
-
-
-func _flash_bar(bar: ProgressBar, flash_color: Color) -> void:
-	var tween := create_tween()
-	tween.tween_property(bar, "modulate", flash_color, 0.06)
-	tween.tween_property(bar, "modulate", Color.WHITE, 0.14)
+func _on_focus_shards_changed(count: int, _max_shards: int) -> void:
+	if shard_count_label:
+		shard_count_label.text = str(count)
+	if _player and mana_segments and mana_segments.has_method(&"update_mana"):
+		mana_segments.update_mana(
+			_player.mana_component.current_mana,
+			float(_player.mana_component.max_mana),
+			count
+		)
 
 
 func _on_overcast_used(hp_cost: int) -> void:
 	overcast_label.text = "Overcast -%d HP" % hp_cost
 	overcast_label.visible = true
-	overcast_bleed.visible = true
-	_flash_bar(mana_bar, COLOR_HP_LOW)
-	var tween := create_tween()
-	tween.tween_property(overcast_bleed, "modulate:a", 1.0, 0.08)
-	tween.tween_property(overcast_bleed, "modulate:a", 0.35, 0.4)
+	if mana_segments.has_method(&"set_overcast_visible"):
+		mana_segments.set_overcast_visible(true)
+	if mana_segments.has_method(&"flash_overcast"):
+		mana_segments.flash_overcast()
 	get_tree().create_timer(1.0).timeout.connect(func() -> void:
 		if is_instance_valid(overcast_label):
 			overcast_label.visible = false
-		if is_instance_valid(overcast_bleed):
-			overcast_bleed.visible = false
-			overcast_bleed.modulate.a = 1.0
+		if is_instance_valid(mana_segments) and mana_segments.has_method(&"set_overcast_visible"):
+			mana_segments.set_overcast_visible(false)
 	, CONNECT_ONE_SHOT)
-
-
-func _update_essence() -> void:
-	if _player:
-		essence_label.text = "Essence: %d" % _player.essence_collected
 
 
 func _on_boss_fight_started(boss_id: StringName) -> void:
@@ -271,6 +240,8 @@ func _on_spell_acquired(spell_id: StringName) -> void:
 				spell_toast.modulate = Color.WHITE
 		)
 	, CONNECT_ONE_SHOT)
+	if quick_spell_bar and quick_spell_bar.has_method(&"refresh"):
+		quick_spell_bar.refresh()
 
 
 func _on_quest_changed(_a = null, _b = null) -> void:
@@ -288,28 +259,8 @@ func _update_quest_tracker() -> void:
 	quest_label.text = "%s: %s" % [quest.title, QuestManager.get_active_objective_text(active[0])]
 
 
-func _build_shard_row() -> void:
-	var mana_row := $MarginContainer/VBox/ManaRow
-	_shard_row = HBoxContainer.new()
-	_shard_row.name = "ShardRow"
-	_shard_row.add_theme_constant_override(&"separation", 2)
-	mana_row.add_child(_shard_row)
-	mana_row.move_child(_shard_row, 0)
-
-
-func _on_focus_shards_changed(count: int, max_shards: int) -> void:
-	if _shard_row == null:
-		return
-	for child in _shard_row.get_children():
-		child.queue_free()
-	for i in max_shards:
-		var pip := ColorRect.new()
-		pip.custom_minimum_size = Vector2(8, 8)
-		pip.color = Color(0.0, 0.85, 0.95, 0.95) if i < count else Color(0.15, 0.15, 0.2, 0.8)
-		_shard_row.add_child(pip)
-
-
 func _on_region_entered(region_id: StringName) -> void:
+	_refresh_region_label(region_id)
 	if region_id == &"dev" or region_id.is_empty():
 		return
 	var region := MapManager.get_region(region_id)
@@ -318,6 +269,18 @@ func _on_region_entered(region_id: StringName) -> void:
 		return
 	if region_title.has_method(&"show_title"):
 		region_title.show_title(title)
+
+
+func _refresh_region_label(region_id: StringName) -> void:
+	if region_label == null:
+		return
+	if region_id.is_empty() or region_id == &"dev":
+		region_id = GameManager.current_region_id
+	if region_id.is_empty():
+		region_label.text = ""
+		return
+	var region := MapManager.get_region(region_id)
+	region_label.text = region.display_name if region else _format_region_id(region_id)
 
 
 func _format_region_id(region_id: StringName) -> String:

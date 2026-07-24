@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var relic_toast: Control = $RelicToast
 
 var _ui_open: bool = false
+var _controls_overlay: Control
 
 
 func _ready() -> void:
@@ -20,6 +21,10 @@ func _ready() -> void:
 	_hide_all_overlays()
 	_ensure_dialogue_box()
 	_ensure_settings_panel()
+	_ensure_controls_overlay()
+	if SaveManager.pending_controls_hint:
+		SaveManager.pending_controls_hint = false
+		call_deferred(&"_present_controls_hint")
 	EventBus.relic_acquired.connect(_on_relic_acquired)
 	EventBus.game_paused.connect(_on_game_paused)
 	EventBus.game_resumed.connect(_on_game_resumed)
@@ -44,6 +49,25 @@ func _ensure_settings_panel() -> void:
 	add_child(settings)
 
 
+func _ensure_controls_overlay() -> void:
+	if has_node("ControlsOverlay"):
+		_controls_overlay = get_node("ControlsOverlay")
+		return
+	_controls_overlay = Control.new()
+	_controls_overlay.name = "ControlsOverlay"
+	_controls_overlay.set_script(load("res://scripts/ui/controls_overlay.gd"))
+	add_child(_controls_overlay)
+	move_child(_controls_overlay, get_child_count() - 1)
+
+
+func _present_controls_hint() -> void:
+	if _controls_overlay == null:
+		return
+	if _controls_overlay.has_method(&"present"):
+		_controls_overlay.present()
+		move_child(_controls_overlay, get_child_count() - 1)
+
+
 func _exit_tree() -> void:
 	if EventBus.relic_acquired.is_connected(_on_relic_acquired):
 		EventBus.relic_acquired.disconnect(_on_relic_acquired)
@@ -56,7 +80,11 @@ func _exit_tree() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _controls_overlay and _controls_overlay.visible:
+		return
 	if GameManager.state == GameManager.GameState.GAME_OVER:
+		return
+	if GameManager.state == GameManager.GameState.CUTSCENE:
 		return
 	if event.is_action_pressed(&"pause"):
 		_toggle_pause()

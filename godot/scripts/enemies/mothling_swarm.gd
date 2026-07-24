@@ -123,7 +123,8 @@ func _engulf(delta: float) -> void:
 		_ai_state = &"chase"
 
 
-func _on_custom_damaged(_amount: int, source: Node) -> void:
+func _on_custom_damaged(amount: int, source: Node) -> void:
+	play_hit_feedback(amount, source)
 	if health_component.current_hp <= 0:
 		return
 	if source and source is HitboxComponent:

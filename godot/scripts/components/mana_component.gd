@@ -64,14 +64,22 @@ func can_afford(cost: int) -> bool:
 	return current_mana >= float(cost)
 
 
+func spend_mana(cost: int) -> bool:
+	if cost <= 0:
+		return true
+	if current_mana < float(cost):
+		return false
+	current_mana -= float(cost)
+	_regen_timer = regen_delay
+	mana_changed.emit(current_mana, float(max_mana))
+	return true
+
+
 func try_spend(cost: int, health: HealthComponent) -> bool:
 	if cost <= 0:
 		return true
 	if current_mana >= float(cost):
-		current_mana -= float(cost)
-		_regen_timer = regen_delay
-		mana_changed.emit(current_mana, float(max_mana))
-		return true
+		return spend_mana(cost)
 	return _try_overcast(cost, health)
 
 

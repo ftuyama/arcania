@@ -115,16 +115,27 @@ func is_attack_pressed() -> bool:
 
 func get_spell_input() -> StringName:
 	if Input.is_action_just_pressed(&"quick_spell_1"):
-		return SpellManager.get_quick_slot(0)
+		return _resolve_quick_slot(0)
 	if Input.is_action_just_pressed(&"quick_spell_2"):
-		return SpellManager.get_quick_slot(1)
+		return _resolve_quick_slot(1)
 	if Input.is_action_just_pressed(&"quick_spell_3"):
-		return SpellManager.get_quick_slot(2)
+		return _resolve_quick_slot(2)
 	if Input.is_action_just_pressed(&"quick_spell_4"):
-		return SpellManager.get_quick_slot(3)
+		return _resolve_quick_slot(3)
 	if Input.is_action_just_pressed(&"cast_spell"):
 		var primary := SpellManager.get_quick_slot(0)
 		return primary if not primary.is_empty() else &"ember_sigil"
+	return &""
+
+
+func _resolve_quick_slot(index: int) -> StringName:
+	var spell_id := SpellManager.get_quick_slot(index)
+	if not spell_id.is_empty():
+		return spell_id
+	if index == 2 and SpellManager.has_spell(&"veil_step"):
+		return &"veil_step"
+	if index == 3 and SpellManager.has_spell(&"rootbind"):
+		return &"rootbind"
 	return &""
 
 
@@ -307,6 +318,11 @@ func _check_locked_spell_feedback() -> void:
 	if Input.is_action_just_pressed(&"dash") and not dash_unlocked:
 		EventBus.ui_toast.emit("Veil Step not learned — find the shrine on the East Road")
 		return
+	if Input.is_action_just_pressed(&"quick_spell_3"):
+		var slot := SpellManager.get_quick_slot(2)
+		if slot.is_empty() and not SpellManager.has_spell(&"veil_step"):
+			EventBus.ui_toast.emit("Veil Step not learned — find the shrine on the East Road")
+			return
 	if not Input.is_action_just_pressed(&"quick_spell_4"):
 		return
 	if SpellManager.has_spell(&"rootbind") or SpellManager.has_spell(&"rune_anchor"):

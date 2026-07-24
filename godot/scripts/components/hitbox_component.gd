@@ -12,7 +12,7 @@ signal hit_landed(target: Node, damage: int)
 
 var _hit_targets: Array[Node] = []
 
-const _SHAPE_REACH: float = 16.0
+const _SHAPE_REACH: float = 34.0
 
 @onready var _shape: CollisionShape2D = $CollisionShape2D
 
@@ -23,7 +23,7 @@ func _ready() -> void:
 	monitorable = false
 
 
-func configure_melee(facing: int, local_offset: Vector2 = Vector2(6.0, -6.0)) -> void:
+func configure_melee(facing: int, local_offset: Vector2 = Vector2(8.0, -8.0)) -> void:
 	position = Vector2(local_offset.x * float(facing), local_offset.y)
 	if _shape:
 		_shape.position.x = _SHAPE_REACH * float(facing)
@@ -33,6 +33,8 @@ func enable_hitbox() -> void:
 	_hit_targets.clear()
 	monitoring = true
 	call_deferred(&"_resolve_overlaps")
+	if is_inside_tree():
+		get_tree().physics_frame.connect(_resolve_overlaps, CONNECT_ONE_SHOT)
 
 
 func disable_hitbox() -> void:
@@ -47,7 +49,7 @@ func _resolve_overlaps() -> void:
 
 
 func _on_area_entered(area: Area2D) -> void:
-	if not area is HurtboxComponent:
+	if not area.has_method(&"receive_hit"):
 		return
 	var hurtbox := area as HurtboxComponent
 	if hurtbox.owner_body in _hit_targets:

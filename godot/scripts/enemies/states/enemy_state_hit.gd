@@ -7,7 +7,15 @@ var _timer: float = 0.35
 
 func enter(_payload: Dictionary) -> void:
 	_timer = 0.35
-	_get_enemy().velocity = Vector2.ZERO
+	var enemy := _get_enemy()
+	enemy.velocity = Vector2.ZERO
+	enemy.animated_sprite.pause()
+
+
+func exit() -> void:
+	var enemy := _get_enemy()
+	if enemy.animated_sprite.sprite_frames:
+		enemy.animated_sprite.play()
 
 
 func physics_update(delta: float) -> void:

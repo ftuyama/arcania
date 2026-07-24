@@ -20,7 +20,8 @@ func set_damage_multipliers(multipliers: Dictionary) -> void:
 
 
 func receive_hit(hitbox: HitboxComponent) -> bool:
-	if _health == null or _health.is_invulnerable:
+	var health := _get_health()
+	if health == null or health.is_invulnerable:
 		return false
 	var multiplier := 1.0
 	if _damage_multipliers.has(hitbox.damage_type):
@@ -29,8 +30,14 @@ func receive_hit(hitbox: HitboxComponent) -> bool:
 	var knockback := hitbox.knockback_vector
 	if owner_body and owner_body.global_position.x < hitbox.global_position.x:
 		knockback.x *= -1.0
-	_health.apply_poise_damage(hitbox.poise_damage)
-	_health.take_damage(final_damage, hitbox.get_parent(), knockback)
+	health.apply_poise_damage(hitbox.poise_damage)
+	health.take_damage(final_damage, hitbox.get_parent(), knockback)
 	if final_damage >= 10:
 		CombatJuice.on_heavy_hit()
 	return true
+
+
+func _get_health() -> HealthComponent:
+	if _health == null and owner_body:
+		_health = owner_body.get_node_or_null("HealthComponent") as HealthComponent
+	return _health

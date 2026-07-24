@@ -44,6 +44,7 @@ func physics_update(delta: float) -> void:
 		_phase = Phase.ACTIVE
 		_timer = float(_step["active"])
 		player.play_melee_swing(player.combo_index)
+		_apply_combo_lunge(player)
 		_enable_hitbox(player)
 	elif _phase == Phase.ACTIVE and _timer <= 0.0:
 		_phase = Phase.RECOVERY
@@ -55,9 +56,6 @@ func physics_update(delta: float) -> void:
 
 	player.apply_gravity(delta)
 	player.move_and_slide()
-
-	if not player.is_on_floor():
-		state_machine.transition_to(&"Fall", {})
 
 
 func _advance_combo(player: Player) -> void:
@@ -73,8 +71,19 @@ func _advance_combo(player: Player) -> void:
 		state_machine.transition_to(&"Fall", {})
 
 
+func _apply_combo_lunge(player: Player) -> void:
+	var step := 0.0
+	match player.combo_index:
+		1:
+			step = 12.0
+		2:
+			step = 18.0
+	if step > 0.0:
+		player.velocity.x = step * float(player.facing_direction)
+
+
 func _enable_hitbox(player: Player) -> void:
-	player.melee_hitbox.configure_melee(player.facing_direction, Vector2(6.0, -6.0))
+	player.melee_hitbox.configure_melee(player.facing_direction, Vector2(8.0, -8.0))
 	player.melee_hitbox.damage = int(_step["damage"])
 	player.melee_hitbox.damage_type = &"physical"
 	player.melee_hitbox.knockback_vector = _step["knockback"] as Vector2

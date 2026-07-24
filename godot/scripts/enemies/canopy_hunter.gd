@@ -143,7 +143,8 @@ func _summon_pods() -> void:
 		larva.global_position = global_position + Vector2(offset, 0)
 
 
-func _on_custom_damaged(_amount: int, _source: Node) -> void:
+func _on_custom_damaged(amount: int, source: Node) -> void:
+	play_hit_feedback(amount, source)
 	if health_component.current_hp <= 0:
 		return
 	_ai_state = &"hit"

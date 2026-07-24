@@ -94,6 +94,7 @@ func add_currency(type: String, amount: int) -> void:
 	if not _currency.has(type):
 		_currency[type] = 0
 	_currency[type] = int(_currency.get(type, 0)) + amount
+	EventBus.currency_changed.emit(type, int(_currency[type]))
 
 
 func get_currency(type: String) -> int:

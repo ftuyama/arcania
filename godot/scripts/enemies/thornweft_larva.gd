@@ -111,7 +111,8 @@ func _fire_spit() -> void:
 	projectile.launch(global_position + Vector2(0, -12), aim, get_data().attack_damage, &"physical", kb)
 
 
-func _on_custom_damaged(_amount: int, _source: Node) -> void:
+func _on_custom_damaged(amount: int, source: Node) -> void:
+	play_hit_feedback(amount, source)
 	if health_component.current_hp <= 0:
 		return
 	_ai_state = &"hit"

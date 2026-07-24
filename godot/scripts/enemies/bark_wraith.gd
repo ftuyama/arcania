@@ -145,10 +145,11 @@ func _find_nearest_tree_marker() -> Vector2:
 	return best
 
 
-func _on_custom_damaged(_amount: int, _source: Node) -> void:
-	if health_component.current_hp <= 0:
-		return
+func _on_custom_damaged(amount: int, source: Node) -> void:
 	if _ai_state == &"phase":
+		return
+	play_hit_feedback(amount, source)
+	if health_component.current_hp <= 0:
 		return
 	_ai_state = &"hit"
 	_timer = 0.3

@@ -3,6 +3,10 @@ extends Node2D
 ## Pooled spell projectile with fire damage.
 
 
+const VFX_EMBER_BOLT := preload("res://assets/sprites/vfx/spells/vfx_ember_bolt.tres")
+const VFX_EMBER_SIGIL := preload("res://assets/sprites/vfx/spells/vfx_ember_sigil.tres")
+const TILE_SIZE := 64.0
+
 @export var speed: float = 420.0
 @export var lifetime: float = 1.2
 
@@ -27,12 +31,15 @@ func launch(from: Vector2, aim: Vector2, spell: SpellData) -> void:
 	direction = aim.normalized() if aim.length_squared() > 0.01 else Vector2.RIGHT
 	spell_id = spell.id
 	_impact_sfx = spell.impact_sfx
-	_hitbox.damage = spell.base_damage
+	_apply_spell_profile(spell)
 	var mods := InventorySystem.get_aggregated_modifiers()
+	var damage := spell.base_damage
 	if mods.has("burn_damage_mult"):
-		_hitbox.damage = int(float(spell.base_damage) * float(mods["burn_damage_mult"]))
+		damage = int(float(spell.base_damage) * float(mods["burn_damage_mult"]))
+	_hitbox.damage = damage
+	_hitbox.poise_damage = spell.poise_damage
 	_hitbox.damage_type = &"fire"
-	_hitbox.knockback_vector = Vector2(140, -60)
+	_hitbox.knockback_vector = Vector2(140, -60) if spell.id == &"ember_bolt" else Vector2(100, -40)
 	_elapsed = 0.0
 	_active = true
 	visible = true
@@ -62,8 +69,24 @@ func _physics_process(delta: float) -> void:
 		deactivate()
 
 
+func _apply_spell_profile(spell: SpellData) -> void:
+	match spell.id:
+		&"ember_sigil":
+			speed = 400.0
+			lifetime = 7.0 * TILE_SIZE / speed
+			_visual.sprite_frames = VFX_EMBER_SIGIL
+		_:
+			speed = 420.0
+			lifetime = 1.2
+			_visual.sprite_frames = VFX_EMBER_BOLT
+
+
 func _try_ignite_nearby_gates() -> void:
-	if spell_id != &"ember_bolt":
+	_notify_nearby_gates()
+
+
+func _notify_nearby_gates() -> void:
+	if spell_id != &"ember_sigil" and spell_id != &"ember_bolt":
 		return
 	for gate in get_tree().get_nodes_in_group(&"ability_gates"):
 		if gate.has_method(&"on_hit_by_spell") and global_position.distance_to(gate.global_position) <= 96.0:
@@ -75,4 +98,5 @@ func _on_hitbox_hit(_target: Node, _damage: int) -> void:
 		return
 	if _impact_sfx:
 		AudioManager.play_sfx_stream(_impact_sfx, global_position)
+	_notify_nearby_gates()
 	deactivate()

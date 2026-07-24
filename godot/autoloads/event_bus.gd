@@ -28,6 +28,7 @@ signal interactable_triggered(interactable_id: StringName)
 
 # Inventory / Quest
 signal relic_acquired(relic_id: StringName)
+signal currency_changed(type: String, total: int)
 signal quest_started(quest_id: StringName)
 signal quest_updated(quest_id: StringName, objective_id: StringName)
 signal quest_completed(quest_id: StringName)

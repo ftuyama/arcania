@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://arcania_root_warden"]
+[gd_scene load_steps=11 format=3 uid="uid://arcania_root_warden"]
 
 [ext_resource type="Script" path="res://scripts/bosses/root_warden.gd" id="1_boss"]
 [ext_resource type="Resource" path="res://resources/bosses/boss_01_root_warden.tres" id="2_data"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="5_hurt"]
 [ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="6_hitbox"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/bosses/boss_01_root_warden/boss_01_sheet.tres" id="7_frames"]
+[ext_resource type="Script" path="res://scripts/components/hit_flash.gd" id="8_flash"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(40, 56)
@@ -41,6 +42,9 @@ color = Color(1, 0.42, 0.21, 0.5)
 [node name="BossPhaseManager" type="Node" parent="."]
 script = ExtResource("3_phase")
 phase_thresholds = Array[float]([0.66, 0.33])
+
+[node name="HitFlash" type="Node" parent="."]
+script = ExtResource("8_flash")
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4_health")

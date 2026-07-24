@@ -1,108 +1,205 @@
-[gd_scene load_steps=3 format=3 uid="uid://arcania_hud"]
+[gd_scene load_steps=12 format=3 uid="uid://arcania_hud"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/region_title_card.gd" id="2_region_title"]
+[ext_resource type="Script" path="res://scripts/ui/health_pip_row.gd" id="3_hp"]
+[ext_resource type="Script" path="res://scripts/ui/mana_segment_bar.gd" id="4_mana"]
+[ext_resource type="Script" path="res://scripts/ui/minimap_widget.gd" id="5_minimap"]
+[ext_resource type="Script" path="res://scripts/ui/quick_spell_bar.gd" id="6_spells"]
+[ext_resource type="Script" path="res://scripts/ui/currency_bar.gd" id="7_currency"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_ember_sigil.png" id="8_sigil"]
+[ext_resource type="Texture2D" uid="uid://bsbrjh1v2numr" path="res://assets/sprites/ui/hud/ui_hud_portrait_frame.png" id="9_portrait"]
+[ext_resource type="Texture2D" uid="uid://bhw2h66vrc2bb" path="res://assets/sprites/ui/hud/ui_hud_shard_icon.png" id="10_shard"]
+[ext_resource type="Texture2D" uid="uid://db8q4buxfgwhr" path="res://assets/sprites/ui/hud/ui_hud_compass_icon.png" id="11_compass"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-offset_right = 200.0
-offset_bottom = 88.0
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
+[node name="PlayerStatusCluster" type="HBoxContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 300.0
+offset_bottom = 104.0
+theme_override_constants/separation = 10
 
-[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+[node name="SigilColumn" type="VBoxContainer" parent="PlayerStatusCluster"]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 4
 
-[node name="HPRow" type="HBoxContainer" parent="MarginContainer/VBox"]
+[node name="PortraitStack" type="Control" parent="PlayerStatusCluster/SigilColumn"]
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
-theme_override_constants/separation = 6
 
-[node name="HPIcon" type="Label" parent="MarginContainer/VBox/HPRow"]
-custom_minimum_size = Vector2(14, 14)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.898, 0.867, 0.824, 1)
-theme_override_font_sizes/font_size = 11
-text = "♥"
-vertical_alignment = 1
-
-[node name="HPBar" type="ProgressBar" parent="MarginContainer/VBox/HPRow"]
-custom_minimum_size = Vector2(140, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-max_value = 100.0
-show_percentage = false
-
-[node name="ManaRow" type="HBoxContainer" parent="MarginContainer/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="ManaIcon" type="Label" parent="MarginContainer/VBox/ManaRow"]
-custom_minimum_size = Vector2(14, 14)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "◆"
-vertical_alignment = 1
-
-[node name="ManaBarWrap" type="Control" parent="MarginContainer/VBox/ManaRow"]
-custom_minimum_size = Vector2(140, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="ManaBar" type="ProgressBar" parent="MarginContainer/VBox/ManaRow/ManaBarWrap"]
+[node name="PortraitFrame" type="TextureRect" parent="PlayerStatusCluster/SigilColumn/PortraitStack"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-max_value = 100.0
-show_percentage = false
-
-[node name="OvercastBleed" type="ColorRect" parent="MarginContainer/VBox/ManaRow/ManaBarWrap"]
-visible = false
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -3.0
-grow_horizontal = 2
-grow_vertical = 0
+texture = ExtResource("9_portrait")
+expand_mode = 1
+stretch_mode = 5
 mouse_filter = 2
-color = Color(0.898, 0.22, 0.231, 0.85)
 
-[node name="EssenceLabel" type="Label" parent="MarginContainer/VBox"]
+[node name="SigilIcon" type="TextureRect" parent="PlayerStatusCluster/SigilColumn/PortraitStack"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_sigil")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="InfoColumn" type="VBoxContainer" parent="PlayerStatusCluster"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.553, 0.6, 0.682, 1)
-theme_override_font_sizes/font_size = 11
-text = "Essence: 0"
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
 
-[node name="OvercastLabel" type="Label" parent="MarginContainer/VBox"]
+[node name="CharacterName" type="Label" parent="PlayerStatusCluster/InfoColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.91, 0.91, 0.91, 1)
+text = "Elara Veilmark"
+
+[node name="HealthPipRow" type="HBoxContainer" parent="PlayerStatusCluster/InfoColumn"]
+layout_mode = 2
+theme_override_constants/separation = 3
+script = ExtResource("3_hp")
+
+[node name="ManaSegmentBar" type="Control" parent="PlayerStatusCluster/InfoColumn"]
+custom_minimum_size = Vector2(140, 16)
+layout_mode = 2
+script = ExtResource("4_mana")
+
+[node name="ShardCounter" type="HBoxContainer" parent="PlayerStatusCluster/InfoColumn"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ShardIcon" type="TextureRect" parent="PlayerStatusCluster/InfoColumn/ShardCounter"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("10_shard")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="ShardCount" type="Label" parent="PlayerStatusCluster/InfoColumn/ShardCounter"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1, 0.42, 0.208, 1)
+text = "3"
+
+[node name="OvercastLabel" type="Label" parent="PlayerStatusCluster/InfoColumn"]
 visible = false
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 theme_override_colors/font_color = Color(0.898, 0.22, 0.231, 1)
-theme_override_font_sizes/font_size = 11
 text = "Overcast"
 
-[node name="QuestTracker" type="MarginContainer" parent="."]
+[node name="NavigationCluster" type="VBoxContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = 112.0
+grow_horizontal = 0
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="RegionRow" type="HBoxContainer" parent="NavigationCluster"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="CompassIcon" type="TextureRect" parent="NavigationCluster/RegionRow"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("11_compass")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="RegionLabel" type="Label" parent="NavigationCluster/RegionRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.91, 0.91, 0.91, 1)
+text = "Ashen Threshold"
+horizontal_alignment = 2
+
+[node name="MinimapWidget" type="Control" parent="NavigationCluster"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 8
+script = ExtResource("5_minimap")
+
+[node name="SpellCluster" type="VBoxContainer" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
 offset_top = -48.0
-offset_right = 480.0
-offset_bottom = -16.0
+offset_right = 162.0
+offset_bottom = -4.0
 grow_vertical = 0
-theme_override_constants/margin_left = 0
+theme_override_constants/separation = 2
+alignment = 0
+
+[node name="SpellNameFade" type="Label" parent="SpellCluster"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.42, 0.208, 1)
+text = ""
+horizontal_alignment = 0
+
+[node name="QuickSpellBar" type="HBoxContainer" parent="SpellCluster"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 0
+script = ExtResource("6_spells")
+
+[node name="CurrencyBar" type="PanelContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+offset_right = -16.0
+offset_bottom = -6.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("7_currency")
+
+[node name="QuestTracker" type="MarginContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 174.0
+offset_top = -20.0
+offset_right = 520.0
+offset_bottom = -4.0
+grow_vertical = 0
 
 [node name="QuestLabel" type="Label" parent="QuestTracker"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.85, 0.8, 0.65, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.553, 0.6, 0.682, 1)
 autowrap_mode = 2
 text = ""
 
@@ -164,9 +261,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -220.0
-offset_top = -48.0
+offset_top = -110.0
 offset_right = 220.0
-offset_bottom = -24.0
+offset_bottom = -86.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.9, 0.75, 0.45, 1)

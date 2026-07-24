@@ -239,53 +239,60 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -160.0
-offset_right = 160.0
-offset_bottom = 160.0
+offset_left = -112.0
+offset_top = -150.0
+offset_right = 112.0
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Margin" type="MarginContainer" parent="PauseMenu/Panel"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel/Margin"]
+[node name="ScrollContainer" type="ScrollContainer" parent="PauseMenu/Panel/Margin"]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-theme_override_constants/separation = 8
+horizontal_scroll_mode = 0
+size_flags_vertical = 3
 
-[node name="Title" type="Label" parent="PauseMenu/Panel/Margin/VBox"]
+[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel/Margin/ScrollContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="SlotList" type="ItemList" parent="PauseMenu/Panel/Margin/VBox"]
-custom_minimum_size = Vector2(260, 80)
+[node name="SlotList" type="ItemList" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
+custom_minimum_size = Vector2(196, 48)
 layout_mode = 2
 
-[node name="SaveButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+[node name="SaveButton" type="Button" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
 layout_mode = 2
 text = "Save Game"
 
-[node name="LoadButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+[node name="LoadButton" type="Button" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
 layout_mode = 2
 text = "Load Game"
 
-[node name="QuestButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+[node name="QuestButton" type="Button" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
 layout_mode = 2
 text = "Quest Log"
 
-[node name="ResumeButton" type="Button" parent="PauseMenu/Panel/Margin/VBox"]
+[node name="ResumeButton" type="Button" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
 layout_mode = 2
 text = "Resume"
 
-[node name="StatusLabel" type="Label" parent="PauseMenu/Panel/Margin/VBox"]
+[node name="StatusLabel" type="Label" parent="PauseMenu/Panel/Margin/ScrollContainer/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 
 [node name="GameOverScreen" type="Control" parent="."]
@@ -369,14 +376,17 @@ horizontal_alignment = 1
 
 [node name="RelicToast" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -200.0
-offset_top = 80.0
-offset_right = 200.0
-offset_bottom = 120.0
-grow_horizontal = 2
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -80.0
+offset_right = -16.0
+offset_bottom = -48.0
+grow_horizontal = 0
+grow_vertical = 0
 script = ExtResource("7_toast")
 
 [node name="Panel" type="PanelContainer" parent="RelicToast"]

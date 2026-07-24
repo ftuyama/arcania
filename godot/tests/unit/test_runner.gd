@@ -40,6 +40,7 @@ func _run_all_tests() -> void:
 	failures += _test_spell_manager()
 	failures += _test_ability_gate_save_persistence()
 	failures += _test_save_manager()
+	failures += _test_enemy_hit_vfx()
 	_cleanup_test_saves()
 	if failures == 0:
 		print("All unit tests passed.")
@@ -156,13 +157,19 @@ func _test_spell_manager() -> int:
 		push_error("SpellManager arc_step should not be acquired by default")
 		return 1
 
+	spells.acquire_spell(&"veil_step")
 	spells.acquire_spell(&"rootbind")
-	if not spells.has_spell(&"rootbind"):
-		push_error("SpellManager acquire_spell rootbind failed")
+	if spells.get_quick_slot(2) != &"veil_step":
+		push_error("SpellManager should assign veil_step to quick slot 3")
+		return 1
+	if spells.get_quick_slot(3) != &"rootbind":
+		push_error("SpellManager should assign rootbind to quick slot 4")
 		return 1
 	spells.set_quick_slot(2, &"rootbind")
-	if spells.get_quick_slot(2) != &"rootbind":
-		push_error("SpellManager set_quick_slot failed")
+	spells.set_quick_slot(3, &"veil_step")
+	spells.apply_save_data(spells.get_save_data())
+	if spells.get_quick_slot(2) != &"veil_step" or spells.get_quick_slot(3) != &"rootbind":
+		push_error("SpellManager legacy quick-slot repair failed")
 		return 1
 	spells.set_quick_slot(0, &"not_a_spell")
 	if spells.get_quick_slot(0) != &"ember_sigil":
@@ -175,7 +182,7 @@ func _test_spell_manager() -> int:
 	if not spells.has_spell(&"rootbind"):
 		push_error("SpellManager save round-trip lost acquired spell")
 		return 1
-	if spells.get_quick_slot(2) != &"rootbind":
+	if spells.get_quick_slot(2) != &"veil_step":
 		push_error("SpellManager save round-trip lost quick slot")
 		return 1
 
@@ -286,6 +293,69 @@ func _test_save_manager() -> int:
 		return 1
 
 	saves.start_new_game()
+	return 0
+
+
+func _test_enemy_hit_vfx() -> int:
+	if EnemyHitVFX.resolve_damage_type(null) != &"physical":
+		push_error("EnemyHitVFX null source should be physical")
+		return 1
+
+	var host := Node2D.new()
+	root.add_child(host)
+	EnemyHitVFX.spawn(host, Vector2.ZERO, Vector2.RIGHT, &"physical")
+	EnemyHitVFX.spawn(host, Vector2.ZERO, Vector2.LEFT, &"fire")
+	var vfx_count := 0
+	for child in host.get_children():
+		if child is EnemyHitVFX:
+			vfx_count += 1
+	if vfx_count < 2:
+		push_error("EnemyHitVFX.spawn should add VFX nodes")
+		host.queue_free()
+		return 1
+
+	var flash_script := load("res://scripts/components/hit_flash.gd") as GDScript
+	var flash: Node = flash_script.new()
+	var sprite := AnimatedSprite2D.new()
+	root.add_child(sprite)
+	root.add_child(flash)
+	flash.call(&"setup", sprite)
+	flash.call(&"flash")
+	var mat := sprite.material as ShaderMaterial
+	if mat == null or float(mat.get_shader_parameter(&"flash")) <= 0.0:
+		push_error("HitFlash should set flash shader parameter")
+		flash.queue_free()
+		sprite.queue_free()
+		host.queue_free()
+		return 1
+
+	flash.queue_free()
+	sprite.queue_free()
+	host.queue_free()
+
+	var stalker_scene := load("res://scenes/enemies/bramble_stalker.tscn") as PackedScene
+	if stalker_scene == null:
+		push_error("Failed to load bramble_stalker.tscn")
+		return 1
+	var stalker := stalker_scene.instantiate() as Node
+	if stalker == null or stalker.get_node_or_null("HitFlash") == null:
+		push_error("BrambleStalker missing HitFlash node")
+		if stalker:
+			stalker.queue_free()
+		return 1
+	root.add_child(stalker)
+	if stalker.has_method(&"play_hit_feedback"):
+		stalker.call(&"play_hit_feedback", 5, null)
+	else:
+		push_error("BaseEnemy missing play_hit_feedback")
+		stalker.queue_free()
+		return 1
+	var anim := stalker.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if anim == null or anim.material == null:
+		push_error("play_hit_feedback should apply HitFlash material")
+		stalker.queue_free()
+		return 1
+	stalker.queue_free()
 	return 0
 
 

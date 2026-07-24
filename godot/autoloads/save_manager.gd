@@ -5,6 +5,7 @@ const SAVE_VERSION := 1
 const SAVE_DIR := "user://saves/"
 
 var current_slot: String = ""
+var pending_controls_hint: bool = false
 
 
 func _ready() -> void:
@@ -27,6 +28,7 @@ func save_game(slot_id: String) -> bool:
 
 
 func load_game(slot_id: String) -> bool:
+	pending_controls_hint = false
 	var path := SAVE_DIR + slot_id + ".json"
 	if not FileAccess.file_exists(path):
 		return false
@@ -107,6 +109,7 @@ func get_save_summary(slot_id: String) -> Dictionary:
 
 func start_new_game() -> void:
 	current_slot = ""
+	pending_controls_hint = true
 	GameManager.reset_session()
 	SpellManager.reset_to_defaults()
 	InventorySystem.reset_to_defaults()

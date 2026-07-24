@@ -1,5 +1,11 @@
 #!/usr/bin/env python3.11
-"""Generate Phase 0 placeholder art and audio for Arcania (P0.1–P0.7)."""
+"""Generate Phase 0 placeholder art and audio for Arcania (P0.1–P0.7).
+
+DEPRECATED as primary art source — emergency fallback / CI stub only.
+Production art follows docs/art-pipeline.md (AI → Aseprite → Godot).
+Interim hi-bit placeholders: tools/generate_aligned_sprites.py
+See docs/art-style-lock.md for screenshot north-star rules.
+"""
 
 from __future__ import annotations
 
