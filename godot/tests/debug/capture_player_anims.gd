@@ -42,13 +42,19 @@ func _run() -> void:
 	var out_dir := ProjectSettings.globalize_path(OUT_DIR)
 	DirAccess.make_dir_recursive_absolute(out_dir)
 
-	var anims: Array[StringName] = [&"idle", &"walk", &"melee_1", &"cast", &"dash"]
+	var anims: Array[StringName] = [&"idle", &"walk", &"jump", &"dash", &"melee_1", &"cast", &"hit"]
 	for anim_name in anims:
 		if not sprite.sprite_frames.has_animation(anim_name):
+			push_warning("capture_player_anims: missing anim %s" % String(anim_name))
 			continue
+		var speed := sprite.sprite_frames.get_animation_speed(anim_name)
+		var total := sprite.sprite_frames.get_frame_count(anim_name)
+		print("capture_player_anims: %s frames=%d speed=%.1f duration≈%.2fs" % [
+			String(anim_name), total, speed, float(total) / maxf(speed, 0.01)
+		])
 		sprite.animation = anim_name
 		sprite.stop()
-		var frame_count := mini(sprite.sprite_frames.get_frame_count(anim_name), 4)
+		var frame_count := mini(total, 4)
 		for fi in frame_count:
 			sprite.frame = fi
 			sprite.pause()

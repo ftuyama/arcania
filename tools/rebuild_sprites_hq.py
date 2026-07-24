@@ -173,58 +173,318 @@ def _atlas_alignment_ok(sheet: Image.Image, max_feet_delta: int = 2, max_feet_x_
     return True
 
 
+def _seal_robe(cell: Image.Image) -> Image.Image:
+    """Close tiny alpha holes so dark robes stay solid on dark skies."""
+    from PIL import ImageFilter
+
+    a = cell.split()[-1].filter(ImageFilter.MaxFilter(3))
+    out = Image.new("RGBA", cell.size, (0, 0, 0, 0))
+    px, ap, op = cell.load(), a.load(), out.load()
+    for y in range(cell.height):
+        for x in range(cell.width):
+            r, g, b, al = px[x, y]
+            if al > 40:
+                op[x, y] = (r, g, b, 255)
+            elif ap[x, y] > 200:
+                op[x, y] = (44, 44, 52, 255)
+    return out
+
+
+def _draw_slash_arc(cell: Image.Image, reach: int, thickness: int = 2, lift: int = 0) -> Image.Image:
+    """Orange crescent slash — readable melee telegraph at 64px."""
+    out = cell.copy()
+    draw = ImageDraw.Draw(out)
+    # Character faces right; arc sweeps ahead of the torso.
+    cx, cy = 38 + reach // 3, 30 - lift
+    r0, r1 = 10 + reach, 16 + reach
+    bbox = [cx - r1, cy - r1, cx + r1, cy + r1]
+    # Outer bright ring segment (roughly 1–5 o'clock)
+    draw.arc(bbox, start=300, end=60, fill=(255, 140, 48, 230), width=thickness + 1)
+    draw.arc(
+        [cx - r0, cy - r0, cx + r0, cy + r0],
+        start=310,
+        end=50,
+        fill=(255, 196, 96, 200),
+        width=max(1, thickness - 1),
+    )
+    # Hot tip spark at the leading edge
+    tip_x = cx + r1 - 1
+    tip_y = cy + 2
+    draw.ellipse((tip_x - 2, tip_y - 2, tip_x + 2, tip_y + 2), fill=(255, 220, 140, 240))
+    return out
+
+
+def _draw_cast_glow(cell: Image.Image, pulse: float) -> Image.Image:
+    """Expand / brighten the ember sigil region for cast frames."""
+    out = cell.copy()
+    draw = ImageDraw.Draw(out)
+    # Sigil sits mid-right on fitted heroes (palm facing right).
+    cx, cy = 44, 24
+    r = max(4, int(6 + pulse * 5))
+    for i, alpha in enumerate((60, 110, 180)):
+        rr = r + (2 - i)
+        draw.ellipse(
+            (cx - rr, cy - rr, cx + rr, cy + rr),
+            outline=(255, 150 + i * 20, 40, alpha),
+            width=1,
+        )
+    draw.ellipse((cx - 2, cy - 2, cx + 2, cy + 2), fill=(255, 210, 120, 230))
+    return out
+
+
+def _draw_dash_streaks(cell: Image.Image, frame: int) -> Image.Image:
+    out = cell.copy()
+    draw = ImageDraw.Draw(out)
+    for streak in range(4):
+        sx = 8 - streak * 6 - frame * 2
+        sy = 22 + streak * 3
+        draw.line((sx, sy, sx + 14, sy), fill=(90, 95, 120, 140 - streak * 25), width=2)
+    return out
+
+
+def _pose(
+    base: Image.Image,
+    *,
+    dx: int = 0,
+    dy: int = 0,
+    squash: float = 1.0,
+) -> Image.Image:
+    """Feet-locked squash/shift used by all synthesized action frames."""
+    return wobble(base, dx, dy, squash)
+
+
+def _extract_atlas_cell(sheet: Image.Image, row: int, col: int, cell: int = 64) -> Image.Image:
+    return sheet.crop((col * cell, row * cell, (col + 1) * cell, (row + 1) * cell)).convert("RGBA")
+
+
+def _align_cell_feet(cell: Image.Image, target_feet_y: int = 62) -> Image.Image:
+    """Re-seat a 64×64 cell so the bottom opaque pixel sits on target_feet_y."""
+    arr = cell.load()
+    bottom = -1
+    for y in range(cell.height - 1, -1, -1):
+        for x in range(cell.width):
+            if arr[x, y][3] > 20:
+                bottom = y
+                break
+        if bottom >= 0:
+            break
+    if bottom < 0:
+        return cell
+    dy = target_feet_y - bottom
+    if dy == 0:
+        return cell
+    out = Image.new("RGBA", cell.size, (0, 0, 0, 0))
+    out.paste(cell, (0, dy), cell)
+    return out
+
+
+def _band_warp(
+    cell: Image.Image,
+    *,
+    leg_shift: int = 0,
+    torso_shift: int = 0,
+    head_shift: int = 0,
+    leg_dy: int = 0,
+    torso_dy: int = 0,
+    head_dy: int = 0,
+    squash: float = 1.0,
+    lean: float = 0.0,
+) -> Image.Image:
+    """Warp d132 art by shifting head/torso/leg bands — keeps paint, changes silhouette.
+
+    Commit d132dfc locomotion rows were ~1px wobbles (hit was identical). Band shifts
+    create a readable stride / tuck / recoil while preserving the recovered sprites.
+    """
+    img = cell
+    if abs(squash - 1.0) > 0.01:
+        img = wobble(cell, 0, 0, squash)
+    src = img.load()
+    out = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    dst = out.load()
+    for y in range(64):
+        if y < 26:
+            sx, sy = head_shift, head_dy
+        elif y < 46:
+            sx, sy = torso_shift, torso_dy
+        else:
+            sx, sy = leg_shift, leg_dy
+        src_y = y - sy
+        shear = int(round(lean * (62 - y))) if abs(lean) >= 0.02 else 0
+        for x in range(64):
+            src_x = x - sx - shear
+            if 0 <= src_x < 64 and 0 <= src_y < 64:
+                dst[x, y] = src[src_x, src_y]
+    return out
+
+
+def _tint_hit(cell: Image.Image, amount: float) -> Image.Image:
+    """Brief white flash on hit frames."""
+    if amount <= 0.0:
+        return cell
+    out = cell.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a < 20:
+                continue
+            px[x, y] = (
+                min(255, int(r + (255 - r) * amount)),
+                min(255, int(g + (255 - g) * amount)),
+                min(255, int(b + (255 - b) * amount)),
+                a,
+            )
+    return out
+
+
+def _load_d132_sheet() -> Image.Image | None:
+    ref = load("elara_core_ref_d132.png")
+    if ref is None or ref.size != (512, 640):
+        return None
+    return ref.convert("RGBA")
+
+
+def _fit_pose_cell(name: str, body_h: int = 54) -> Image.Image | None:
+    src = load(name)
+    if src is None:
+        return None
+    return _seal_robe(fit_subject(src, body_h=body_h, key_black=False))
+
+
+def _lerp_pose(a: Image.Image, b: Image.Image, t: float) -> Image.Image:
+    """Cross-fade two pose cells (t in 0..1) for in-between walk frames."""
+    t = max(0.0, min(1.0, t))
+    if t <= 0.02:
+        return a.copy()
+    if t >= 0.98:
+        return b.copy()
+    return Image.blend(a.convert("RGBA"), b.convert("RGBA"), t)
+
+
 def build_elara() -> None:
-    """Prefer adjusted AI idle/cast heroes — never overwrite with PIL placeholders."""
-    idle_src = load("elara_idle_stand.png") or load("elara_idle_hero.png") or load("elara_cast_hero.png")
-    cast_src = load("elara_cast_hero.png") or idle_src
-    if idle_src is None:
-        print("  WARN: missing Elara AI hero art in docs/art-batches/incoming/")
+    """Rebuild Elara atlas from d132dfc art + dedicated action pose sprites.
+
+    Idle/cast bases come from commit d132dfc (`elara_core_ref_d132.png`). Walk/jump/
+    dash/hit use fitted AI pose heroes (those rows were idle-wobbles in d132).
+    """
+    ref = _load_d132_sheet()
+    if ref is None:
+        print("  WARN: missing elara_core_ref_d132.png — copy from d132dfc first")
         return
 
-    idle_cell = fit_subject(idle_src, body_h=54, key_black=False)
-    cast_cell = fit_subject(cast_src, body_h=54, key_black=False)
+    idle_cell = _seal_robe(_align_cell_feet(_extract_atlas_cell(ref, 0, 0)))
+    cast_cell = _seal_robe(_align_cell_feet(_extract_atlas_cell(ref, 8, 2)))
 
-    # Close tiny alpha holes so dark robes stay solid on dark skies
-    def seal(cell: Image.Image) -> Image.Image:
-        from PIL import ImageFilter
-
-        a = cell.split()[-1].filter(ImageFilter.MaxFilter(3))
-        out = Image.new("RGBA", cell.size, (0, 0, 0, 0))
-        px, ap, op = cell.load(), a.load(), out.load()
-        for y in range(cell.height):
-            for x in range(cell.width):
-                r, g, b, al = px[x, y]
-                if al > 40:
-                    op[x, y] = (r, g, b, 255)
-                elif ap[x, y] > 200:
-                    op[x, y] = (44, 44, 52, 255)
-        return out
-
-    idle_cell = seal(idle_cell)
-    cast_cell = seal(cast_cell)
+    walk_a = _fit_pose_cell("elara_walk_stride.png") or idle_cell
+    walk_b = _fit_pose_cell("elara_walk_stride_b.png") or walk_a
+    jump_pose = _fit_pose_cell("elara_jump_pose.png") or idle_cell
+    dash_pose = _fit_pose_cell("elara_dash_pose.png") or idle_cell
+    hit_pose = _fit_pose_cell("elara_hit_pose.png") or idle_cell
+    print("  elara: d132dfc idle/cast + dedicated walk/jump/dash/hit pose sprites")
 
     rows: list[list[Image.Image]] = []
-    rows.append([wobble(idle_cell, 0, -(i % 2), 1.0) for i in range(8)])
-    walk = []
-    for i in range(8):
-        phase = math.sin(i / 8 * math.pi * 2)
-        walk.append(wobble(idle_cell, int(phase * 1.5), 0, 1.0))
+
+    # 0 idle — d132 breathing bob
+    rows.append([_band_warp(idle_cell, head_dy=-(i % 2)) for i in range(8)])
+
+    # 1 walk — idle contact ↔ stride pose (walk_a/b are too similar after fit)
+    walk: list[Image.Image] = []
+    # Weights toward stride on odd contacts for a readable gait
+    cycle = [0.0, 0.45, 0.85, 1.0, 0.85, 0.45, 0.15, 0.55]
+    for i, t in enumerate(cycle):
+        stride = walk_a if (i // 2) % 2 == 0 else walk_b
+        pose = _lerp_pose(idle_cell, stride, t)
+        bob = -(i % 2)
+        # Alternate leg bias via band shift so even similar strides read as a cycle
+        leg = int(round(math.sin(i / 8 * math.pi * 2) * 3))
+        walk.append(
+            _band_warp(pose, leg_shift=leg, torso_shift=leg // 2, head_dy=bob, squash=1.0 + (0.03 if i % 2 else 0.0))
+        )
     rows.append(walk)
-    rows.append([wobble(idle_cell, 0, -2 - i // 2, 0.98) for i in range(6)])
-    rows.append([wobble(idle_cell, 0, i // 2, 1.02) for i in range(4)])
-    rows.append([wobble(idle_cell, 1 + i // 2, 0, 0.96) for i in range(6)])
-    for _ in range(3):
-        rows.append([wobble(idle_cell, min(i, 2), 0, 1.0) for i in range(6)])
-    rows.append([cast_cell if i >= 2 else idle_cell for i in range(6)])
-    rows.append([wobble(idle_cell, -1, 0, 1.0) for i in range(4)])
+
+    # 2 jump — crouch (idle) → airborne pose → stretch
+    jump: list[Image.Image] = []
+    for i in range(6):
+        t = i / 5
+        if i < 2:
+            cell = _band_warp(idle_cell, squash=0.92, head_dy=-1)
+        else:
+            cell = _lerp_pose(idle_cell, jump_pose, min(1.0, (i - 1) / 3))
+            cell = _band_warp(cell, head_dy=-2 - (i - 2), squash=0.96 + (i - 2) * 0.02)
+        jump.append(cell)
+    rows.append(jump)
+
+    # 3 fall — settle from jump pose toward idle
+    rows.append(
+        [
+            _band_warp(_lerp_pose(jump_pose, idle_cell, i / 3), leg_dy=i, squash=1.02 + i * 0.02)
+            for i in range(4)
+        ]
+    )
+
+    # 4 dash — idle → dash lean + streaks
+    dash: list[Image.Image] = []
+    for i in range(6):
+        t = min(1.0, i / 3)
+        cell = _lerp_pose(idle_cell, dash_pose, t)
+        cell = _band_warp(cell, torso_shift=1 + i // 2, squash=0.90, lean=0.08 + i * 0.02)
+        dash.append(_draw_dash_streaks(cell, i))
+    rows.append(dash)
+
+    # 5–7 melee — d132 body + slash arcs
+    for step, reach_boost in enumerate((0, 3, 6)):
+        melee: list[Image.Image] = []
+        legs = [0, -1, 4, 5, 2, 0]
+        tors = [-2, -1, 3, 4, 1, 0]
+        leans = [-0.10, -0.05, 0.18, 0.24, 0.08, 0.0]
+        reaches = [0, 2, 8 + reach_boost, 10 + reach_boost, 5 + reach_boost // 2, 1]
+        for i in range(6):
+            cell = _band_warp(
+                idle_cell,
+                leg_shift=legs[i],
+                torso_shift=tors[i],
+                head_shift=tors[i] // 2,
+                squash=0.94 if i in (2, 3) else 1.0,
+                lean=leans[i],
+            )
+            if reaches[i] >= 4:
+                cell = _draw_slash_arc(cell, reaches[i], thickness=2 + step, lift=step)
+            melee.append(cell)
+        rows.append(melee)
+
+    # 8 cast — d132 cast pose + glow
+    cast_row: list[Image.Image] = []
+    for i in range(6):
+        if i < 2:
+            cell = _band_warp(idle_cell, torso_shift=-1, head_dy=-i)
+            cell = _draw_cast_glow(cell, 0.2 + i * 0.25)
+        else:
+            cell = _band_warp(cast_cell, torso_shift=i - 1, head_shift=1)
+            cell = _draw_cast_glow(cell, 0.55 + (i - 2) * 0.15)
+        cast_row.append(cell)
+    rows.append(cast_row)
+
+    # 9 hit — flash into recoil pose (d132 hit was static)
+    hit_row: list[Image.Image] = []
+    for i in range(4):
+        t = min(1.0, i / 2)
+        cell = _lerp_pose(idle_cell, hit_pose, t)
+        cell = _band_warp(cell, torso_shift=-2 if i < 2 else -1, lean=-0.12)
+        cell = _tint_hit(cell, 0.55 if i == 0 else (0.25 if i == 1 else 0.0))
+        hit_row.append(cell)
+    rows.append(hit_row)
 
     sheet = Image.new("RGBA", (512, 640), (0, 0, 0, 0))
     for ri, row in enumerate(rows):
         for ci, cell in enumerate(row):
             sheet.paste(cell, (ci * 64, ri * 64), cell)
+
+    if not _atlas_alignment_ok(sheet):
+        print("  WARN: elara atlas feet alignment soft-fail (shipping anyway for action readability)")
+
     save(sheet, "player/elara_core.png")
-    save(fit_subject(cast_src, (48, 48), body_h=42, key_black=False), "player/elara_portrait_48.png")
-    print("  elara: AI hero poses → game atlas (no PIL placeholders)")
+    save(cast_cell.resize((48, 48), Image.Resampling.NEAREST), "player/elara_portrait_48.png")
+    print("  elara: atlas ready (d132 idle/cast + pose heroes for loco/combat)")
 
 
 def _matte_purple_bg(img: Image.Image) -> Image.Image:
