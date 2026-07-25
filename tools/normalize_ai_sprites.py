@@ -163,10 +163,10 @@ def pack_sheet(
 
 
 def assemble_elara(incoming: Path) -> Image.Image | None:
-    """Assemble Elara only from complete per-frame PNGs.
+    """Assemble Elara from per-frame PNGs when present.
 
-    The staged 1536×1024 elara_core.png is not a valid game atlas (cell bleed /
-    inconsistent pivots). Do not nearest-resize or remap it into production.
+    Prefer `python3.11 tools/rebuild_sprites_hq.py` for the staged 1536×1024
+    `elara_core.png` HQ sheet (128px cells → 64px game atlas).
     """
     frames_dir = incoming / "elara_frames"
     if not frames_dir.is_dir():
