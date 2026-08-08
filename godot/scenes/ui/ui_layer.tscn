@@ -8,9 +8,13 @@
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="6_pause"]
 [ext_resource type="Script" path="res://scripts/ui/relic_toast.gd" id="7_toast"]
 [ext_resource type="Script" path="res://scripts/ui/game_over_screen.gd" id="8_gameover"]
+[ext_resource type="Script" path="res://scripts/ui/mobile_controls.gd" id="9_mobile"]
 
 [node name="UILayer" type="CanvasLayer"]
 script = ExtResource("1_ui")
+
+[node name="MobileControls" type="CanvasLayer" parent="."]
+script = ExtResource("9_mobile")
 
 [node name="InventoryPanel" type="Control" parent="."]
 layout_mode = 3
@@ -348,7 +352,7 @@ horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="GameOverScreen/Panel/Margin/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.58, 0.54, 0.48, 1)
+theme_override_colors/font_color = Color(0.78, 0.74, 0.68, 1)
 theme_override_font_sizes/font_size = 10
 text = "Elara's sigil dims in the ash."
 horizontal_alignment = 1

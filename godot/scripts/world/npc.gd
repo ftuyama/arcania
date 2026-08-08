@@ -18,6 +18,7 @@ func _ready() -> void:
 	add_to_group(&"npcs")
 	collision_layer = 512
 	collision_mask = 2
+	HudStyle.apply_hud_font(_prompt, 11)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	_apply_visual()

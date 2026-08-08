@@ -11,6 +11,9 @@ const CELL_SIZE := 48
 
 func _ready() -> void:
 	visible = false
+	HudStyle.apply_hud_font(region_label, 16, &"semibold")
+	HudStyle.apply_hud_font(completion_label, 12)
+	_add_close_button()
 
 
 func refresh() -> void:
@@ -57,3 +60,15 @@ func refresh() -> void:
 				var marker_cell := grid_container.get_child(idx) as ColorRect
 				if marker_cell:
 					marker_cell.color = Color(0.85, 0.3, 0.5, 1.0)
+
+
+func _add_close_button() -> void:
+	var close_button := Button.new()
+	close_button.text = "Close"
+	HudStyle.apply_ui_font(close_button, 11)
+	close_button.pressed.connect(func() -> void:
+		var ui := get_parent()
+		if ui.has_method(&"close_overlay"):
+			ui.close_overlay()
+	)
+	$Panel/Margin/VBox.add_child(close_button)

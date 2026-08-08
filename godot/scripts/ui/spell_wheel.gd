@@ -12,7 +12,11 @@ var _selected_wheel_slot: int = -1
 
 func _ready() -> void:
 	visible = false
+	HudStyle.apply_hud_font($Panel/Margin/VBox/Title, 16, &"semibold")
+	HudStyle.apply_ui_font(acquired_list, 11)
+	HudStyle.apply_hud_font(hint_label, 12)
 	acquired_list.item_selected.connect(_on_acquired_selected)
+	_add_close_button()
 
 
 func refresh() -> void:
@@ -27,6 +31,7 @@ func refresh() -> void:
 		else:
 			var spell := SpellManager.get_spell(spell_id)
 			btn.text = "[%d] %s" % [i + 1, spell.display_name if spell else String(spell_id)]
+		HudStyle.apply_ui_font(btn, 11)
 		btn.pressed.connect(_on_wheel_slot_pressed.bind(i))
 		UiSfx.wire_button(btn)
 		slot_grid.add_child(btn)
@@ -51,3 +56,15 @@ func _on_acquired_selected(index: int) -> void:
 	if _selected_wheel_slot < SpellManager.QUICK_SLOT_COUNT:
 		SpellManager.set_quick_slot(_selected_wheel_slot, spell_id)
 	refresh()
+
+
+func _add_close_button() -> void:
+	var close_button := Button.new()
+	close_button.text = "Close"
+	HudStyle.apply_ui_font(close_button, 11)
+	close_button.pressed.connect(func() -> void:
+		var ui := get_parent()
+		if ui.has_method(&"close_overlay"):
+			ui.close_overlay()
+	)
+	$Panel/Margin/VBox.add_child(close_button)

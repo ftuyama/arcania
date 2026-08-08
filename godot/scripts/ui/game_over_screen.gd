@@ -24,6 +24,9 @@ const BUTTON_FONT_SIZE := 12
 func _ready() -> void:
 	visible = false
 	_style_panel()
+	HudStyle.apply_hud_font($Panel/Margin/VBox/Title, 18)
+	HudStyle.apply_hud_font($Panel/Margin/VBox/Subtitle, 11)
+	HudStyle.apply_hud_font(status_label, 11)
 	_style_buttons()
 	retry_button.pressed.connect(_on_retry_pressed)
 	load_button.pressed.connect(_on_load_pressed)
@@ -71,7 +74,7 @@ func _apply_button_theme(btn: Button) -> void:
 	normal.content_margin_left = 6
 	normal.content_margin_right = 6
 	btn.add_theme_stylebox_override(&"normal", normal)
-	btn.add_theme_font_size_override(&"font_size", BUTTON_FONT_SIZE)
+	HudStyle.apply_ui_font(btn, BUTTON_FONT_SIZE)
 
 	var hover := normal.duplicate() as StyleBoxFlat
 	hover.bg_color = Color(0.18, 0.12, 0.12, 0.96)

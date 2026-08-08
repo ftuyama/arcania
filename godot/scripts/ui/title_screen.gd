@@ -32,6 +32,13 @@ func _ready() -> void:
 	GameManager.state = GameManager.GameState.TITLE
 	AudioManager.play_ui(TITLE_STINGER)
 	AudioManager.play_region(&"ashen_threshold")
+	HudStyle.apply_ui_font($SafeArea/MainLayout/TitleLabel, 32)
+	HudStyle.apply_hud_font($SafeArea/MainLayout/TaglineLabel, 11)
+	HudStyle.apply_hud_font(prompt_label, 11)
+	HudStyle.apply_hud_font($SafeArea/MainLayout/VersionLabel, 11)
+	HudStyle.apply_hud_font($LoadPanel/Margin/VBox/LoadTitle, 13)
+	HudStyle.apply_ui_font(slot_list, 11)
+	HudStyle.apply_hud_font(load_status, 11)
 	_style_buttons()
 	_style_load_panel()
 	_style_slot_list()
@@ -93,7 +100,7 @@ func _apply_button_theme(btn: Button) -> void:
 	normal.content_margin_left = 6
 	normal.content_margin_right = 6
 	btn.add_theme_stylebox_override(&"normal", normal)
-	btn.add_theme_font_size_override(&"font_size", BUTTON_FONT_SIZE)
+	HudStyle.apply_ui_font(btn, BUTTON_FONT_SIZE)
 
 	var hover := normal.duplicate() as StyleBoxFlat
 	hover.bg_color = Color(0.18, 0.14, 0.10, 0.96)

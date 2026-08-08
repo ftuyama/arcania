@@ -8,6 +8,7 @@ var _panel: PanelContainer
 var _name_label: Label
 var _body_label: Label
 var _prompt_label: Label
+var _continue_button: Button
 
 var _lines: Array[String] = []
 var _speaker: String = ""
@@ -47,15 +48,23 @@ func _build_ui() -> void:
 	var vbox := VBoxContainer.new()
 	_panel.add_child(vbox)
 	_name_label = Label.new()
+	HudStyle.apply_hud_font(_name_label, 13, &"semibold")
 	_name_label.add_theme_color_override(&"font_color", Color(0.92, 0.78, 0.55, 1.0))
 	vbox.add_child(_name_label)
 	_body_label = Label.new()
 	_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	HudStyle.apply_hud_font(_body_label, 12)
 	_body_label.add_theme_color_override(&"font_color", Color(0.88, 0.84, 0.76, 1.0))
 	vbox.add_child(_body_label)
 	_prompt_label = Label.new()
+	HudStyle.apply_hud_font(_prompt_label, 11)
 	_prompt_label.add_theme_color_override(&"font_color", Color(0.58, 0.54, 0.48, 1.0))
 	vbox.add_child(_prompt_label)
+	if DisplayServer.is_touchscreen_available():
+		_continue_button = Button.new()
+		_continue_button.pressed.connect(_advance)
+		HudStyle.apply_ui_font(_continue_button, 11)
+		vbox.add_child(_continue_button)
 
 
 func start_dialogue(speaker: String, lines: Array[String]) -> void:
@@ -90,7 +99,12 @@ func _advance() -> void:
 func _show_line() -> void:
 	_name_label.text = _speaker
 	_body_label.text = _lines[_index]
-	_prompt_label.text = "[E] Continue" if _index < _lines.size() - 1 else "[E] Close"
+	if DisplayServer.is_touchscreen_available():
+		_prompt_label.text = "Tap Continue" if _index < _lines.size() - 1 else "Tap Close"
+		if _continue_button:
+			_continue_button.text = "Continue" if _index < _lines.size() - 1 else "Close"
+	else:
+		_prompt_label.text = "[E] Continue" if _index < _lines.size() - 1 else "[E] Close"
 
 
 func _close() -> void:

@@ -103,11 +103,17 @@ func _build_ui() -> void:
 	controls_row.add_child(_make_control_column(CONTROL_ROWS.slice(split)))
 
 	_prompt_label = Label.new()
-	_prompt_label.text = "Press Space or E to begin"
+	_prompt_label.text = "Tap to begin" if DisplayServer.is_touchscreen_available() else "Press Space or E to begin"
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	HudStyle.apply_hud_font(_prompt_label, 10)
 	_prompt_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
 	vbox.add_child(_prompt_label)
+	if DisplayServer.is_touchscreen_available():
+		var begin_button := Button.new()
+		begin_button.text = "Begin"
+		begin_button.pressed.connect(_dismiss)
+		HudStyle.apply_ui_font(begin_button, 11)
+		vbox.add_child(begin_button)
 
 
 func _make_control_column(rows: Array) -> GridContainer:

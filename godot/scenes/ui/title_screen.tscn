@@ -65,7 +65,7 @@ horizontal_alignment = 1
 
 [node name="TaglineLabel" type="Label" parent="SafeArea/MainLayout"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.58, 0.54, 0.48, 1)
+theme_override_colors/font_color = Color(0.78, 0.74, 0.68, 1)
 theme_override_font_sizes/font_size = 10
 text = "The weave is torn. You are the last thread."
 horizontal_alignment = 1
@@ -107,14 +107,14 @@ size_flags_vertical = 3
 
 [node name="PromptLabel" type="Label" parent="SafeArea/MainLayout"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.46, 0.4, 1)
+theme_override_colors/font_color = Color(0.78, 0.74, 0.68, 1)
 theme_override_font_sizes/font_size = 9
 text = "Space / E — New Game"
 horizontal_alignment = 1
 
 [node name="VersionLabel" type="Label" parent="SafeArea/MainLayout"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.32, 0.30, 0.28, 1)
+theme_override_colors/font_color = Color(0.65, 0.62, 0.58, 1)
 theme_override_font_sizes/font_size = 8
 text = "Phase 4"
 horizontal_alignment = 2

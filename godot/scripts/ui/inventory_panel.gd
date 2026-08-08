@@ -9,7 +9,12 @@ extends Control
 
 func _ready() -> void:
 	visible = false
+	HudStyle.apply_hud_font($Panel/Margin/VBox/Title, 16, &"semibold")
+	HudStyle.apply_ui_font(relic_list, 11)
+	HudStyle.apply_hud_font(detail_label, 12)
+	HudStyle.apply_hud_font(currency_label, 11)
 	relic_list.item_selected.connect(_on_item_selected)
+	_add_close_button()
 
 
 func refresh() -> void:
@@ -37,6 +42,18 @@ func _on_item_selected(index: int) -> void:
 	if relic == null:
 		return
 	detail_label.text = "%s\n%s" % [relic.display_name, relic.description]
+
+
+func _add_close_button() -> void:
+	var close_button := Button.new()
+	close_button.text = "Close"
+	HudStyle.apply_ui_font(close_button, 11)
+	close_button.pressed.connect(func() -> void:
+		var ui := get_parent()
+		if ui.has_method(&"close_overlay"):
+			ui.close_overlay()
+	)
+	$Panel/Margin/VBox.add_child(close_button)
 
 
 func _gui_input(event: InputEvent) -> void:

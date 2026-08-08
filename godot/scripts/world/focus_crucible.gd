@@ -83,7 +83,7 @@ func _build_prompt() -> void:
 	_prompt.text = "[E] Rest at Focus Crucible"
 	_prompt.position = Vector2(-80, -56)
 	_prompt.visible = false
-	_prompt.add_theme_font_size_override(&"font_size", 12)
+	HudStyle.apply_hud_font(_prompt, 12)
 	add_child(_prompt)
 
 

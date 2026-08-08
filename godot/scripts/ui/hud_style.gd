@@ -3,11 +3,11 @@ extends RefCounted
 ## Shared HUD StyleBox / font / texture helpers (art bible §10 color tokens).
 
 
-const COLOR_BG := Color(0.102, 0.102, 0.18, 0.85) # #1A1A2E @ 85%
+const COLOR_BG := Color(0.102, 0.102, 0.18, 0.96) # #1A1A2E @ 96%
 const COLOR_BORDER := Color(0.173, 0.173, 0.204, 1.0) # #2C2C34
 const COLOR_BORDER_GOLD := Color(0.549, 0.384, 0.141, 0.9) # #8C6224
 const COLOR_TEXT := Color(0.91, 0.91, 0.91, 1.0) # #E8E8E8
-const COLOR_TEXT_DIM := Color(0.553, 0.6, 0.682, 1.0) # #8D99AE
+const COLOR_TEXT_DIM := Color(0.72, 0.76, 0.84, 1.0)
 const COLOR_MANA := Color(0.0, 1.0, 1.0, 1.0) # #00FFFF
 const COLOR_HP := Color(1.0, 0.867, 0.824, 1.0) # #FFDDD2
 const COLOR_HP_LOW := Color(0.898, 0.22, 0.231, 1.0) # #E5383B
@@ -16,6 +16,9 @@ const COLOR_PIP_EMPTY := Color(0.173, 0.173, 0.204, 1.0)
 
 const FONT_REGULAR_PATH := "res://assets/fonts/Cinzel-Regular.ttf"
 const FONT_SEMIBOLD_PATH := "res://assets/fonts/Cinzel-SemiBold.ttf"
+const MIN_READABLE_FONT_SIZE := 11
+const TEXT_SHADOW_COLOR := Color(0.0, 0.0, 0.0, 0.9)
+const TEXT_SHADOW_OFFSET := 1
 
 const HUD_DIR := "res://assets/sprites/ui/hud/"
 
@@ -52,11 +55,18 @@ static func get_font(weight: StringName = &"regular") -> FontFile:
 	return _font_regular
 
 
-static func apply_hud_font(label: Label, size: int, weight: StringName = &"regular") -> void:
+static func apply_hud_font(label: Label, size: int, weight: StringName = &"semibold") -> void:
+	apply_ui_font(label, size, weight)
+
+
+static func apply_ui_font(control: Control, size: int, weight: StringName = &"semibold") -> void:
 	var font := get_font(weight)
 	if font:
-		label.add_theme_font_override(&"font", font)
-	label.add_theme_font_size_override(&"font_size", size)
+		control.add_theme_font_override(&"font", font)
+	control.add_theme_font_size_override(&"font_size", maxi(size, MIN_READABLE_FONT_SIZE))
+	control.add_theme_color_override(&"font_shadow_color", TEXT_SHADOW_COLOR)
+	control.add_theme_constant_override(&"shadow_offset_x", TEXT_SHADOW_OFFSET)
+	control.add_theme_constant_override(&"shadow_offset_y", TEXT_SHADOW_OFFSET)
 
 
 static func get_hud_texture(key: StringName) -> Texture2D:

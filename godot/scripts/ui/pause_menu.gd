@@ -47,7 +47,7 @@ func _style_ui() -> void:
 	HudStyle.apply_hud_font(status_label, BODY_FONT_SIZE)
 	_title.add_theme_color_override(&"font_color", COLOR_GOLD)
 	status_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
-	slot_list.add_theme_font_size_override(&"font_size", BODY_FONT_SIZE)
+	HudStyle.apply_ui_font(slot_list, BODY_FONT_SIZE)
 
 	var slot_style := StyleBoxFlat.new()
 	slot_style.bg_color = Color(0.06, 0.06, 0.09, 0.95)
@@ -77,7 +77,7 @@ func _apply_button_theme(btn: Button) -> void:
 	normal.content_margin_left = BUTTON_MARGIN_H
 	normal.content_margin_right = BUTTON_MARGIN_H
 	btn.add_theme_stylebox_override(&"normal", normal)
-	btn.add_theme_font_size_override(&"font_size", BUTTON_FONT_SIZE)
+	HudStyle.apply_ui_font(btn, BUTTON_FONT_SIZE)
 
 	var hover := normal.duplicate() as StyleBoxFlat
 	hover.bg_color = Color(0.18, 0.14, 0.10, 0.96)
