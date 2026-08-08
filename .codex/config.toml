@@ -1,0 +1,6 @@
+[mcp_servers.godot]
+command = "npx"
+args = ["-y", "@coding-solo/godot-mcp"]
+
+[mcp_servers.godot.env]
+GODOT_PATH = "/Applications/Godot.app/Contents/MacOS/Godot"
