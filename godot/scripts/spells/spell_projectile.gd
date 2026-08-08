@@ -46,6 +46,7 @@ func launch(from: Vector2, aim: Vector2, spell: SpellData) -> void:
 	set_physics_process(true)
 	_hitbox.enable_hitbox()
 	_visual.play(&"effect")
+	_visual.frame = 0
 	_visual.rotation = direction.angle()
 
 
@@ -66,7 +67,7 @@ func _physics_process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= lifetime:
 		_try_ignite_nearby_gates()
-		deactivate()
+		_finish_projectile()
 
 
 func _apply_spell_profile(spell: SpellData) -> void:
@@ -99,4 +100,14 @@ func _on_hitbox_hit(_target: Node, _damage: int) -> void:
 	if _impact_sfx:
 		AudioManager.play_sfx_stream(_impact_sfx, global_position)
 	_notify_nearby_gates()
+	_finish_projectile()
+
+
+func _finish_projectile() -> void:
+	_active = false
+	set_physics_process(false)
+	_hitbox.disable_hitbox()
+	if _visual.sprite_frames and _visual.sprite_frames.has_animation(&"impact"):
+		_visual.play(&"impact")
+		await _visual.animation_finished
 	deactivate()

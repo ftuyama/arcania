@@ -16,6 +16,7 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	_apply_interact_radius()
 	_build_prompt()
+	_build_ambient_fx()
 
 
 func _exit_tree() -> void:
@@ -84,3 +85,54 @@ func _build_prompt() -> void:
 	_prompt.visible = false
 	_prompt.add_theme_font_size_override(&"font_size", 12)
 	add_child(_prompt)
+
+
+func _build_ambient_fx() -> void:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.35, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(1.0, 0.42, 0.16, 0.7),
+		Color(0.55, 0.18, 0.05, 0.22),
+		Color(0.0, 0.0, 0.0, 0.0),
+	])
+	var light_texture := GradientTexture2D.new()
+	light_texture.width = 96
+	light_texture.height = 96
+	light_texture.fill = GradientTexture2D.FILL_RADIAL
+	light_texture.fill_from = Vector2(0.5, 0.5)
+	light_texture.fill_to = Vector2(1.0, 0.5)
+	light_texture.gradient = gradient
+
+	var glow := PointLight2D.new()
+	glow.name = &"EmberGlow"
+	glow.position = Vector2(0, -29)
+	glow.color = Color(1.0, 0.42, 0.16, 1.0)
+	glow.energy = 0.45
+	glow.texture = light_texture
+	add_child(glow)
+
+	var embers := CPUParticles2D.new()
+	embers.name = &"Embers"
+	embers.position = Vector2(0, -32)
+	embers.amount = 8
+	embers.lifetime = 1.4
+	embers.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	embers.emission_sphere_radius = 5.0
+	embers.direction = Vector2.UP
+	embers.spread = 24.0
+	embers.gravity = Vector2(0, -7)
+	embers.initial_velocity_min = 6.0
+	embers.initial_velocity_max = 13.0
+	embers.scale_amount_min = 1.0
+	embers.scale_amount_max = 2.0
+	embers.color = Color(1.0, 0.42, 0.16, 0.9)
+	add_child(embers)
+
+	var sprite := get_node_or_null("Sprite") as Sprite2D
+	var pulse := create_tween().set_loops()
+	pulse.tween_property(glow, "energy", 0.62, 0.65).set_trans(Tween.TRANS_SINE)
+	if sprite:
+		pulse.parallel().tween_property(sprite, "scale", Vector2(1.03, 1.03), 0.65).set_trans(Tween.TRANS_SINE)
+	pulse.tween_property(glow, "energy", 0.42, 0.65).set_trans(Tween.TRANS_SINE)
+	if sprite:
+		pulse.parallel().tween_property(sprite, "scale", Vector2.ONE, 0.65).set_trans(Tween.TRANS_SINE)

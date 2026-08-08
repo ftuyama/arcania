@@ -8,29 +8,35 @@ region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2"]
 atlas = ExtResource("1_tex")
-region = Rect2(128, 0, 128, 128)
+region = Rect2(130, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3"]
 atlas = ExtResource("1_tex")
-region = Rect2(256, 0, 128, 128)
+region = Rect2(260, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4"]
 atlas = ExtResource("1_tex")
-region = Rect2(384, 0, 128, 128)
+region = Rect2(390, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5"]
 atlas = ExtResource("1_tex")
-region = Rect2(512, 0, 128, 128)
+region = Rect2(520, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6"]
 atlas = ExtResource("1_tex")
-region = Rect2(640, 0, 128, 128)
+region = Rect2(650, 0, 128, 128)
 [resource]
 animations = [
 {
-"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_4")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_6")}],
-"loop": false,
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_4")}],
+"loop": true,
 "name": &"effect",
-"speed": 12.0
+"speed": 14.0
+},
+{
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_6")}],
+"loop": false,
+"name": &"impact",
+"speed": 14.0
 }
 ]
