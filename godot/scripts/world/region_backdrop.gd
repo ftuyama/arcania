@@ -84,5 +84,6 @@ func _build_layers() -> void:
 			sprite.texture = tex
 			sprite.centered = false
 			sprite.position = Vector2.ZERO
+			sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		layer.add_child(sprite)
 		add_child(layer)

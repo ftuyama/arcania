@@ -6,7 +6,9 @@ func enter(_payload: Dictionary) -> void:
 	var player := _get_player()
 	player.velocity = Vector2.ZERO
 	player.set_invulnerable(true)
-	player.animated_sprite.modulate = Color(0.4, 0.4, 0.4, 0.6)
+	player.play_animation(&"death", true)
+	var fade := player.create_tween()
+	fade.tween_property(player.animated_sprite, "modulate", Color(0.4, 0.4, 0.4, 0.6), 1.0)
 
 
 func _get_player() -> Player:
