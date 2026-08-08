@@ -24,30 +24,12 @@ func _ensure_backdrop() -> void:
 	if not RegionBackdrop.region_has_backdrop(region_id):
 		return
 
-	# Screen-space sky behind parallax — rooms are taller than 540px, so a single
-	# 960×540 parallax sprite at y=0 leaves the play floor (y≈700) on void/checkerboard.
-	var sky_layer := CanvasLayer.new()
-	sky_layer.name = &"SkyLayer"
-	sky_layer.layer = -101
-	var sky_root := Control.new()
-	sky_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	sky_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sky := ColorRect.new()
-	sky.color = Color(0.102, 0.102, 0.18, 1.0)
-	sky.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	sky.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	sky_root.add_child(sky)
-	sky_layer.add_child(sky_root)
-	add_child(sky_layer)
-
 	var backdrop := ParallaxBackground.new()
 	backdrop.name = &"Backdrop"
-	backdrop.layer = -100
 	backdrop.set_script(REGION_BACKDROP_SCRIPT)
 	backdrop.region_id = region_id
 	add_child(backdrop)
 	move_child(backdrop, 0)
-	move_child(sky_layer, 0)
 
 
 func get_spawn_position(marker_name: StringName = &"default") -> Vector2:

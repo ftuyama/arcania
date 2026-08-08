@@ -8,17 +8,7 @@ var _endcap: TextureRect
 
 
 func _ready() -> void:
-	# Flatter currency plate — closer to screenshot bottom-right chrome.
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.07, 0.1, 0.82)
-	style.border_color = HudStyle.COLOR_BORDER_GOLD
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(2)
-	style.content_margin_left = 8
-	style.content_margin_top = 4
-	style.content_margin_right = 6
-	style.content_margin_bottom = 4
-	add_theme_stylebox_override(&"panel", style)
+	add_theme_stylebox_override(&"panel", HudStyle.make_panel_style(true))
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var row := HBoxContainer.new()
@@ -43,14 +33,14 @@ func _ready() -> void:
 	row.add_child(_value)
 
 	_endcap = TextureRect.new()
-	_endcap.custom_minimum_size = Vector2(22, 22)
+	_endcap.custom_minimum_size = Vector2(28, 28)
 	_endcap.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_endcap.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_endcap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_endcap.texture = HudStyle.get_hud_texture(&"currency_endcap")
 	row.add_child(_endcap)
 
-	custom_minimum_size = Vector2(120, 26)
+	custom_minimum_size = Vector2(130, 28)
 	EventBus.currency_changed.connect(_on_currency_changed)
 	EventBus.enemy_defeated.connect(_on_enemy_defeated)
 	EventBus.quest_completed.connect(_on_quest_completed)

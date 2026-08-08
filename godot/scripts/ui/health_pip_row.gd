@@ -9,7 +9,7 @@ var _pips: Array[TextureRect] = []
 
 
 func _ready() -> void:
-	add_theme_constant_override(&"separation", 2)
+	add_theme_constant_override(&"separation", 3)
 
 
 func update_health(current_hp: int, max_hp: int) -> void:

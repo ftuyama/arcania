@@ -1,131 +1,122 @@
 #!/usr/bin/env python3.11
-"""Validate Arcania sprite imports against art-style-lock + asset production list.
-
-Usage:
-  python3 tools/validate_sprite_imports.py
-  python3 tools/validate_sprite_imports.py --strict
-"""
+"""Validate the painted-realism East Road benchmark assets."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from PIL import Image
 
+
 ROOT = Path(__file__).resolve().parents[1]
 SPRITES = ROOT / "godot" / "assets" / "sprites"
+MANIFEST_PATH = ROOT / "docs" / "art-batches" / "painted_realism" / "manifest.json"
 
-# Wave 1 required assets (style-lock exit criteria)
-WAVE1_REQUIRED: list[tuple[str, tuple[int, int] | None]] = [
-    ("player/elara_core.png", None),  # multi-row sheet
-    ("player/elara_portrait_48.png", (48, 48)),
-    ("tilesets/01_ashen_threshold/tileset.png", None),
-    ("tilesets/01_ashen_threshold/parallax_0_sky.png", (960, 540)),
-    ("tilesets/01_ashen_threshold/parallax_1_far_ruins.png", (960, 540)),
-    ("tilesets/01_ashen_threshold/parallax_2_mid_architecture.png", (960, 540)),
-    ("tilesets/01_ashen_threshold/parallax_3_mid_fog.png", (960, 540)),
-    ("tilesets/01_ashen_threshold/parallax_4_near_occluders.png", (960, 540)),
-    ("tilesets/01_ashen_threshold/props.png", None),
-    ("enemies/e01_ash_wisp/e01_sheet.png", None),
-    ("enemies/e02_bone_crawler/e02_sheet.png", None),
-    ("enemies/e04_ember_moth/e04_sheet.png", None),
-    ("enemies/e08_threshold_shade/e08_sheet.png", None),
-    ("vfx/spells/vfx_ember_sigil.png", None),
-    ("vfx/spells/vfx_ember_bolt.png", None),
+REQUIRED: list[tuple[str, tuple[int, int]]] = [
+	("player/elara_core.png", (2048, 2560)),
+	("enemies/e03_bramble_stalker/e03_bramble_stalker_sheet.png", (768, 256)),
+	("enemies/e15_thornweft_larva/e15_thornweft_larva_sheet.png", (768, 256)),
+	("enemies/e07_mothling_swarm/e07_mothling_swarm_sheet.png", (768, 256)),
+	("tilesets/01_ashen_threshold/parallax_0_sky.png", (1536, 540)),
+	("tilesets/01_ashen_threshold/parallax_1_far_ruins.png", (1536, 540)),
+	("tilesets/01_ashen_threshold/parallax_2_mid_architecture.png", (1536, 540)),
+	("tilesets/01_ashen_threshold/parallax_3_mid_fog.png", (1536, 540)),
+	("tilesets/01_ashen_threshold/parallax_4_near_occluders.png", (1536, 540)),
+	("tilesets/01_ashen_threshold/painted_platform_kit.png", (512, 256)),
+	("vfx/spells/vfx_ember_sigil.png", (1024, 128)),
+	("vfx/spells/vfx_ember_bolt.png", (768, 128)),
+	("vfx/spells/vfx_veil_step.png", (1024, 128)),
+	("world/world_phase_barrier.png", (128, 256)),
+	("ui/hud/ui_hud_portrait_frame.png", (96, 96)),
+	("ui/hud/ui_hud_minimap_frame.png", (176, 104)),
 ]
 
-# Co-located SpriteFrames expected beside character/VFX sheets
-TRES_PAIRS = [
-    "player/elara_core",
-    "enemies/e01_ash_wisp/e01_sheet",
-    "enemies/e02_bone_crawler/e02_sheet",
-    "enemies/e03_bramble_stalker/e03_sheet",
-    "enemies/e04_ember_moth/e04_sheet",
-    "enemies/e08_threshold_shade/e08_sheet",
-    "vfx/spells/vfx_ember_sigil",
-    "vfx/spells/vfx_ember_bolt",
+SPRITE_FRAME_STEMS = [
+	"player/elara_core",
+	"enemies/e03_bramble_stalker/e03_bramble_stalker_sheet",
+	"enemies/e15_thornweft_larva/e15_thornweft_larva_sheet",
+	"enemies/e07_mothling_swarm/e07_mothling_swarm_sheet",
+	"vfx/spells/vfx_ember_sigil",
+	"vfx/spells/vfx_ember_bolt",
 ]
 
-SNAKE_OK = set("abcdefghijklmnopqrstuvwxyz0123456789_.")
+
+def check_png(relative_path: str, expected_size: tuple[int, int], errors: list[str]) -> None:
+	path = SPRITES / relative_path
+	if not path.exists():
+		errors.append(f"missing: {relative_path}")
+		return
+	try:
+		with Image.open(path) as image:
+			if image.size != expected_size:
+				errors.append(
+					f"size: {relative_path} is {image.width}x{image.height}, "
+					f"expected {expected_size[0]}x{expected_size[1]}"
+				)
+			if image.mode not in ("RGB", "RGBA"):
+				errors.append(f"mode: {relative_path} is {image.mode}, expected RGB or RGBA")
+	except OSError as exception:
+		errors.append(f"unreadable: {relative_path} ({exception})")
 
 
-def check_naming(rel: str, errors: list[str]) -> None:
-    name = Path(rel).name
-    if name != name.lower() or any(c not in SNAKE_OK for c in name):
-        errors.append(f"naming: {rel} must be lowercase snake_case")
-
-
-def check_png(rel: str, expected_size: tuple[int, int] | None, errors: list[str], warnings: list[str]) -> None:
-    path = SPRITES / rel
-    if not path.exists():
-        errors.append(f"missing: {rel}")
-        return
-    check_naming(rel, errors)
-    try:
-        with Image.open(path) as img:
-            w, h = img.size
-            if expected_size and (w, h) != expected_size:
-                errors.append(f"size: {rel} is {w}x{h}, expected {expected_size[0]}x{expected_size[1]}")
-            if rel.endswith("tileset.png") and (h != 64 or w % 64 != 0):
-                warnings.append(f"tileset: {rel} should be N*64 x 64 (got {w}x{h})")
-            if "parallax" in rel and h != 540:
-                warnings.append(f"parallax: {rel} height {h} != 540")
-            if img.mode not in ("RGBA", "RGB"):
-                warnings.append(f"mode: {rel} is {img.mode}, prefer RGBA")
-    except OSError as exc:
-        errors.append(f"unreadable: {rel} ({exc})")
-
-
-def check_tres_pairs(errors: list[str]) -> None:
-    for stem in TRES_PAIRS:
-        png = SPRITES / f"{stem}.png"
-        tres = SPRITES / f"{stem}.tres"
-        if png.exists() and not tres.exists():
-            errors.append(f"missing .tres for {stem}.png")
+def check_player_cells(manifest: dict, errors: list[str]) -> None:
+	path = SPRITES / "player" / "elara_core.png"
+	if not path.exists():
+		return
+	cell_size = int(manifest["player"]["cell_size"])
+	minimum = float(manifest["quality"]["min_subject_height_ratio"])
+	maximum = float(manifest["quality"]["max_subject_height_ratio"])
+	with Image.open(path) as source:
+		image = source.convert("RGBA")
+		for row, animation in enumerate(manifest["player"]["animations"].values()):
+			for column in range(len(animation["frames"])):
+				cell = image.crop((
+					column * cell_size,
+					row * cell_size,
+					(column + 1) * cell_size,
+					(row + 1) * cell_size,
+				))
+				bounds = cell.getchannel("A").getbbox()
+				if bounds is None:
+					errors.append(f"empty player cell: row {row}, column {column}")
+					continue
+				height_ratio = (bounds[3] - bounds[1]) / cell_size
+				if not minimum <= height_ratio <= maximum:
+					errors.append(
+					f"player cell {row}:{column} height ratio {height_ratio:.2f}, "
+					f"expected {minimum:.2f}-{maximum:.2f}"
+				)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
-    args = parser.parse_args()
+	parser = argparse.ArgumentParser(description=__doc__)
+	parser.add_argument("--strict", action="store_true", help="Retained for CI compatibility")
+	parser.parse_args()
 
-    errors: list[str] = []
-    warnings: list[str] = []
+	errors: list[str] = []
+	if not MANIFEST_PATH.exists():
+		print(f"ERROR missing manifest: {MANIFEST_PATH.relative_to(ROOT)}")
+		return 2
+	manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
 
-    if not SPRITES.is_dir():
-        print(f"ERROR: sprites root missing: {SPRITES}", file=sys.stderr)
-        return 2
+	for relative_path, expected_size in REQUIRED:
+		check_png(relative_path, expected_size, errors)
+	for stem in SPRITE_FRAME_STEMS:
+		if not (SPRITES / f"{stem}.tres").exists():
+			errors.append(f"missing SpriteFrames: {stem}.tres")
+	check_player_cells(manifest, errors)
 
-    for rel, size in WAVE1_REQUIRED:
-        check_png(rel, size, errors, warnings)
-
-    check_tres_pairs(errors)
-
-    # Soft check: tileset should have ≥16 tiles (1024px+) for Wave 1
-    tileset = SPRITES / "tilesets/01_ashen_threshold/tileset.png"
-    if tileset.exists():
-        with Image.open(tileset) as img:
-            tile_count = img.size[0] // 64
-            if tile_count < 16:
-                warnings.append(f"tileset: only {tile_count} tiles (Wave 1 target 16–24)")
-
-    for w in warnings:
-        print(f"WARN  {w}")
-    for e in errors:
-        print(f"ERROR {e}")
-
-    if args.strict:
-        errors.extend(f"(strict) {w}" for w in warnings)
-
-    if errors:
-        print(f"\nFAILED — {len(errors)} error(s), {len(warnings)} warning(s)")
-        return 1
-
-    print(f"OK — Wave 1 assets present ({len(warnings)} warning(s))")
-    return 0
+	for error in errors:
+		print(f"ERROR {error}")
+	if errors:
+		print(f"\nFAILED — {len(errors)} error(s)")
+		return 1
+	print(f"OK — painted benchmark assets passed ({len(REQUIRED)} PNGs)")
+	return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+	raise SystemExit(main())

@@ -20,7 +20,7 @@ offset_bottom = 512.0
 
 [node name="Geometry" type="Node2D" parent="."]
 script = ExtResource("2_geom")
-tileset_path = "res://assets/sprites/tilesets/01_ashen_threshold/tileset.png"
+tileset_path = "res://assets/sprites/tilesets/01_ashen_threshold/painted_platform_kit.png"
 platform_rects = Array[Rect2]([Rect2(0, 448, 1536, 64), Rect2(320, 352, 160, 20), Rect2(640, 288, 128, 20), Rect2(960, 352, 192, 20), Rect2(1152, 256, 160, 20), Rect2(1280, 320, 128, 20)])
 west_transition = true
 east_transition = true

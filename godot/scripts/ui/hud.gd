@@ -29,7 +29,7 @@ var _active_boss: BaseBoss = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	layer = 20
+	layer = 10
 	_style_static_labels()
 	_style_boss_bar()
 	_load_sigil_icon()
@@ -83,28 +83,22 @@ func _disconnect_if(sig: Signal, callable: Callable) -> void:
 
 
 func _style_static_labels() -> void:
-	HudStyle.apply_hud_font(character_name, 13, &"semibold")
+	HudStyle.apply_hud_font(character_name, 12, &"semibold")
 	character_name.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
-	character_name.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 0.85))
-	character_name.add_theme_constant_override(&"shadow_offset_x", 1)
-	character_name.add_theme_constant_override(&"shadow_offset_y", 1)
 	HudStyle.apply_hud_font(shard_count_label, 11)
 	shard_count_label.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	HudStyle.apply_hud_font(overcast_label, 10)
 	overcast_label.add_theme_color_override(&"font_color", HudStyle.COLOR_HP_LOW)
-	HudStyle.apply_hud_font(region_label, 12)
+	HudStyle.apply_hud_font(region_label, 11)
 	region_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
-	region_label.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 0.85))
-	region_label.add_theme_constant_override(&"shadow_offset_x", 1)
-	region_label.add_theme_constant_override(&"shadow_offset_y", 1)
-	HudStyle.apply_hud_font(quest_label, 9)
-	quest_label.add_theme_color_override(&"font_color", Color(HudStyle.COLOR_TEXT_DIM.r, HudStyle.COLOR_TEXT_DIM.g, HudStyle.COLOR_TEXT_DIM.b, 0.55))
+	HudStyle.apply_hud_font(quest_label, 10)
+	quest_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
 	HudStyle.apply_hud_font(boss_name_label, 13, &"semibold")
 	boss_name_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
 	HudStyle.apply_hud_font(spell_name_label, 14)
 	spell_name_label.add_theme_color_override(&"font_color", Color(0.78, 0.62, 0.95, 1))
-	HudStyle.apply_hud_font(spell_name_fade, 11)
-	spell_name_fade.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
+	HudStyle.apply_hud_font(spell_name_fade, 12)
+	spell_name_fade.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	var toast: Label = $ToastLabel
 	HudStyle.apply_hud_font(toast, 12)
 

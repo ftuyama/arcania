@@ -55,8 +55,7 @@ func physics_update(delta: float) -> void:
 		_resolved = true
 		player.spell_caster.resolve_cast(_spell_id, player)
 
-	# Hold briefly after resolve so the slower cast SpriteFrames can finish reading.
-	if _resolved and _timer <= -0.28:
+	if _resolved and _timer <= -0.05:
 		if player.is_on_floor():
 			state_machine.transition_to(&"Idle", {})
 		else:

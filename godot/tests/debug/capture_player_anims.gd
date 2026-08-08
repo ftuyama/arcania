@@ -21,6 +21,7 @@ func _run() -> void:
 
 	var player: Node = packed.instantiate()
 	root.add_child(player)
+	player.process_mode = Node.PROCESS_MODE_DISABLED
 
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)

@@ -13,10 +13,9 @@ const FOOTSTEP_INTERVAL := 0.32
 const HURT_SFX := "res://assets/audio/sfx/player/sfx_player_hurt_1.wav"
 
 const COMBO_STEPS: Array[Dictionary] = [
-	# Tuned so melee SpriteFrames (~11 fps, 6 frames) can read before recovery ends.
-	{"windup": 0.10, "active": 0.14, "recovery": 0.18, "damage": 8, "knockback": Vector2(120, -40)},
-	{"windup": 0.08, "active": 0.12, "recovery": 0.16, "damage": 8, "knockback": Vector2(120, -40)},
-	{"windup": 0.14, "active": 0.16, "recovery": 0.24, "damage": 14, "knockback": Vector2(180, -80)},
+	{"windup": 0.08, "active": 0.10, "recovery": 0.12, "damage": 8, "knockback": Vector2(120, -40)},
+	{"windup": 0.06, "active": 0.08, "recovery": 0.10, "damage": 8, "knockback": Vector2(120, -40)},
+	{"windup": 0.12, "active": 0.14, "recovery": 0.20, "damage": 14, "knockback": Vector2(180, -80)},
 ]
 
 @onready var state_machine: StateMachine = $StateMachine
@@ -84,7 +83,6 @@ func _physics_process(delta: float) -> void:
 		combo_reset_timer = maxf(combo_reset_timer - delta, 0.0)
 		if combo_reset_timer == 0.0:
 			combo_index = 0
-	_apply_pixel_snap()
 	_was_on_floor = is_on_floor()
 
 
@@ -182,6 +180,7 @@ func respawn() -> void:
 	health_component.current_hp = health_component.max_hp
 	mana_component.restore_full()
 	global_position = respawn_position
+	reset_physics_interpolation()
 	velocity = Vector2.ZERO
 	combo_index = 0
 	animated_sprite.modulate = Color.WHITE
@@ -309,10 +308,6 @@ func _update_landing_audio() -> void:
 
 func _update_facing() -> void:
 	animated_sprite.flip_h = facing_direction < 0
-
-
-func _apply_pixel_snap() -> void:
-	global_position = global_position.round()
 
 
 func _check_locked_spell_feedback() -> void:

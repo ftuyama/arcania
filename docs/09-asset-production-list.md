@@ -5,7 +5,7 @@
 
 **Purpose:** Master checklist and production specs for all visual, audio, and UI assets in Arcania. Cross-reference [03-art-bible.md](03-art-bible.md) for style tokens, [04-enemy-bible.md](04-enemy-bible.md) for enemy IDs, [05-boss-bible.md](05-boss-bible.md) for boss phases, [06-magic-system.md](06-magic-system.md) for spell mechanics, and [02-world-design.md](02-world-design.md) for region context.
 
-**Canonical counts:** 14 spells · 55 enemies · 19 bosses (10 mini + 8 major + 1 final) · 12 regions · Elara @ 56px body / 64×64 canvas
+**Canonical counts:** 14 spells · 55 enemies · 19 bosses (10 mini + 8 major + 1 final) · 12 regions · Elara @ 112 logical px / 256×256 source cell displayed at 0.5×
 
 ---
 
@@ -71,7 +71,7 @@
 | Asset Type | Format | Canvas / Grid |
 |------------|--------|---------------|
 | Sprites / UI | PNG RGBA 32-bit | Per [03-art-bible.md](03-art-bible.md) §14 |
-| Tilesets | PNG | 64×64 tiles |
+| Modular environment kit | PNG RGBA | 128×128 source modules displayed on 64-unit grid |
 | Parallax | PNG | Height 540px; width = region tile width × 64 |
 | VFX | PNG | 128×128 cells |
 | Audio | OGG Vorbis | 44.1 kHz; loops seamless ±10 ms |
@@ -81,10 +81,10 @@
 
 ## 2. Player Animations — Elara Veilmark
 
-**Canvas:** 64×64 px (56px body height; 2px padding; hood/FX may extend to canvas edge)  
-**Pivot:** Feet center-bottom `(32, 62)`  
+**Canvas:** 256×256 px source cell (approximately 224px body height, displayed at 0.5×)  
+**Pivot:** Feet center-bottom `(128, 248)`  
 **Direction:** Face-right default; engine mirrors for left  
-**Global style:** 12 FPS sprite stepping at 60 FPS game tick unless noted; robe hem + hood lag 1 frame (secondary action)
+**Global style:** painted frame animation at 10–18 FPS over interpolated 60 Hz movement; robe hem + hood retain readable secondary action
 
 ### 2.1 Core Locomotion & States
 

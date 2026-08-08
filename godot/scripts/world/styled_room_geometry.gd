@@ -10,12 +10,10 @@ extends Node2D
 @export var east_transition: bool = false
 
 const TILE_SIZE := 64
+const SOURCE_TILE_SIZE := 128
+const SOURCE_COLUMNS := 4
+const SOURCE_SCALE := 0.5
 const DOOR_GAP := 64.0
-## Platform tile art draws the walkable cap at y=16; collision uses rect top (y=0).
-const PLATFORM_SURFACE_Y := 16
-const PLATFORM_BODY_Y := 20
-const PLATFORM_CAP_HEIGHT := TILE_SIZE - PLATFORM_SURFACE_Y
-const PLATFORM_BODY_HEIGHT := TILE_SIZE - PLATFORM_BODY_Y
 
 var _tileset: Texture2D
 
@@ -77,71 +75,35 @@ func _make_platform(rect: Rect2, is_floor: bool) -> StaticBody2D:
 	var visuals := Node2D.new()
 	body.add_child(visuals)
 
-	var tile_index := floor_tile_index if is_floor else platform_tile_index
-	_tile_rect(visuals, rect.size, tile_index, is_floor)
+	_tile_rect(visuals, rect.size, is_floor)
 
 	return body
 
 
-func _tile_rect(parent: Node2D, size: Vector2, tile_index: int, is_floor: bool) -> void:
-	if is_floor:
-		_tile_floor_rect(parent, size, tile_index)
-		return
-
-	_add_platform_cap_strip(parent, size.x, 0.0)
-
-	var body_remaining := maxf(0.0, size.y - float(PLATFORM_CAP_HEIGHT))
-	var y_cursor := float(PLATFORM_CAP_HEIGHT)
-	while body_remaining > 0.0:
-		var slice_h := minf(float(PLATFORM_BODY_HEIGHT), body_remaining)
-		_add_platform_body_strip(parent, size.x, y_cursor, slice_h)
-		y_cursor += slice_h
-		body_remaining -= slice_h
-
-
-func _tile_floor_rect(parent: Node2D, size: Vector2, tile_index: int) -> void:
+func _tile_rect(parent: Node2D, size: Vector2, is_floor: bool) -> void:
 	var cols := int(ceil(size.x / float(TILE_SIZE)))
 	var rows := int(ceil(size.y / float(TILE_SIZE)))
-	# Mix AI stone variants — no flat Polygon2D slab (reads as a giant grey bar).
-	var variants: Array[int] = [tile_index, 9, 13, 3]
-
 	for row in rows:
 		for col in cols:
-			var variant: int = variants[(row * 7 + col * 3) % variants.size()]
-			_add_tile_sprite(
-				parent,
-				Rect2(variant * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE),
-				Vector2(col * TILE_SIZE, row * TILE_SIZE)
-			)
+			var source_index := _source_index(col, cols, row, is_floor)
+			var source_column := source_index % SOURCE_COLUMNS
+			var source_row := source_index / SOURCE_COLUMNS
+			_add_tile_sprite(parent, Rect2(
+				source_column * SOURCE_TILE_SIZE,
+				source_row * SOURCE_TILE_SIZE,
+				SOURCE_TILE_SIZE,
+				SOURCE_TILE_SIZE
+			), Vector2(col * TILE_SIZE, row * TILE_SIZE))
 
 
-func _add_platform_cap_strip(parent: Node2D, width: float, y_pos: float) -> void:
-	_add_tile_sprite(
-		parent,
-		Rect2(
-			platform_tile_index * TILE_SIZE,
-			PLATFORM_SURFACE_Y,
-			TILE_SIZE,
-			PLATFORM_CAP_HEIGHT
-		),
-		Vector2(0.0, y_pos),
-		Vector2(width / float(TILE_SIZE), 1.0)
-	)
-
-
-func _add_platform_body_strip(parent: Node2D, width: float, y_pos: float, height: float) -> void:
-	var scale_y := height / float(PLATFORM_BODY_HEIGHT)
-	_add_tile_sprite(
-		parent,
-		Rect2(
-			platform_tile_index * TILE_SIZE,
-			PLATFORM_BODY_Y,
-			TILE_SIZE,
-			PLATFORM_BODY_HEIGHT
-		),
-		Vector2(0.0, y_pos),
-		Vector2(width / float(TILE_SIZE), scale_y)
-	)
+func _source_index(column: int, column_count: int, row: int, is_floor: bool) -> int:
+	if row > 0 or is_floor:
+		return 4 + ((column + row) % 2)
+	if column == 0:
+		return 0
+	if column == column_count - 1:
+		return 3
+	return 1 + (column % 2)
 
 
 func _add_tile_sprite(
@@ -156,6 +118,6 @@ func _add_tile_sprite(
 	sprite.region_rect = region
 	sprite.centered = false
 	sprite.position = position
-	sprite.scale = scale
-	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	sprite.scale = scale * SOURCE_SCALE
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	parent.add_child(sprite)

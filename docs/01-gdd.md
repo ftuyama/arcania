@@ -4,7 +4,7 @@
 **Engine:** Godot 4.3+  
 **Genre:** 2D Metroidvania / Action-Adventure  
 **Perspective:** Side-view, hand-drawn  
-**Target Resolution:** 1920×1080 (viewport 960×540, pixel-perfect scaling)  
+**Target Resolution:** 1920×1080 (viewport 960×540, smooth 2× presentation)  
 **Status:** Pre-production (design lock for Phase 0)
 
 > *"The weave is torn. You are the last thread."*
@@ -17,7 +17,7 @@
 
 The world of Arcania is a semi-open, interconnected ruinscape of twelve regions, each layered with environmental storytelling, optional challenges, and secrets. Progression is driven by **fourteen dual-purpose spells**, **Focus Shards** that expand mana capacity, **relics** that reshape build identity, and **map discovery** that rewards curiosity. The central narrative mystery—the **Arcane Collapse** and the fate of the **World Sigil**—unfolds through exploration, boss encounters, and faction remnants rather than cutscene-heavy exposition.
 
-Visually, Arcania targets a **Hollow Knight–inspired hand-drawn aesthetic**: strong silhouettes, limited but expressive palettes, and readable combat telegraphs at 64px tile scale with characters roughly 48–64px tall. Gameplay emphasizes responsive movement, a tight three-hit melee combo, eight-directional spell casting, and a mana economy that encourages deliberate play while allowing **overcast**—casting at zero mana at the cost of health—for clutch moments.
+Visually, Arcania targets **high-resolution painted 2D dark fantasy**: realistic weathered materials, strong silhouettes, restrained regional palettes, and readable combat telegraphs on a 64-unit gameplay grid. Elara is approximately 112 logical pixels tall, with intentionally tighter collision geometry so the larger mockup-like silhouette does not compromise platforming. Gameplay emphasizes responsive movement, a tight three-hit melee combo, eight-directional spell casting, and a mana economy that encourages deliberate play while allowing **overcast**—casting at zero mana at the cost of health—for clutch moments.
 
 This document is the master design reference. Detailed specifications live in companion docs indexed in [Section 12](#12-document-index--cross-links).
 

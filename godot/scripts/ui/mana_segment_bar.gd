@@ -3,10 +3,10 @@ extends Control
 
 
 const MANA_PER_SHARD := 10
-const SEGMENT_HEIGHT := 6
-const SEGMENT_GAP := 1
+const SEGMENT_HEIGHT := 8
+const SEGMENT_GAP := 2
 const MIN_SEGMENT_WIDTH := 28
-const BAR_INSET := Rect2(8, 5, 124, 6) # thin trough inside 140×16 bg — screenshot style
+const BAR_INSET := Rect2(10, 4, 120, 8) # inset inside 140×16 bg sprite
 
 var _shard_count: int = 3
 var _current_mana: float = 30.0
@@ -70,7 +70,7 @@ func _draw() -> void:
 	for i in _shard_count:
 		var x := inset.position.x + float(i) * (seg_w + float(SEGMENT_GAP))
 		var seg_rect := Rect2(x, inset.position.y, seg_w, inset.size.y)
-		draw_rect(seg_rect, Color(0.06, 0.06, 0.1, 0.9), true)
+		draw_rect(seg_rect, Color(0.08, 0.08, 0.12, 0.95), true)
 		var shard_start := float(i * MANA_PER_SHARD)
 		var fill_in_shard := clampf(_current_mana - shard_start, 0.0, float(MANA_PER_SHARD))
 		var fill_ratio := fill_in_shard / float(MANA_PER_SHARD)
@@ -80,14 +80,7 @@ func _draw() -> void:
 				draw_texture_rect(_fill_tex, fill_rect, false)
 			else:
 				draw_rect(fill_rect, HudStyle.COLOR_MANA, true)
-		# Subtle divider ticks only (screenshot is mostly continuous cyan)
-		if i > 0:
-			draw_line(
-				Vector2(seg_rect.position.x - 1.0, seg_rect.position.y),
-				Vector2(seg_rect.position.x - 1.0, seg_rect.position.y + seg_rect.size.y),
-				Color(HudStyle.COLOR_BORDER.r, HudStyle.COLOR_BORDER.g, HudStyle.COLOR_BORDER.b, 0.55),
-				1.0
-			)
+		draw_rect(seg_rect, HudStyle.COLOR_BORDER, false, 1.0)
 	if _overcast_visible:
 		var bleed := Rect2(8.0 * scale_x, size.y - 4.0, size.x - 16.0 * scale_x, 4.0)
 		if _overcast_tex:

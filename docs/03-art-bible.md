@@ -11,6 +11,8 @@
 
 This document is the single source of truth for Arcania's visual identity: style pillars, color systems, character sheets, environment mood boards, UI/UX, VFX, animation principles, and asset export specs. Cross-reference [02-world-design.md](02-world-design.md) for region lore, [07-narrative.md](07-narrative.md) for NPC details, and [06-magic-system.md](06-magic-system.md) for spell VFX hooks.
 
+> **Production override (August 2026):** final visuals use high-resolution painted 2D art with linear filtering and smooth interpolation. Older pixel-art sizes and prompt tokens below remain historical planning references; [art-style-lock.md](art-style-lock.md), [art-pipeline.md](art-pipeline.md), and the painted benchmark manifest define current exports.
+
 ---
 
 ## Table of Contents
@@ -36,7 +38,7 @@ This document is the single source of truth for Arcania's visual identity: style
 
 ### Core Aesthetic
 
-Arcania reads as **hi-bit pixel-art dark fantasy** at **64px tile scale**, with player characters at **48–64px** height. The visual north star is [`docs/images/screenshot.png`](images/screenshot.png) (Ashen Threshold hub): textured stone, fabric folds, atmospheric fog, and warm ember accents — with **Hollow Knight–level silhouette readability** preserved so combat stays clear. Every frame must communicate **threat, mood, and interactability** before beauty.
+Arcania reads as **high-resolution painted 2D dark fantasy** on a **64-unit gameplay grid**, with Elara approximately **112 logical pixels** tall. The visual north star is [`docs/images/screenshot.png`](images/screenshot.png): realistic weathered stone and cloth, atmospheric depth, warm ember accents, and a large readable protagonist silhouette. Every frame must communicate **threat, mood, and interactability** before beauty.
 
 ### Six Style Pillars
 
@@ -75,7 +77,7 @@ Regions may omit Layer 0 (interior) or add a Layer 6 (full-screen weather overla
 **Reuse this prefix on every AI generation prompt in this document and in production:**
 
 ```
-hi-bit pixel art 2D game sprite, dark fantasy metroidvania, screenshot-locked Ashen Threshold style, strong readable silhouette, textured stone and fabric detail, limited color palette, cool shadows warm ember accents, no photorealism, transparent background, sprite sheet friendly
+high-resolution hand-painted 2D game art, dark fantasy metroidvania, screenshot-locked Ashen Threshold composition, realistic weathered materials, strong readable silhouette, restrained charcoal and ember palette, cool shadows, warm point-light accents, no 3D render, production-ready separated layers
 ```
 
 ### Prompt Suffix Variants

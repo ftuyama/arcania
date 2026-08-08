@@ -11,7 +11,7 @@
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="9_health"]
 [ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="10_hurt"]
 [ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="11_hitbox"]
-[ext_resource type="SpriteFrames" path="res://assets/sprites/enemies/e03_bramble_stalker/e03_sheet.tres" id="12_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/enemies/e03_bramble_stalker/e03_bramble_stalker_sheet.tres" id="12_frames"]
 [ext_resource type="Script" path="res://scripts/components/hit_flash.gd" id="13_flash"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
@@ -33,10 +33,12 @@ position = Vector2(0, 3)
 shape = SubResource("RectangleShape2D_body")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -16)
+position = Vector2(0, -26)
+scale = Vector2(0.75, 0.75)
 sprite_frames = ExtResource("12_frames")
 animation = &"idle"
 autoplay = "idle"
+texture_filter = 1
 
 [node name="Telegraph" type="ColorRect" parent="."]
 visible = false

@@ -7,7 +7,7 @@ extends StaticBody2D
 var _collision_enabled: bool = true
 
 @onready var _detector: Area2D = $Detector
-@onready var _visual: ColorRect = $Visual
+@onready var _visual: CanvasItem = $Visual
 
 
 func _ready() -> void:
@@ -15,7 +15,7 @@ func _ready() -> void:
 	collision_layer = 1
 	collision_mask = 0
 	if _visual:
-		_visual.color = Color(0.45, 0.35, 0.65, 0.55)
+		_visual.modulate.a = 0.9
 
 
 func _physics_process(_delta: float) -> void:
@@ -53,4 +53,4 @@ func _restore_collision() -> void:
 	_collision_enabled = true
 	set_collision_layer_value(1, true)
 	if _visual:
-		_visual.modulate.a = 0.55
+		_visual.modulate.a = 0.9

@@ -2,12 +2,11 @@ extends HBoxContainer
 ## Persistent quick-spell slots 1–4 with ornate frames, cooldown overlays, key labels.
 
 
-const SLOT_SIZE := 36
+const SLOT_SIZE := 32
 
 var _slots: Array[Dictionary] = []
 var _active_index: int = 0
 var _name_label: Label
-var _hold_hint: Label
 var _name_tween: Tween
 var _inactive_tex: Texture2D
 var _active_tex: Texture2D
@@ -20,19 +19,12 @@ func _ready() -> void:
 	_active_tex = HudStyle.get_hud_texture(&"spell_slot_active")
 	_build_slots()
 	_name_label = get_node_or_null("../SpellNameFade") as Label
-	_hold_hint = get_node_or_null("../SpellHoldHint") as Label
 	if _name_label:
-		HudStyle.apply_hud_font(_name_label, 11)
-		_name_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
-		_name_label.visible = true
-	if _hold_hint:
-		HudStyle.apply_hud_font(_hold_hint, 9)
-		_hold_hint.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
-		_hold_hint.visible = true
+		HudStyle.apply_hud_font(_name_label, 12)
+		_name_label.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	EventBus.spell_acquired.connect(_on_spell_acquired)
 	EventBus.spell_cast.connect(_on_spell_cast)
 	refresh()
-	_sync_active_labels()
 
 
 func _exit_tree() -> void:
@@ -59,7 +51,6 @@ func refresh() -> void:
 			icon.texture = null
 			icon.modulate = Color(1, 1, 1, 0.25)
 		_set_slot_active(i, i == _active_index)
-	_sync_active_labels()
 
 
 func show_spell_name(spell_id: StringName) -> void:
@@ -69,31 +60,15 @@ func show_spell_name(spell_id: StringName) -> void:
 	_name_label.text = spell.display_name
 	_name_label.visible = true
 	_name_label.modulate.a = 1.0
-	if _hold_hint:
-		_hold_hint.visible = true
-	# Keep name visible (screenshot-style); brief emphasis pulse only.
 	if _name_tween and _name_tween.is_valid():
 		_name_tween.kill()
 	_name_tween = create_tween()
-	_name_tween.tween_property(_name_label, "modulate", Color(1.15, 1.05, 0.9, 1.0), 0.08)
-	_name_tween.tween_property(_name_label, "modulate", Color.WHITE, 0.2)
-
-
-func _sync_active_labels() -> void:
-	if _name_label == null:
-		return
-	var spell_id := SpellManager.get_quick_slot(_active_index)
-	var spell := SpellManager.get_spell(spell_id)
-	if spell:
-		_name_label.text = spell.display_name
-		_name_label.visible = true
-	elif not spell_id.is_empty():
-		_name_label.text = String(spell_id).capitalize()
-		_name_label.visible = true
-	else:
-		_name_label.text = ""
-	if _hold_hint:
-		_hold_hint.visible = spell != null
+	_name_tween.tween_interval(1.2)
+	_name_tween.tween_property(_name_label, "modulate:a", 0.0, 0.35)
+	_name_tween.tween_callback(func() -> void:
+		if is_instance_valid(_name_label):
+			_name_label.visible = false
+	)
 
 
 func _build_slots() -> void:
@@ -104,7 +79,6 @@ func _build_slots() -> void:
 
 		var stack := Control.new()
 		stack.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
-		stack.clip_contents = true
 		column.add_child(stack)
 
 		var frame_node: Control
@@ -117,7 +91,6 @@ func _build_slots() -> void:
 			frame.stretch_mode = TextureRect.STRETCH_SCALE
 			frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			frame.texture = _inactive_tex
-			frame.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			stack.add_child(frame)
 			frame_node = frame
 		else:
@@ -129,13 +102,12 @@ func _build_slots() -> void:
 
 		var icon := TextureRect.new()
 		icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		icon.offset_left = 6
-		icon.offset_top = 6
-		icon.offset_right = -6
-		icon.offset_bottom = -6
+		icon.offset_left = 5
+		icon.offset_top = 5
+		icon.offset_right = -5
+		icon.offset_bottom = -5
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stack.add_child(icon)
 

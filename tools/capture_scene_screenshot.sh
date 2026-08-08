@@ -7,7 +7,6 @@
 # Usage:
 #   ./tools/capture_scene_screenshot.sh
 #   ./tools/capture_scene_screenshot.sh at_01_threshold_hub
-#   ./tools/capture_scene_screenshot.sh game_world /tmp/hub_hud.png   # includes HUD + player
 #   ./tools/capture_scene_screenshot.sh ww_07_heartwood_chamber /tmp/ww07.png
 #   ./tools/capture_scene_screenshot.sh res://scenes/rooms/ashen_threshold/at_03_east_road.tscn
 #
@@ -19,7 +18,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GODOT_SH="$ROOT/tools/godot.sh"
 OUT_DIR="$ROOT/tmp/scene_captures"
-DEFAULT_SCENE="game_world"
+DEFAULT_SCENE="at_01_threshold_hub"
 
 SCENE="${1:-$DEFAULT_SCENE}"
 STAMP="$(date +%Y%m%d_%H%M%S)"

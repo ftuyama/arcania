@@ -5,7 +5,7 @@
 This document is the Godot 4 implementation blueprint for **Arcania**. It defines engine configuration, folder conventions, autoload singletons, scene patterns, component architecture, state machines, persistence, and performance guidelines. All systems align with the [Game Design Document](01-gdd.md), [Magic System](06-magic-system.md), and [World Design](02-world-design.md).
 
 **Target engine:** Godot 4.3+  
-**Target viewport:** 960×540 (pixel-perfect upscale to 1920×1080)  
+**Target viewport:** 960×540 (smooth upscale to 1920×1080)  
 **Scripting:** GDScript 2.0 (typed where practical)
 
 ### Implementation Status (June 2026)
@@ -81,12 +81,13 @@ Phases 0–4 are implemented in `godot/`. This table maps design sections to bui
 | `display/window/size/viewport_height` | `540` | 16:9 aspect |
 | `display/window/size/window_width_override` | `1920` | Window size |
 | `display/window/size/window_height_override` | `1080` | |
-| `display/window/stretch/mode` | `canvas_items` | Crisp 2D scaling |
+| `display/window/stretch/mode` | `canvas_items` | 2D scaling |
 | `display/window/stretch/aspect` | `keep` | Letterbox on non-16:9 |
 | `display/window/stretch/scale` | `2.0` | Integer upscale (960→1920) |
-| `rendering/2d/snap/snap_2d_transforms_to_pixel` | `true` | Eliminates sub-pixel shimmer |
-| `rendering/2d/snap/snap_2d_vertices_to_pixel` | `true` | Tile-aligned geometry |
-| `rendering/textures/canvas_textures/default_texture_filter` | `0` (Nearest) | Pixel art |
+| `rendering/2d/snap/snap_2d_transforms_to_pixel` | `false` | Preserve smooth painted motion |
+| `rendering/2d/snap/snap_2d_vertices_to_pixel` | `false` | Preserve sub-pixel transforms |
+| `rendering/textures/canvas_textures/default_texture_filter` | `1` (Linear) | Painted high-resolution assets |
+| `physics/common/physics_interpolation` | `true` | Smooth rendering between fixed physics ticks |
 
 #### Physics Layers (2D)
 
@@ -116,13 +117,13 @@ Store in `project.godot` `[gameplay]` section or `data/constants.gd` autoload:
 | `HIT_IFRAMES` | `20` | Damage taken |
 | `TARGET_FPS` | `60` | Performance budget |
 
-### Pixel Snap Checklist
+### Painted 2D Rendering Checklist
 
-- Enable both `snap_2d_transforms_to_pixel` and `snap_2d_vertices_to_pixel`.
-- Set `Camera2D` position smoothing to **disabled** during gameplay; enable only for cutscenes if needed.
-- Round sprite positions in `CharacterBody2D._physics_process` when using kinematic movement: `global_position = global_position.round()`.
-- Use integer `scale` values on root nodes (1.0, 2.0 — never 1.5).
-- Import all sprite assets with **Filter: Nearest**, **Mipmaps: Off**.
+- Keep gameplay movement and transforms in `_physics_process` so physics interpolation remains correct.
+- Call `reset_physics_interpolation()` after spawns, room transitions, respawns, and other teleports.
+- Use linear texture filtering and lossless imports for painted sprites, VFX, UI, and parallax layers.
+- Keep mipmaps disabled for 2D gameplay assets; author source art at 2×–4× its logical display size.
+- Keep collision geometry independent from the larger painted silhouette.
 
 ---
 

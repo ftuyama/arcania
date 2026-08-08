@@ -13,7 +13,6 @@
 [ext_resource type="Texture2D" uid="uid://db8q4buxfgwhr" path="res://assets/sprites/ui/hud/ui_hud_compass_icon.png" id="11_compass"]
 
 [node name="HUD" type="CanvasLayer"]
-layer = 20
 script = ExtResource("1_hud")
 
 [node name="PlayerStatusCluster" type="HBoxContainer" parent="."]
@@ -41,7 +40,6 @@ grow_vertical = 2
 texture = ExtResource("9_portrait")
 expand_mode = 1
 stretch_mode = 5
-texture_filter = 0
 mouse_filter = 2
 
 [node name="SigilIcon" type="TextureRect" parent="PlayerStatusCluster/SigilColumn/PortraitStack"]
@@ -51,16 +49,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -14.0
-offset_top = -14.0
-offset_right = 14.0
-offset_bottom = 14.0
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("8_sigil")
 expand_mode = 1
 stretch_mode = 5
-texture_filter = 0
 mouse_filter = 2
 
 [node name="InfoColumn" type="VBoxContainer" parent="PlayerStatusCluster"]
@@ -128,7 +125,6 @@ theme_override_constants/separation = 4
 alignment = 2
 
 [node name="CompassIcon" type="TextureRect" parent="NavigationCluster/RegionRow"]
-visible = false
 custom_minimum_size = Vector2(12, 12)
 layout_mode = 2
 size_flags_vertical = 4
@@ -155,25 +151,19 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -72.0
-offset_right = 220.0
-offset_bottom = -8.0
+offset_top = -48.0
+offset_right = 162.0
+offset_bottom = -4.0
 grow_vertical = 0
 theme_override_constants/separation = 2
-alignment = 2
+alignment = 0
 
 [node name="SpellNameFade" type="Label" parent="SpellCluster"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.91, 0.91, 0.91, 1)
-text = "Ember Sigil"
-horizontal_alignment = 0
-
-[node name="SpellHoldHint" type="Label" parent="SpellCluster"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 9
-theme_override_colors/font_color = Color(0.553, 0.6, 0.682, 0.85)
-text = "(Hold)"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.42, 0.208, 1)
+text = ""
 horizontal_alignment = 0
 
 [node name="QuickSpellBar" type="HBoxContainer" parent="SpellCluster"]
@@ -188,16 +178,15 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -140.0
-offset_top = -36.0
+offset_left = -160.0
+offset_top = -40.0
 offset_right = -16.0
-offset_bottom = -8.0
+offset_bottom = -6.0
 grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("7_currency")
 
 [node name="QuestTracker" type="MarginContainer" parent="."]
-visible = false
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0

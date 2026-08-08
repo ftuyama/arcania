@@ -1,128 +1,35 @@
-# Art Pipeline — AI → Aseprite → Godot
+# Art Pipeline — AI Sources to Godot
 
 **Style lock:** [art-style-lock.md](art-style-lock.md)  
-**Export specs:** [03-art-bible.md §14](03-art-bible.md)  
-**Naming:** [09-asset-production-list.md §11](09-asset-production-list.md)
+**Manifest:** [art-batches/painted_realism/manifest.json](art-batches/painted_realism/manifest.json)  
+**Builder:** `tools/build_painted_benchmark.py`
 
----
+## Workflow
 
-## 1. Workflow (Every Batch)
+1. Generate one asset or coherent animation sheet per prompt using the approved identity/style references.
+2. Save immutable sources under `docs/art-batches/painted_realism/source/`.
+3. Remove flat chroma backgrounds with the installed image-generation helper and save reviewed mattes under `processed/`.
+4. Run `python3.11 tools/build_painted_benchmark.py` to slice, align, scale, pack, and validate the benchmark assets.
+5. Import in Godot with lossless compression, linear filtering, and mipmaps disabled.
+6. Run unit tests, animation contact-sheet capture, East Road screenshots, and the performance profile.
 
-```
-1. Generate   → Cursor AI image generation with style-lock prompts + screenshot reference
-2. Stage      → docs/art-batches/incoming/ (auto-synced from Cursor assets)
-3. Normalize  → python3.11 tools/build_ai_sprite_batch.py
-4. Validate   → python3.11 tools/validate_sprite_imports.py [--strict]
-5. Import     → Godot: nearest + lossless; co-locate .tres
-6. Wire       → Update SpriteFrames / scene refs if rects change
-7. Verify     → Side-by-side vs docs/images/screenshot.png (Ashen)
-```
+The builder never invents in-between frames by alpha blending. Repeated key poses are allowed; ghosted interpolation is not. Character bodies and VFX are always packed separately.
 
-### Generate
+## Source Roles
 
-- Use prompts from art bible §§5–9 + style-lock suffix.
-- Prefer turnaround sheets and **separate** parallax layer PNGs.
-- Anchor scale: Elara idle at 56px body — all characters match that scale.
+| Source | Output |
+|--------|--------|
+| Elara locomotion/combat sheets | 256×256-cell `elara_core.png` and `SpriteFrames` |
+| East Road enemy sheet | Separate Bramble Stalker, Thornweft Larva, and Mothling Swarm atlases |
+| Sky/ruins/architecture/fog/foreground | Five 1536×540 Ashen parallax layers |
+| Platform kit | 128×128 painted source modules displayed on the 64-unit grid |
+| Combat VFX | 128×128 additive Ember Sigil, Ember Bolt, and Veil Step frames |
+| HUD pack | Individual painted frames; text remains native Godot UI |
 
-### Normalize (Aseprite)
+## Promotion Rules
 
-| Asset | Canvas / cell | Pivot |
-|-------|---------------|-------|
-| Elara / NPC / standard enemy | 64×64 cells, 2px gutter | Feet `(32, 62)` |
-| Elite enemy | 96×96 | Feet center-bottom |
-| Boss | 96–256 cell (per bible) | Feet / arena center |
-| Tileset | 64×64 tiles | — |
-| Parallax | **960×540** | Top-left |
-| Spell VFX | 128×128 cells | Center |
-| UI icons | 16 / 32 / 48 | Center |
-
-Palette: Index to region 5 colors. Greyscale-check silhouette at game resolution.
-
-### Validate
-
-```bash
-python3 tools/validate_sprite_imports.py
-python3 tools/validate_sprite_imports.py --strict   # fail on warnings
-```
-
-Checks: expected paths exist, PNG dimensions, `.tres` co-location, naming snake_case.
-
-### Import (Godot)
-
-```ini
-compress/mode=0          # Lossless
-mipmaps/generate=false
-process/fix_alpha_border=true
-```
-
-- Gameplay sprites: **Nearest** filter.
-- Far parallax: Nearest preferred; Linear only if seams look worse.
-
-### Deprecation
-
-`tools/generate_phase0_assets.py` is **emergency fallback / CI stub only**.
-`tools/generate_aligned_sprites.py` writes **PIL placeholders only** and requires `--force-placeholders` so it cannot overwrite production AI art by accident.
-New production art: Cursor AI image generation → stage in `docs/art-batches/incoming/` → **`python3.11 tools/rebuild_sprites_hq.py`** (preserves color fidelity; do not use the old 10-color crush path) → `tools/validate_sprite_imports.py` → Godot.
-`tools/build_ai_sprite_batch.py` / `normalize_ai_sprites.py` are legacy helpers; prefer `rebuild_sprites_hq.py`.
-
----
-
-## 2. Prompt Library (Quick Copy)
-
-### Global prefix
-
-```
-hi-bit pixel art 2D game sprite, dark fantasy metroidvania, screenshot-locked Ashen Threshold style, strong readable silhouette, textured stone and fabric detail, limited color palette, cool shadows warm ember accents, no photorealism, transparent background, sprite sheet friendly, 64px tile grid
-```
-
-### Elara (Ashen)
-
-```
-[PREFIX], limited 5-color palette #1A1A2E #2C2C34 #4A4E69 #8B4513 #FF6B35, character design sheet side view facing right, young woman mage Elara Veilmark, dark tattered hooded robes gold orange trim, ember orange circular sigil on left palm, 48-64px game character scale
-```
-
-### Ashen parallax layer
-
-```
-[PREFIX], limited 5-color palette #1A1A2E #2C2C34 #4A4E69 #8B4513 #FF6B35, side-scrolling parallax layer only, {LAYER_DESC}, 960x540, tileable horizontally, transparent where empty
-```
-
-Layer descs: `purple-grey sky with distant spires and ember motes` | `silhouetted ruined city mountains` | `gothic arches dead trees hooded king statue` | `ember fog band` | `foreground pillars hanging roots brazier glow`
-
-### Enemy
-
-```
-[PREFIX], enemy sprite readable silhouette telegraph pose, {SILHOUETTE_BRIEF}, single creature, side view facing right
-```
-
----
-
-## 3. Directory Targets
-
-Keep existing Godot paths (avoid mass refactors):
-
-```
-godot/assets/sprites/
-  player/elara_core.png + .tres
-  player/elara_portrait_48.png
-  enemies/e{nn}_{name}/e{nn}_sheet.png + .tres
-  bosses/{id}/...
-  tilesets/01_ashen_threshold/{tileset,parallax_*,props}.png
-  vfx/spells/vfx_{spell}.png + .tres
-  ui/hud/...
-  world/...
-```
-
----
-
-## 4. Batch Checklist Template
-
-```
-Batch ID: ________  Wave: __  Region: ________
-- [ ] Style-lock palette applied
-- [ ] Aseprite export matches cell size
-- [ ] validate_sprite_imports.py clean
-- [ ] SpriteFrames .tres updated
-- [ ] Scenes wired (no leftover modulate tint hacks)
-- [ ] Screenshot / playtest note attached
-```
+- Sources and processed mattes are review artifacts; runtime PNGs and `.tres` files are generated outputs.
+- Run the builder before Godot import. A nonzero exit means nothing is ready to promote.
+- Allow one initial generation and at most three targeted regenerations per failed asset.
+- If identity, alpha, scale, continuity, or composition still fails, stop and keep the current playable fallback.
+- The retired `incoming/` batch and its rebuild scripts remain recoverable from Git history but are not part of this pipeline.
