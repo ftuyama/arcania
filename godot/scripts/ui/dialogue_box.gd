@@ -60,7 +60,7 @@ func _build_ui() -> void:
 	HudStyle.apply_hud_font(_prompt_label, 11)
 	_prompt_label.add_theme_color_override(&"font_color", Color(0.58, 0.54, 0.48, 1.0))
 	vbox.add_child(_prompt_label)
-	if DisplayServer.is_touchscreen_available():
+	if MobileControls.is_likely_touch_device():
 		_continue_button = Button.new()
 		_continue_button.pressed.connect(_advance)
 		HudStyle.apply_ui_font(_continue_button, 11)
@@ -99,7 +99,7 @@ func _advance() -> void:
 func _show_line() -> void:
 	_name_label.text = _speaker
 	_body_label.text = _lines[_index]
-	if DisplayServer.is_touchscreen_available():
+	if MobileControls.is_likely_touch_device():
 		_prompt_label.text = "Tap Continue" if _index < _lines.size() - 1 else "Tap Close"
 		if _continue_button:
 			_continue_button.text = "Continue" if _index < _lines.size() - 1 else "Close"

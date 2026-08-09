@@ -370,12 +370,22 @@ func _test_mobile_controls() -> int:
 		&"map_toggle", &"inventory_toggle", &"spell_wheel", &"quick_spell_1", &"quick_spell_4",
 	]:
 		var button := controls.get_node_or_null(NodePath("GameplayControls/%s" % action)) as TouchScreenButton
-		if button == null or button.action != action:
-			push_error("MobileControls missing touch action: %s" % action)
+		if button == null:
+			push_error("MobileControls missing touch button: %s" % action)
 			controls.queue_free()
 			return 1
-		if button.visibility_mode != TouchScreenButton.VISIBILITY_TOUCHSCREEN_ONLY:
-			push_error("MobileControls action should be touch-only: %s" % action)
+		if button.name != String(action):
+			push_error("MobileControls button misnamed for action: %s" % action)
+			controls.queue_free()
+			return 1
+		# Built-in action is intentionally empty so we can inject InputEventAction
+		# events that reliably trigger Input.is_action_just_pressed() on mobile/web.
+		if button.action != &"":
+			push_error("MobileControls action should be manually injected: %s" % action)
+			controls.queue_free()
+			return 1
+		if button.visibility_mode != TouchScreenButton.VISIBILITY_ALWAYS:
+			push_error("MobileControls action should always be visible when enabled: %s" % action)
 			controls.queue_free()
 			return 1
 	if not bool(controls.call(&"is_landscape")):
