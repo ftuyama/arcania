@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
-[ext_resource type="Script" path="res://scripts/world/dev_room_geometry.gd" id="2_geom"]
+[ext_resource type="Script" path="res://scripts/world/styled_room_geometry.gd" id="2_geom"]
 [ext_resource type="PackedScene" path="res://scenes/components/room_transition.tscn" id="3_door"]
 [ext_resource type="PackedScene" path="res://scenes/bosses/thornweft_matron.tscn" id="4_matron"]
 
@@ -18,8 +18,9 @@ offset_bottom = 896.0
 
 [node name="Geometry" type="Node2D" parent="."]
 script = ExtResource("2_geom")
-floor_color = Color(0.1, 0.16, 0.08, 1)
-platform_color = Color(0.2, 0.34, 0.14, 1)
+tileset_path = "res://assets/sprites/tilesets/02_whisperwood_hollow/tileset.png"
+floor_tile_index = 1
+platform_tile_index = 9
 platform_rects = Array[Rect2]([Rect2(0, 832, 1152, 64), Rect2(128, 640, 160, 20), Rect2(864, 640, 160, 20), Rect2(384, 544, 128, 20), Rect2(704, 544, 128, 20), Rect2(512, 448, 96, 20)])
 west_transition = true
 east_transition = true

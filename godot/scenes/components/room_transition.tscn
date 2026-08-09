@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://arcania_room_transition"]
+[gd_scene load_steps=4 format=3 uid="uid://arcania_room_transition"]
 
 [ext_resource type="Script" path="res://scripts/world/room_transition.gd" id="1_rt"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/world/world_room_doors.tres" id="2_frames"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
 size = Vector2(48, 64)
@@ -13,3 +14,8 @@ script = ExtResource("1_rt")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -32)
 shape = SubResource("RectangleShape2D_door")
+
+[node name="Visual" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -48)
+sprite_frames = ExtResource("2_frames")
+animation = &"ashen_threshold"

@@ -6,7 +6,7 @@ extends Area2D
 
 var _discovered: bool = false
 
-@onready var _visual: ColorRect = $Visual
+@onready var _visual: AnimatedSprite2D = $Visual
 @onready var _label: Label = $Label
 
 
@@ -17,7 +17,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	if waystone_id and GameManager.has_world_flag(StringName("waystone_%s" % waystone_id)):
 		_discovered = true
-		_visual.color = Color(0.55, 0.85, 0.95, 1.0)
+		_visual.modulate = Color(0.75, 0.95, 1.0, 1.0)
 		_label.text = "Waystone"
 
 
@@ -34,6 +34,6 @@ func _on_body_entered(body: Node2D) -> void:
 	_discovered = true
 	GameManager.set_world_flag(StringName("waystone_%s" % waystone_id))
 	MapManager.register_waystone(waystone_id, GameManager.current_room_id)
-	_visual.color = Color(0.55, 0.85, 0.95, 1.0)
+	_visual.modulate = Color(0.75, 0.95, 1.0, 1.0)
 	_label.text = "Waystone"
 	EventBus.ui_toast.emit("Waystone discovered.")

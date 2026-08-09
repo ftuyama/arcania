@@ -161,6 +161,10 @@ func _hide_all_overlays() -> void:
 		_ui_open = false
 
 
+func close_overlay() -> void:
+	_hide_all_overlays()
+
+
 func _try_place_map_marker() -> void:
 	if GameManager.current_room_id.is_empty():
 		return

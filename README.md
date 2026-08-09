@@ -42,6 +42,10 @@ Play as **Elara Veilmark**, a disgraced apprentice who awakens in the Ashen Thre
 
 Hold an aim direction (arrow keys) before casting to fire spells upward, downward, or diagonally.
 
+### Mobile browsers
+
+The Web build supports landscape touch play. On touch devices, on-screen controls appear automatically: movement on the left; aim, jump, attack, cast, and dash on the right; utility and quick-spell buttons along the top. Rotate the device to landscape to play.
+
 ---
 
 ## Current Playable Content

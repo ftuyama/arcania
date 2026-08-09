@@ -41,6 +41,7 @@ func _run_all_tests() -> void:
 	failures += _test_ability_gate_save_persistence()
 	failures += _test_save_manager()
 	failures += _test_enemy_hit_vfx()
+	failures += _test_mobile_controls()
 	_cleanup_test_saves()
 	if failures == 0:
 		print("All unit tests passed.")
@@ -356,6 +357,42 @@ func _test_enemy_hit_vfx() -> int:
 		stalker.queue_free()
 		return 1
 	stalker.queue_free()
+	return 0
+
+
+func _test_mobile_controls() -> int:
+	var mobile_controls_script := load("res://scripts/ui/mobile_controls.gd") as GDScript
+	var controls := mobile_controls_script.new() as CanvasLayer
+	root.add_child(controls)
+	for action in [
+		&"move_left", &"move_right", &"aim_up", &"aim_down", &"aim_left", &"aim_right",
+		&"jump", &"melee_attack", &"cast_spell", &"dash", &"interact", &"pause",
+		&"map_toggle", &"inventory_toggle", &"spell_wheel", &"quick_spell_1", &"quick_spell_4",
+	]:
+		var button := controls.get_node_or_null(NodePath("GameplayControls/%s" % action)) as TouchScreenButton
+		if button == null:
+			push_error("MobileControls missing touch button: %s" % action)
+			controls.queue_free()
+			return 1
+		if button.name != String(action):
+			push_error("MobileControls button misnamed for action: %s" % action)
+			controls.queue_free()
+			return 1
+		# Built-in action is intentionally empty so we can inject InputEventAction
+		# events that reliably trigger Input.is_action_just_pressed() on mobile/web.
+		if button.action != &"":
+			push_error("MobileControls action should be manually injected: %s" % action)
+			controls.queue_free()
+			return 1
+		if button.visibility_mode != TouchScreenButton.VISIBILITY_ALWAYS:
+			push_error("MobileControls action should always be visible when enabled: %s" % action)
+			controls.queue_free()
+			return 1
+	if not bool(controls.call(&"is_landscape")):
+		push_error("MobileControls should treat the default viewport as landscape")
+		controls.queue_free()
+		return 1
+	controls.queue_free()
 	return 0
 
 

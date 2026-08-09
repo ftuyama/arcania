@@ -8,10 +8,14 @@ extends Control
 
 func _ready() -> void:
 	visible = false
+	HudStyle.apply_hud_font($Panel/Margin/VBox/Title, 16, &"semibold")
+	HudStyle.apply_ui_font(quest_list, 11)
+	HudStyle.apply_hud_font(objective_label, 12)
 	quest_list.item_selected.connect(_on_item_selected)
 	EventBus.quest_started.connect(_on_quest_changed)
 	EventBus.quest_updated.connect(_on_quest_changed)
 	EventBus.quest_completed.connect(_on_quest_changed)
+	_add_close_button()
 
 
 func _exit_tree() -> void:
@@ -49,3 +53,15 @@ func _on_item_selected(index: int) -> void:
 func _update_objective(index: int) -> void:
 	var quest_id: StringName = quest_list.get_item_metadata(index)
 	objective_label.text = QuestManager.get_active_objective_text(quest_id)
+
+
+func _add_close_button() -> void:
+	var close_button := Button.new()
+	close_button.text = "Close"
+	HudStyle.apply_ui_font(close_button, 11)
+	close_button.pressed.connect(func() -> void:
+		var ui := get_parent()
+		if ui.has_method(&"close_overlay"):
+			ui.close_overlay()
+	)
+	$Panel/Margin/VBox.add_child(close_button)

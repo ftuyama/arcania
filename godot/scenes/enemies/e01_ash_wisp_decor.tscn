@@ -4,6 +4,6 @@
 
 [node name="AshWispDecor" type="AnimatedSprite2D"]
 sprite_frames = ExtResource("1_frames")
-animation = &"idle"
-autoplay = "idle"
+animation = &"float"
+autoplay = "float"
 position = Vector2(0, -16)

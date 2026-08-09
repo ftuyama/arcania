@@ -5,15 +5,15 @@ extends Node2D
 @export var platform_rects: Array[Rect2] = []
 @export var tileset_path := "res://assets/sprites/tilesets/01_ashen_threshold/tileset.png"
 @export var floor_tile_index := 0
-@export var platform_tile_index := 2
+@export var platform_tile_index := 1
 @export var west_transition: bool = false
 @export var east_transition: bool = false
 
 const TILE_SIZE := 64
 const DOOR_GAP := 64.0
-## Platform tile art draws the walkable cap at y=16; collision uses rect top (y=0).
-const PLATFORM_SURFACE_Y := 16
-const PLATFORM_BODY_Y := 20
+## Production platform tiles start at their top edge; collision uses rect top (y=0).
+const PLATFORM_SURFACE_Y := 0
+const PLATFORM_BODY_Y := 16
 const PLATFORM_CAP_HEIGHT := TILE_SIZE - PLATFORM_SURFACE_Y
 const PLATFORM_BODY_HEIGHT := TILE_SIZE - PLATFORM_BODY_Y
 
@@ -102,44 +102,51 @@ func _tile_rect(parent: Node2D, size: Vector2, tile_index: int, is_floor: bool) 
 func _tile_floor_rect(parent: Node2D, size: Vector2, tile_index: int) -> void:
 	var cols := int(ceil(size.x / float(TILE_SIZE)))
 	var rows := int(ceil(size.y / float(TILE_SIZE)))
-	var region_x := tile_index * TILE_SIZE
 
 	for row in rows:
 		for col in cols:
 			_add_tile_sprite(
 				parent,
-				Rect2(region_x, 0, TILE_SIZE, TILE_SIZE),
+				_tile_region(tile_index),
 				Vector2(col * TILE_SIZE, row * TILE_SIZE)
 			)
 
 
 func _add_platform_cap_strip(parent: Node2D, width: float, y_pos: float) -> void:
-	_add_tile_sprite(
+	_add_repeated_strip(
 		parent,
-		Rect2(
-			platform_tile_index * TILE_SIZE,
-			PLATFORM_SURFACE_Y,
-			TILE_SIZE,
-			PLATFORM_CAP_HEIGHT
-		),
-		Vector2(0.0, y_pos),
-		Vector2(width / float(TILE_SIZE), 1.0)
+		_tile_region(platform_tile_index, PLATFORM_SURFACE_Y, PLATFORM_CAP_HEIGHT),
+		width,
+		y_pos
 	)
 
 
 func _add_platform_body_strip(parent: Node2D, width: float, y_pos: float, height: float) -> void:
-	var scale_y := height / float(PLATFORM_BODY_HEIGHT)
-	_add_tile_sprite(
+	_add_repeated_strip(
 		parent,
-		Rect2(
-			platform_tile_index * TILE_SIZE,
-			PLATFORM_BODY_Y,
-			TILE_SIZE,
-			PLATFORM_BODY_HEIGHT
-		),
-		Vector2(0.0, y_pos),
-		Vector2(width / float(TILE_SIZE), scale_y)
+		_tile_region(platform_tile_index, PLATFORM_BODY_Y, height),
+		width,
+		y_pos
 	)
+
+
+func _tile_region(tile_index: int, y_offset: float = 0.0, height: float = TILE_SIZE) -> Rect2:
+	var atlas_columns := maxi(1, int(_tileset.get_width() / TILE_SIZE))
+	var tile_column := tile_index % atlas_columns
+	var tile_row := floori(float(tile_index) / float(atlas_columns))
+	return Rect2(
+		Vector2(tile_column * TILE_SIZE, tile_row * TILE_SIZE + y_offset),
+		Vector2(TILE_SIZE, height)
+	)
+
+
+func _add_repeated_strip(parent: Node2D, source_region: Rect2, width: float, y_pos: float) -> void:
+	var x_pos := 0.0
+	while x_pos < width:
+		var slice_width := minf(float(TILE_SIZE), width - x_pos)
+		var region := Rect2(source_region.position, Vector2(slice_width, source_region.size.y))
+		_add_tile_sprite(parent, region, Vector2(x_pos, y_pos))
+		x_pos += slice_width
 
 
 func _add_tile_sprite(

@@ -56,27 +56,27 @@ func _build_ui() -> void:
 	add_child(center)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(520, 0)
+	panel.custom_minimum_size = Vector2(460, 0)
 	var panel_style := HudStyle.make_panel_style(true)
 	panel_style.bg_color.a = 1.0
 	panel.add_theme_stylebox_override(&"panel", panel_style)
 	center.add_child(panel)
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override(&"margin_left", 14)
-	margin.add_theme_constant_override(&"margin_top", 12)
-	margin.add_theme_constant_override(&"margin_right", 14)
-	margin.add_theme_constant_override(&"margin_bottom", 12)
+	margin.add_theme_constant_override(&"margin_left", 10)
+	margin.add_theme_constant_override(&"margin_top", 10)
+	margin.add_theme_constant_override(&"margin_right", 10)
+	margin.add_theme_constant_override(&"margin_bottom", 10)
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override(&"separation", 6)
+	vbox.add_theme_constant_override(&"separation", 4)
 	margin.add_child(vbox)
 
 	var title := Label.new()
 	title.text = "How to Play"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	HudStyle.apply_hud_font(title, 15, &"semibold")
+	HudStyle.apply_hud_font(title, 13, &"semibold")
 	title.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	vbox.add_child(title)
 
@@ -89,12 +89,12 @@ func _build_ui() -> void:
 	var section := Label.new()
 	section.text = "Controls"
 	section.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	HudStyle.apply_hud_font(section, 12, &"semibold")
+	HudStyle.apply_hud_font(section, 11, &"semibold")
 	section.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
 	vbox.add_child(section)
 
 	var controls_row := HBoxContainer.new()
-	controls_row.add_theme_constant_override(&"separation", 20)
+	controls_row.add_theme_constant_override(&"separation", 14)
 	controls_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_child(controls_row)
 
@@ -103,17 +103,23 @@ func _build_ui() -> void:
 	controls_row.add_child(_make_control_column(CONTROL_ROWS.slice(split)))
 
 	_prompt_label = Label.new()
-	_prompt_label.text = "Press Space or E to begin"
+	_prompt_label.text = "Tap to begin" if MobileControls.is_likely_touch_device() else "Press Space or E to begin"
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	HudStyle.apply_hud_font(_prompt_label, 10)
 	_prompt_label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
 	vbox.add_child(_prompt_label)
+	if MobileControls.is_likely_touch_device():
+		var begin_button := Button.new()
+		begin_button.text = "Begin"
+		begin_button.pressed.connect(_dismiss)
+		HudStyle.apply_ui_font(begin_button, 11)
+		vbox.add_child(begin_button)
 
 
 func _make_control_column(rows: Array) -> GridContainer:
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override(&"h_separation", 10)
+	grid.add_theme_constant_override(&"h_separation", 8)
 	grid.add_theme_constant_override(&"v_separation", 2)
 	for row in rows:
 		grid.add_child(_make_action_label(row["action"]))
@@ -125,7 +131,7 @@ func _make_body_label(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size.x = 480.0
+	label.custom_minimum_size.x = 420.0
 	HudStyle.apply_hud_font(label, 9)
 	label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
 	return label
@@ -134,7 +140,7 @@ func _make_body_label(text: String) -> Label:
 func _make_action_label(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.custom_minimum_size.x = 96.0
+	label.custom_minimum_size.x = 80.0
 	HudStyle.apply_hud_font(label, 9)
 	label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT_DIM)
 	return label

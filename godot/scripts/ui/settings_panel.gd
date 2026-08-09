@@ -84,7 +84,7 @@ func _build_ui() -> void:
 
 	_damage_toggle = CheckBox.new()
 	_damage_toggle.text = "Damage numbers"
-	_damage_toggle.add_theme_font_size_override(&"font_size", BODY_FONT_SIZE)
+	HudStyle.apply_ui_font(_damage_toggle, BODY_FONT_SIZE)
 	_damage_toggle.add_theme_color_override(&"font_color", COLOR_TEXT)
 	vbox.add_child(_damage_toggle)
 
@@ -139,7 +139,7 @@ func _apply_button_theme(btn: Button) -> void:
 	normal.content_margin_left = BUTTON_MARGIN_H
 	normal.content_margin_right = BUTTON_MARGIN_H
 	btn.add_theme_stylebox_override(&"normal", normal)
-	btn.add_theme_font_size_override(&"font_size", BUTTON_FONT_SIZE)
+	HudStyle.apply_ui_font(btn, BUTTON_FONT_SIZE)
 
 	var hover := normal.duplicate() as StyleBoxFlat
 	hover.bg_color = Color(0.18, 0.14, 0.10, 0.96)

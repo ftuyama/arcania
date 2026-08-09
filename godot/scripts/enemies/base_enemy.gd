@@ -13,7 +13,7 @@ extends CharacterBody2D
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var detection_area: Area2D = $DetectionArea
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var telegraph: ColorRect = $Telegraph
+@onready var telegraph: Node2D = $Telegraph
 @onready var hit_flash: Node = $HitFlash
 
 var player: Player
@@ -59,6 +59,7 @@ func face_player() -> void:
 
 func update_facing() -> void:
 	animated_sprite.flip_h = facing_direction < 0
+	telegraph.scale.x = float(facing_direction)
 
 
 func play_animation(anim_name: StringName) -> void:

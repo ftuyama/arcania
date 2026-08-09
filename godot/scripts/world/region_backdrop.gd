@@ -25,10 +25,7 @@ const REGION_PARALLAX: Dictionary = {
 	},
 	&"whisperwood_hollow": {
 		"layers": [
-			{"path": "res://assets/sprites/tilesets/02_whisperwood_hollow/parallax_0_sky.png", "scroll": Vector2(0.1, 0.0)},
-			{"path": "res://assets/sprites/tilesets/02_whisperwood_hollow/parallax_1_far_trees.png", "scroll": Vector2(0.3, 0.0)},
-			{"path": "res://assets/sprites/tilesets/02_whisperwood_hollow/parallax_2_mid_canopy.png", "scroll": Vector2(0.55, 0.0)},
-			{"path": "res://assets/sprites/tilesets/02_whisperwood_hollow/parallax_3_spore_fog.png", "scroll": Vector2(0.75, 0.0)},
+			{"path": "res://assets/sprites/tilesets/02_whisperwood_hollow/whisperwood_hollow_background.png", "scroll": Vector2(0.1, 0.0)},
 		],
 	},
 }
@@ -84,5 +81,6 @@ func _build_layers() -> void:
 			sprite.texture = tex
 			sprite.centered = false
 			sprite.position = Vector2.ZERO
+			sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		layer.add_child(sprite)
 		add_child(layer)
