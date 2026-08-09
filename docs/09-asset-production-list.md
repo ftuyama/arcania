@@ -91,7 +91,7 @@
 | Clip ID | Frames | FPS | Duration (ms) | Key Poses | Enters From | Exits To | Sheet Row |
 |---------|--------|-----|---------------|-----------|-------------|----------|-----------|
 | `idle` | 8 | 10 | 800 | F1 breathe in · F3 neutral · F5 sigil pulse peak (`#FF6B35`) · F7 breathe out | any neutral | walk, run, jump, cast, interact | `elara_core` R0 |
-| `walk` | 8 | 12 | 667 | F1 contact L · F3 passing · F5 contact R · F7 passing | idle, run decel | run, idle, jump | `elara_core` R0 |
+| `walk` | 12 | 12 | 1,000 | F1 contact L · F4 stride L · F7 contact R · F10 stride R · F12 recovery | idle, run decel | run, idle, jump | `elara_run_12` |
 | `run` | 8 | 14 | 571 | F1 lean forward 8° · F3 stride ext · F5 robe flare · F7 dust kick | walk (hold sprint) | walk, dash, jump | `elara_core` R0 |
 | `jump` | 6 | 12 | 500 | F1–2 crouch squash 90% · F3 launch stretch 110% · F4–5 apex tuck · F6 transition to fall | ground | fall, double_jump | `elara_core` R1 |
 | `double_jump` | 8 | 14 | 571 | F1–2 sigil burst under feet · F3–4 spin 90° · F5 peak glow · F6–8 robe billow settle | fall (mid-air, 1/charge) | fall | `elara_core` R1 |
@@ -111,6 +111,107 @@ Row 2 (y=128): [ cast ×10 | hit ×4 | death ×12 | interact ×6 ]  death wraps;
 ```
 
 *Production note:* If `death` + `interact` overflow one row, split to `elara_core_b.png` — keep 2px gutter between cells.
+
+*Current implementation:* The standard movement state still uses the animation ID
+`walk`, but its refined artwork is the dedicated 768×64 strip
+`godot/assets/sprites/player/elara_run_12.png`. It is referenced by
+`godot/assets/sprites/player/elara_core.tres` as 12 looping frames at 12 FPS.
+
+#### Elara locomotion refinement workflow
+
+Use this workflow when regenerating Elara's movement animation. It preserves her idle
+scale and avoids the chroma fringe, soft details, weak sigil, and apparent shrinking
+found in earlier passes.
+
+**1. Generate a high-resolution source**
+
+- Use `godot/assets/sprites/player/elara_core.png` as the identity, costume, palette,
+  face, spell, and rendering-quality reference.
+- Request exactly 12 right-facing frames covering two complete strides. Require clear
+  alternating hand and foot positions, a stable torso size and head height, a fixed
+  ground line, and a seamless frame 12 to frame 1 loop.
+- Require a bright, consistently sized hand sigil in every frame. Keep the face,
+  fingers, boots, cloak edges, and silhouette crisp enough to survive reduction.
+- Generate against a perfectly flat `#ff00ff` background. Explicitly forbid magenta,
+  pink, green, and cyan in the character and effects so the key color remains unique.
+- Do not resize the generated image before removing its background.
+
+**2. Remove the matte at full resolution**
+
+The soft matte, despill, and one-pixel edge contraction remove colored fringe before
+resampling can blend it into the character:
+
+```sh
+python "${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/scripts/remove_chroma_key.py" \
+  --input tmp/imagegen/elara_run_source.png \
+  --out tmp/imagegen/elara_run_transparent_full.png \
+  --auto-key border \
+  --soft-matte \
+  --transparent-threshold 12 \
+  --opaque-threshold 220 \
+  --despill \
+  --edge-contract 1
+```
+
+The helper requires Pillow. Keep the full-resolution transparent result as an
+intermediate source rather than editing the generated original destructively.
+
+**3. Extract and normalize each pose independently**
+
+- Detect the transparent gaps between poses and crop each frame by its actual visible
+  bounds. Do not divide the generated image into equal cells; generators may vary the
+  spacing, which can clip a sigil or include part of the neighboring pose.
+- Threshold negligible alpha at 5%, trim the transparent bounds, and resize the visible
+  silhouette to 58px high with `LanczosSharp`.
+- Apply only a light unsharp pass (`0x0.8+0.9+0.02`) after resizing.
+- Place each pose on a transparent 64×64 canvas, horizontally centered, with its visible
+  bounds at Y=4..62. This matches the canonical idle sprite's apparent height and feet
+  pivot; normalizing only against the other movement frames makes Elara shrink on move.
+- Append the 12 canvases horizontally to produce `elara_run_12.png` at 768×64.
+
+Representative ImageMagick operations for one already-detected pose are:
+
+```sh
+magick elara_run_transparent_full.png \
+  -crop "<detected-frame-bounds>" +repage \
+  -channel A -threshold 5% +channel -trim +repage \
+  -filter LanczosSharp -resize "x58" \
+  -unsharp "0x0.8+0.9+0.02" \
+  -gravity south -background none -extent "64x62" \
+  -gravity north -extent "64x64" frame_01.png
+
+magick frame_01.png frame_02.png frame_03.png frame_04.png \
+  frame_05.png frame_06.png frame_07.png frame_08.png \
+  frame_09.png frame_10.png frame_11.png frame_12.png \
+  +append elara_run_12.png
+```
+
+**4. Import and validate**
+
+- Import with nearest-neighbor filtering and no mipmaps. Configure 12 frames, 12 FPS,
+  and looping in `elara_core.tres`.
+- Check every frame for a 58px visible height, Y=4..62 bounds, fully transparent corner
+  pixels, and no green or magenta fringe.
+- Preview the loop beside `idle`: torso and head scale must remain constant while hands,
+  feet, cloak, and hair show readable motion. Check frame 12 to frame 1 explicitly.
+- Confirm the sigil keeps comparable size and brightness through the entire loop.
+- Load the resource in Godot and verify the animation has 12 frames, loops, and reports
+  12 FPS. Then run the unit suite:
+
+```sh
+./tools/godot.sh --headless --path godot \
+  --script res://tests/unit/test_runner.gd
+```
+
+**Failure signatures**
+
+| Symptom | Cause | Correction |
+|---|---|---|
+| Green or magenta border | Background was resized into the silhouette before keying | Remove the matte at full resolution, despill, contract the edge, then resize |
+| Elara shrinks when moving | Movement frames were normalized only against one another | Match the idle silhouette: 58px visible height, Y=4..62 |
+| Blurry face or faint sigil | Low-detail source was enlarged or reduced repeatedly | Regenerate at high resolution, resize once with LanczosSharp, then lightly sharpen |
+| Hands and feet barely move | Pose differences are too subtle | Require two complete strides and explicit alternating extremities in the generation prompt |
+| Sigil or limb is clipped | Generated spacing was treated as a uniform grid | Detect transparent gaps and crop each pose independently |
 
 ### 2.2 Melee Combo
 
