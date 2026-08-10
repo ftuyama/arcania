@@ -7,42 +7,65 @@ extends CanvasLayer
 ## Input.is_action_just_pressed() on mobile/web exports. Instead, the
 ## pressed/released signals are wired to Input.parse_input_event() so the
 ## regular input map behaves identically to keyboard/gamepad input.
+##
+## Mobile layout (960x540 design resolution):
+##   Top-right: inventory | map | pause icons
+##   Bottom-left: < >  (enlarged movement)
+##   Bottom-right: attack (sword icon) in the centre, jump below, four quick
+##   spells in a semi-circle to the left and above the attack button.
 
 
 const BASE_VIEWPORT := Vector2(960.0, 540.0)
-const BUTTON_RADIUS := 25.0
-const SMALL_BUTTON_RADIUS := 17.0
 const MIN_SCALE := 0.55
 
-const ACTION_BUTTONS: Array[Dictionary] = [
-	{"id": &"move_left", "label": "<", "position": Vector2(54, 478)},
-	{"id": &"move_right", "label": ">", "position": Vector2(116, 478)},
-	{"id": &"aim_up", "label": "UP", "position": Vector2(786, 388)},
-	{"id": &"aim_left", "label": "<", "position": Vector2(752, 422)},
-	{"id": &"aim_right", "label": ">", "position": Vector2(820, 422)},
-	{"id": &"aim_down", "label": "DN", "position": Vector2(786, 456)},
-	{"id": &"jump", "label": "JUMP", "position": Vector2(902, 458)},
-	{"id": &"melee_attack", "label": "ATK", "position": Vector2(900, 394)},
-	{"id": &"cast_spell", "label": "CAST", "position": Vector2(848, 484)},
-	{"id": &"dash", "label": "DASH", "position": Vector2(906, 330)},
-	{"id": &"interact", "label": "USE", "position": Vector2(480, 496)},
+const MOVE_BUTTON_RADIUS := 34.0
+const ATTACK_BUTTON_RADIUS := 34.0
+const JUMP_BUTTON_RADIUS := 24.0
+const SPELL_BUTTON_RADIUS := 26.0
+const UTILITY_BUTTON_RADIUS := 17.0
+const UTILITY_ICON_RADIUS := 14.0
+
+const MOVE_BUTTONS: Array[Dictionary] = [
+	{"id": &"move_left", "label": "<", "position": Vector2(74, 466)},
+	{"id": &"move_right", "label": ">", "position": Vector2(150, 466)},
 ]
 
-const UTILITY_BUTTONS: Array[Dictionary] = [
-	{"id": &"pause", "label": "II", "position": Vector2(926, 32)},
-	{"id": &"map_toggle", "label": "MAP", "position": Vector2(878, 32)},
-	{"id": &"inventory_toggle", "label": "INV", "position": Vector2(826, 32)},
-	{"id": &"spell_wheel", "label": "SPELL", "position": Vector2(758, 32)},
-	{"id": &"quick_spell_1", "label": "1", "position": Vector2(650, 32)},
-	{"id": &"quick_spell_2", "label": "2", "position": Vector2(688, 32)},
-	{"id": &"quick_spell_3", "label": "3", "position": Vector2(726, 32)},
-	{"id": &"quick_spell_4", "label": "4", "position": Vector2(764, 70)},
+const ATTACK_BUTTON := {"id": &"melee_attack", "position": Vector2(880, 420)}
+const JUMP_BUTTON := {"id": &"jump", "label": "J", "position": Vector2(910, 480)}
+
+const SPELL_CLUSTER_CENTER := Vector2(880, 420)
+const SPELL_BUTTON_OFFSET := 72.0
+const SPELL_BUTTON_ANGLES: Array[float] = [
+	deg_to_rad(135.0),
+	deg_to_rad(180.0),
+	deg_to_rad(225.0),
+	deg_to_rad(270.0),
+]
+
+const TOP_UTILITY_BUTTONS: Array[Dictionary] = [
+	{"id": &"inventory_toggle", "icon": &"inventory", "position": Vector2(820, 52)},
+	{"id": &"map_toggle", "icon": &"map", "position": Vector2(860, 52)},
+	{"id": &"pause", "icon": &"menu", "position": Vector2(900, 52)},
+]
+
+const SIDE_UTILITY_BUTTONS: Array[Dictionary] = [
+	{"id": &"dash", "icon": &"dash", "position": Vector2(886, 300)},
+	{"id": &"interact", "icon": &"use", "position": Vector2(480, 496)},
+]
+
+const QUICK_SPELL_ACTIONS: Array[StringName] = [
+	&"quick_spell_1",
+	&"quick_spell_2",
+	&"quick_spell_3",
+	&"quick_spell_4",
 ]
 
 var _gameplay_controls := Node2D.new()
 var _rotate_prompt := Control.new()
 var _touch_confirmed := false
 var _touch_available_at_startup := false
+var _spell_buttons: Array[Dictionary] = []
+var _dash_icon: Sprite2D = null
 
 
 func _ready() -> void:
@@ -52,13 +75,22 @@ func _ready() -> void:
 	_gameplay_controls.name = "GameplayControls"
 	_touch_available_at_startup = _detect_touch_available()
 	add_child(_gameplay_controls)
-	for button_data in ACTION_BUTTONS:
-		_add_action_button(button_data, BUTTON_RADIUS)
-	for button_data in UTILITY_BUTTONS:
-		_add_action_button(button_data, SMALL_BUTTON_RADIUS)
+
+	for button_data in MOVE_BUTTONS:
+		_add_action_button(button_data, MOVE_BUTTON_RADIUS)
+	_add_attack_button()
+	_add_action_button(JUMP_BUTTON, JUMP_BUTTON_RADIUS)
+	_build_quick_spell_buttons()
+	for button_data in TOP_UTILITY_BUTTONS:
+		_add_icon_button(button_data, UTILITY_ICON_RADIUS)
+	for button_data in SIDE_UTILITY_BUTTONS:
+		_add_icon_button(button_data, UTILITY_BUTTON_RADIUS)
+
 	_build_rotate_prompt()
 	get_viewport().size_changed.connect(_refresh_visibility)
 	get_viewport().size_changed.connect(_refresh_layout)
+	EventBus.spell_acquired.connect(_on_spell_acquired)
+	_refresh_spell_icons()
 	_refresh_visibility()
 	_refresh_layout()
 
@@ -68,6 +100,8 @@ func _exit_tree() -> void:
 		get_viewport().size_changed.disconnect(_refresh_visibility)
 	if get_viewport().size_changed.is_connected(_refresh_layout):
 		get_viewport().size_changed.disconnect(_refresh_layout)
+	if EventBus.spell_acquired.is_connected(_on_spell_acquired):
+		EventBus.spell_acquired.disconnect(_on_spell_acquired)
 
 
 func _process(_delta: float) -> void:
@@ -157,9 +191,82 @@ func _no_modal_is_open() -> bool:
 
 func _add_action_button(button_data: Dictionary, radius: float) -> void:
 	var action := button_data["id"] as StringName
+	var button := _create_touch_button(action, button_data["position"] as Vector2, radius)
+	_gameplay_controls.add_child(button)
+
+	button.add_child(_create_button_face(radius))
+	button.add_child(_create_button_border(radius))
+
+	var label := Label.new()
+	label.position = Vector2(-radius, -8)
+	label.size = Vector2(radius * 2.0, 16.0)
+	label.text = String(button_data.get("label", ""))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	HudStyle.apply_hud_font(label, 9)
+	label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
+	button.add_child(label)
+
+
+func _add_icon_button(button_data: Dictionary, radius: float) -> void:
+	var action := button_data["id"] as StringName
+	var button := _create_touch_button(action, button_data["position"] as Vector2, radius)
+	_gameplay_controls.add_child(button)
+
+	button.add_child(_create_button_face(radius))
+	button.add_child(_create_button_border(radius))
+
+	var icon_type := button_data["icon"] as StringName
+	match icon_type:
+		&"inventory":
+			button.add_child(_create_inventory_icon(radius))
+		&"map":
+			button.add_child(_create_map_icon(radius))
+		&"menu":
+			button.add_child(_create_menu_icon(radius))
+		&"use":
+			button.add_child(_create_use_icon(radius))
+		&"dash":
+			var icon := Sprite2D.new()
+			icon.name = "DashIcon"
+			button.add_child(icon)
+			_dash_icon = icon
+
+
+func _add_attack_button() -> void:
+	var button := _create_touch_button(
+		ATTACK_BUTTON["id"] as StringName,
+		ATTACK_BUTTON["position"] as Vector2,
+		ATTACK_BUTTON_RADIUS
+	)
+	_gameplay_controls.add_child(button)
+	button.add_child(_create_button_face(ATTACK_BUTTON_RADIUS))
+	button.add_child(_create_button_border(ATTACK_BUTTON_RADIUS))
+	button.add_child(_create_sword_icon(ATTACK_BUTTON_RADIUS))
+
+
+func _build_quick_spell_buttons() -> void:
+	_spell_buttons.clear()
+	for i in QUICK_SPELL_ACTIONS.size():
+		var angle: float = SPELL_BUTTON_ANGLES[i]
+		var offset := Vector2(cos(angle), sin(angle)) * SPELL_BUTTON_OFFSET
+		var position := SPELL_CLUSTER_CENTER + offset
+		var action := QUICK_SPELL_ACTIONS[i]
+		var button := _create_touch_button(action, position, SPELL_BUTTON_RADIUS)
+		_gameplay_controls.add_child(button)
+		button.add_child(_create_button_face(SPELL_BUTTON_RADIUS))
+		button.add_child(_create_button_border(SPELL_BUTTON_RADIUS))
+
+		var icon := Sprite2D.new()
+		icon.name = "SpellIcon"
+		button.add_child(icon)
+		_spell_buttons.append({"index": i, "icon": icon})
+
+
+func _create_touch_button(action: StringName, position: Vector2, radius: float) -> TouchScreenButton:
 	var button := TouchScreenButton.new()
 	button.name = String(action)
-	button.position = button_data["position"] as Vector2
+	button.position = position
 	# Leave the built-in action empty so we can inject InputEventAction manually.
 	# This avoids the mobile/web bug where TouchScreenButton actions do not
 	# reliably trigger Input.is_action_just_pressed().
@@ -172,31 +279,205 @@ func _add_action_button(button_data: Dictionary, radius: float) -> void:
 	button.shape = shape
 	button.pressed.connect(_on_button_pressed.bind(action))
 	button.released.connect(_on_button_released.bind(action))
-	_gameplay_controls.add_child(button)
+	return button
 
+
+func _create_button_face(radius: float) -> Polygon2D:
 	var face := Polygon2D.new()
 	face.polygon = _circle_points(radius - 1.0)
 	var face_color := HudStyle.COLOR_BG
 	face_color.a = 0.82
 	face.color = face_color
-	button.add_child(face)
+	return face
 
+
+func _create_button_border(radius: float) -> Line2D:
 	var border := Line2D.new()
 	border.width = 1.0
 	border.default_color = HudStyle.COLOR_BORDER_GOLD
 	border.points = _circle_points(radius - 1.5)
 	border.points.append(border.points[0])
-	button.add_child(border)
+	return border
 
-	var label := Label.new()
-	label.position = Vector2(-radius, -8)
-	label.size = Vector2(radius * 2.0, 16.0)
-	label.text = String(button_data["label"])
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	HudStyle.apply_hud_font(label, 9)
-	label.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
-	button.add_child(label)
+
+func _create_sword_icon(radius: float) -> Node2D:
+	var root := Node2D.new()
+	root.rotation = deg_to_rad(42.0)
+	var reach := radius * 0.62
+
+	var blade := Polygon2D.new()
+	blade.polygon = PackedVector2Array([
+		Vector2(-reach * 0.14, reach * 0.25),
+		Vector2(-reach * 0.14, -reach * 0.58),
+		Vector2(0, -reach * 0.82),
+		Vector2(reach * 0.14, -reach * 0.58),
+		Vector2(reach * 0.14, reach * 0.25),
+	])
+	blade.color = HudStyle.COLOR_TEXT
+	root.add_child(blade)
+
+	var guard := Line2D.new()
+	guard.width = 4.0
+	guard.default_color = HudStyle.COLOR_BORDER_GOLD
+	guard.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	guard.end_cap_mode = Line2D.LINE_CAP_ROUND
+	guard.points = PackedVector2Array([
+		Vector2(-reach * 0.42, reach * 0.22),
+		Vector2(reach * 0.42, reach * 0.22),
+	])
+	root.add_child(guard)
+
+	var grip := Line2D.new()
+	grip.width = 5.0
+	grip.default_color = HudStyle.COLOR_BORDER
+	grip.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	grip.end_cap_mode = Line2D.LINE_CAP_ROUND
+	grip.points = PackedVector2Array([
+		Vector2(0, reach * 0.25),
+		Vector2(0, reach * 0.62),
+	])
+	root.add_child(grip)
+
+	var pommel := Polygon2D.new()
+	pommel.polygon = _circle_points(reach * 0.14)
+	pommel.position = Vector2(0, reach * 0.68)
+	pommel.color = HudStyle.COLOR_EMBER
+	root.add_child(pommel)
+
+	return root
+
+
+func _create_inventory_icon(radius: float) -> Node2D:
+	var root := Node2D.new()
+	var reach := radius * 0.5
+	var color := HudStyle.COLOR_TEXT
+
+	var body := Line2D.new()
+	body.width = 2.0
+	body.default_color = color
+	body.joint_mode = Line2D.LINE_JOINT_ROUND
+	body.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	body.end_cap_mode = Line2D.LINE_CAP_ROUND
+	body.points = PackedVector2Array([
+		Vector2(-reach, -reach * 0.3),
+		Vector2(reach, -reach * 0.3),
+		Vector2(reach * 0.7, reach * 0.6),
+		Vector2(-reach * 0.7, reach * 0.6),
+		Vector2(-reach, -reach * 0.3),
+	])
+	root.add_child(body)
+
+	var handle := Line2D.new()
+	handle.width = 2.0
+	handle.default_color = color
+	handle.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	handle.end_cap_mode = Line2D.LINE_CAP_ROUND
+	handle.points = PackedVector2Array([
+		Vector2(-reach * 0.3, -reach * 0.3),
+		Vector2(-reach * 0.3, -reach * 0.65),
+		Vector2(reach * 0.3, -reach * 0.65),
+		Vector2(reach * 0.3, -reach * 0.3),
+	])
+	root.add_child(handle)
+
+	return root
+
+
+func _create_map_icon(radius: float) -> Node2D:
+	var root := Node2D.new()
+	var reach := radius * 0.55
+	var color := HudStyle.COLOR_TEXT
+
+	var ring := Line2D.new()
+	ring.width = 2.0
+	ring.default_color = color
+	ring.points = _circle_points(reach)
+	ring.points.append(ring.points[0])
+	root.add_child(ring)
+
+	var needle := Line2D.new()
+	needle.width = 2.0
+	needle.default_color = color
+	needle.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	needle.end_cap_mode = Line2D.LINE_CAP_ROUND
+	needle.points = PackedVector2Array([
+		Vector2(0, -reach * 0.7),
+		Vector2(0, reach * 0.3),
+	])
+	root.add_child(needle)
+
+	return root
+
+
+func _create_menu_icon(radius: float) -> Node2D:
+	var root := Node2D.new()
+	var w := radius * 0.6
+	var color := HudStyle.COLOR_TEXT
+	var y_positions := [-radius * 0.25, 0.0, radius * 0.25]
+	for y in y_positions:
+		var line := Line2D.new()
+		line.width = 2.0
+		line.default_color = color
+		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
+		line.end_cap_mode = Line2D.LINE_CAP_ROUND
+		line.points = PackedVector2Array([Vector2(-w, y), Vector2(w, y)])
+		root.add_child(line)
+	return root
+
+
+func _create_use_icon(radius: float) -> Node2D:
+	var root := Node2D.new()
+	var reach := radius * 0.5
+	var color := HudStyle.COLOR_TEXT
+
+	var arrow := Line2D.new()
+	arrow.width = 2.5
+	arrow.default_color = color
+	arrow.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	arrow.end_cap_mode = Line2D.LINE_CAP_ROUND
+	arrow.joint_mode = Line2D.LINE_JOINT_ROUND
+	arrow.points = PackedVector2Array([
+		Vector2(-reach * 0.55, reach * 0.15),
+		Vector2(0, -reach * 0.55),
+		Vector2(reach * 0.55, reach * 0.15),
+	])
+	root.add_child(arrow)
+
+	return root
+
+
+func _refresh_spell_icons() -> void:
+	for entry in _spell_buttons:
+		var index: int = entry["index"]
+		var icon: Sprite2D = entry["icon"]
+		var spell_id := SpellManager.get_quick_slot(index)
+		var spell := SpellManager.get_spell(spell_id)
+		if spell and spell.icon:
+			icon.texture = spell.icon
+			var size := spell.icon.get_size()
+			var target := SPELL_BUTTON_RADIUS * 1.4
+			icon.scale = Vector2(target / size.x, target / size.y)
+			icon.modulate = Color.WHITE
+		else:
+			icon.texture = null
+			icon.scale = Vector2.ONE
+			icon.modulate = Color(1, 1, 1, 0.25)
+
+	if _dash_icon:
+		var dash_spell := SpellManager.get_spell(&"veil_step")
+		if dash_spell and dash_spell.icon:
+			_dash_icon.texture = dash_spell.icon
+			var size := dash_spell.icon.get_size()
+			var target := UTILITY_BUTTON_RADIUS * 1.6
+			_dash_icon.scale = Vector2(target / size.x, target / size.y)
+			_dash_icon.modulate = Color.WHITE if SpellManager.has_spell(&"veil_step") else Color(1, 1, 1, 0.35)
+		else:
+			_dash_icon.texture = null
+			_dash_icon.modulate = Color(1, 1, 1, 0.25)
+
+
+func _on_spell_acquired(_spell_id: StringName) -> void:
+	_refresh_spell_icons()
 
 
 func _on_button_pressed(action: StringName) -> void:

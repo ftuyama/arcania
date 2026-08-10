@@ -33,6 +33,8 @@ func _ready() -> void:
 	_style_static_labels()
 	_style_boss_bar()
 	_load_sigil_icon()
+	if MobileControls.is_likely_touch_device() and quick_spell_bar:
+		quick_spell_bar.visible = false
 	EventBus.player_spawned.connect(_on_player_spawned)
 	EventBus.region_entered.connect(_on_region_entered)
 	EventBus.boss_fight_started.connect(_on_boss_fight_started)

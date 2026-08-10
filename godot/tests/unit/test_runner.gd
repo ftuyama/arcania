@@ -365,9 +365,10 @@ func _test_mobile_controls() -> int:
 	var controls := mobile_controls_script.new() as CanvasLayer
 	root.add_child(controls)
 	for action in [
-		&"move_left", &"move_right", &"aim_up", &"aim_down", &"aim_left", &"aim_right",
-		&"jump", &"melee_attack", &"cast_spell", &"dash", &"interact", &"pause",
-		&"map_toggle", &"inventory_toggle", &"spell_wheel", &"quick_spell_1", &"quick_spell_4",
+		&"move_left", &"move_right",
+		&"jump", &"melee_attack", &"dash", &"interact",
+		&"pause", &"map_toggle", &"inventory_toggle",
+		&"quick_spell_1", &"quick_spell_2", &"quick_spell_3", &"quick_spell_4",
 	]:
 		var button := controls.get_node_or_null(NodePath("GameplayControls/%s" % action)) as TouchScreenButton
 		if button == null:

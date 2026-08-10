@@ -85,9 +85,6 @@ rtk git add . && rtk git commit -m "msg" && rtk git push
 
 ### Build & Compile (80-90% savings)
 ```bash
-rtk cargo build         # Cargo build output
-rtk cargo check         # Cargo check output
-rtk cargo clippy        # Clippy warnings grouped by file (80%)
 rtk tsc                 # TypeScript errors grouped by file/code (83%)
 rtk lint                # ESLint/Biome violations grouped (84%)
 rtk prettier --check    # Files needing format only (70%)
@@ -96,14 +93,9 @@ rtk next build          # Next.js build with route metrics (87%)
 
 ### Test (60-99% savings)
 ```bash
-rtk cargo test          # Cargo test failures only (90%)
-rtk go test             # Go test failures only (90%)
-rtk jest                # Jest failures only (99.5%)
 rtk vitest              # Vitest failures only (99.5%)
 rtk playwright test     # Playwright failures only (94%)
-rtk pytest              # Python test failures only (90%)
 rtk rake test           # Ruby test failures only (90%)
-rtk rspec               # RSpec test failures only (60%)
 rtk test <cmd>          # Generic test wrapper - failures only
 ```
 
@@ -136,12 +128,8 @@ rtk gh api              # Compact API responses (26%)
 
 ### JavaScript/TypeScript Tooling (70-90% savings)
 ```bash
-rtk pnpm list           # Compact dependency tree (70%)
-rtk pnpm outdated       # Compact outdated packages (80%)
-rtk pnpm install        # Compact install output (90%)
 rtk npm run <script>    # Compact npm script output
 rtk npx <cmd>           # Compact npx command output
-rtk prisma              # Prisma without ASCII art (88%)
 rtk uv run <cmd>        # Compact uv project command output
 ```
 
@@ -164,43 +152,10 @@ rtk summary <cmd>       # Smart summary of command output
 rtk diff                # Ultra-compact diffs
 ```
 
-### Infrastructure (85% savings)
-```bash
-rtk docker ps           # Compact container list
-rtk docker images       # Compact image list
-rtk docker logs <c>     # Deduplicated logs
-rtk kubectl get         # Compact resource list
-rtk kubectl logs        # Deduplicated pod logs
-```
-
 ### Network (65-70% savings)
 ```bash
 rtk curl <url>          # Compact HTTP responses (70%)
 rtk wget <url>          # Compact download output (65%)
 ```
 
-### Meta Commands
-```bash
-rtk gain                # View token savings statistics
-rtk gain --history      # View command history with savings
-rtk discover            # Analyze Claude Code sessions for missed RTK usage
-rtk proxy <cmd>         # Run command without filtering (for debugging)
-rtk init                # Add RTK instructions to CLAUDE.md
-rtk init --global       # Add RTK to ~/.claude/CLAUDE.md
-```
-
-## Token Savings Overview
-
-| Category | Commands | Typical Savings |
-|----------|----------|-----------------|
-| Tests | vitest, playwright, cargo test | 90-99% |
-| Build | next, tsc, lint, prettier | 70-87% |
-| Git | status, log, diff, add, commit | 59-80% |
-| GitHub | gh pr, gh run, gh issue | 26-87% |
-| Package Managers | pnpm, npm, npx | 70-90% |
-| Files | ls, read, grep, find | 60-75% |
-| Infrastructure | docker, kubectl | 85% |
-| Network | curl, wget | 65-70% |
-
-Overall average: **60-90% token reduction** on common development operations.
 <!-- /rtk-instructions -->
