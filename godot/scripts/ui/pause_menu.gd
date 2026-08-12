@@ -10,38 +10,59 @@ const BODY_FONT_SIZE := 10
 const BUTTON_FONT_SIZE := 10
 const BUTTON_MARGIN_V := 2
 const BUTTON_MARGIN_H := 5
+const MAX_HEIGHT_RATIO := 0.92
+const MIN_PANEL_HEIGHT := 100.0
+const MIN_SCROLL_HEIGHT := 60.0
 
 @onready var slot_list: ItemList = $Panel/Margin/ScrollContainer/VBox/SlotList
 @onready var status_label: Label = $Panel/Margin/ScrollContainer/VBox/StatusLabel
 @onready var _panel: PanelContainer = $Panel
 @onready var _scroll: ScrollContainer = $Panel/Margin/ScrollContainer
+@onready var _margin: MarginContainer = $Panel/Margin
 @onready var _title: Label = $Panel/Margin/ScrollContainer/VBox/Title
+
+var _panel_style: StyleBoxFlat
 
 
 func _ready() -> void:
 	visible = false
 	_style_ui()
-	$Panel/Margin/ScrollContainer/VBox/SaveButton.pressed.connect(_on_save_pressed)
-	$Panel/Margin/ScrollContainer/VBox/LoadButton.pressed.connect(_on_load_pressed)
+	$Panel/Margin/ScrollContainer/VBox/SaveLoadRow/SaveButton.pressed.connect(_on_save_pressed)
+	$Panel/Margin/ScrollContainer/VBox/SaveLoadRow/LoadButton.pressed.connect(_on_load_pressed)
 	$Panel/Margin/ScrollContainer/VBox/ResumeButton.pressed.connect(_on_resume_pressed)
 	$Panel/Margin/ScrollContainer/VBox/QuestButton.pressed.connect(_on_quest_pressed)
 	_add_settings_button()
 	_populate_slots()
 	UiSfx.wire_tree(self)
+	visibility_changed.connect(_on_visibility_changed)
+	if get_viewport():
+		get_viewport().size_changed.connect(_fit_scroll_to_viewport)
 	call_deferred(&"_fit_scroll_to_viewport")
 
 
+func _exit_tree() -> void:
+	if visibility_changed.is_connected(_on_visibility_changed):
+		visibility_changed.disconnect(_on_visibility_changed)
+	if get_viewport() and get_viewport().size_changed.is_connected(_fit_scroll_to_viewport):
+		get_viewport().size_changed.disconnect(_fit_scroll_to_viewport)
+
+
+func _on_visibility_changed() -> void:
+	if visible:
+		_fit_scroll_to_viewport()
+
+
 func _style_ui() -> void:
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.08, 0.08, 0.11, 0.96)
-	panel_style.border_color = Color(0.72, 0.48, 0.18, 0.65)
-	panel_style.set_border_width_all(1)
-	panel_style.set_corner_radius_all(3)
-	panel_style.content_margin_left = 8
-	panel_style.content_margin_top = 8
-	panel_style.content_margin_right = 8
-	panel_style.content_margin_bottom = 8
-	_panel.add_theme_stylebox_override(&"panel", panel_style)
+	_panel_style = StyleBoxFlat.new()
+	_panel_style.bg_color = Color(0.08, 0.08, 0.11, 0.96)
+	_panel_style.border_color = Color(0.72, 0.48, 0.18, 0.65)
+	_panel_style.set_border_width_all(1)
+	_panel_style.set_corner_radius_all(3)
+	_panel_style.content_margin_left = 8
+	_panel_style.content_margin_top = 8
+	_panel_style.content_margin_right = 8
+	_panel_style.content_margin_bottom = 8
+	_panel.add_theme_stylebox_override(&"panel", _panel_style)
 
 	HudStyle.apply_hud_font(_title, TITLE_FONT_SIZE, &"semibold")
 	HudStyle.apply_hud_font(status_label, BODY_FONT_SIZE)
@@ -64,6 +85,10 @@ func _style_ui() -> void:
 	for child in vbox.get_children():
 		if child is Button:
 			_apply_button_theme(child as Button)
+		elif child is HBoxContainer:
+			for subchild in child.get_children():
+				if subchild is Button:
+					_apply_button_theme(subchild as Button)
 
 
 func _apply_button_theme(btn: Button) -> void:
@@ -106,13 +131,43 @@ func _apply_button_theme(btn: Button) -> void:
 
 
 func _fit_scroll_to_viewport() -> void:
+	if not is_instance_valid(_panel) or not is_instance_valid(_scroll) or not is_instance_valid(_margin):
+		return
 	await get_tree().process_frame
+	await get_tree().process_frame
+	if not visible or not is_inside_tree():
+		return
 	var viewport_h: float = get_viewport().get_visible_rect().size.y
-	var max_panel_h: float = viewport_h - 20.0
-	var margin_h: float = $Panel/Margin.get_combined_minimum_size().y - _scroll.get_combined_minimum_size().y
-	var max_scroll_h: float = maxf(max_panel_h - margin_h, 96.0)
-	var content_h: float = _scroll.get_combined_minimum_size().y
-	_scroll.custom_minimum_size.y = minf(content_h, max_scroll_h)
+	var max_panel_h: float = maxf(viewport_h * MAX_HEIGHT_RATIO, MIN_PANEL_HEIGHT)
+	var non_scroll_h: float = _get_non_scroll_height()
+	var content_h: float = _measure_content_height()
+	var max_scroll_h: float = maxf(max_panel_h - non_scroll_h, MIN_SCROLL_HEIGHT)
+	var scroll_h: float = clampf(content_h, MIN_SCROLL_HEIGHT, max_scroll_h)
+	_scroll.custom_minimum_size.y = scroll_h
+	var panel_h: float = clampf(scroll_h + non_scroll_h, MIN_PANEL_HEIGHT, max_panel_h)
+	_panel.offset_top = -panel_h * 0.5
+	_panel.offset_bottom = panel_h * 0.5
+
+
+func _measure_content_height() -> float:
+	var vbox: VBoxContainer = $Panel/Margin/ScrollContainer/VBox
+	var height := 0.0
+	var visible_children := 0
+	for child in vbox.get_children():
+		if child is Control and child.visible:
+			height += child.get_combined_minimum_size().y
+			visible_children += 1
+	if visible_children > 1:
+		height += (visible_children - 1) * vbox.get_theme_constant(&"separation")
+	return height
+
+
+func _get_non_scroll_height() -> float:
+	var panel_margin_v := 0.0
+	if _panel_style:
+		panel_margin_v = _panel_style.content_margin_top + _panel_style.content_margin_bottom
+	var margin_v := _margin.get_theme_constant(&"margin_top") + _margin.get_theme_constant(&"margin_bottom")
+	return panel_margin_v + margin_v
 
 
 func _add_settings_button() -> void:

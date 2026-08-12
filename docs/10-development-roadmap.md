@@ -499,8 +499,22 @@ Batch by week; track IDs in [09-asset-production-list.md](09-asset-production-li
 ## Phase 5 — Content Expansion
 
 **Duration:** Ongoing (~15 hrs/week)  
-**Target:** Region-by-region alpha until critical path complete  
-**Status:** **IN PROGRESS** — Whisperwood slice (16 rooms) shipped; remainder + new regions next.
+**Target:** Region-by-region alpha until scoped 1.0 critical path is complete  
+**Status:** **IN PROGRESS** — Whisperwood slice (19 rooms registered per [11-scoped-release.md](11-scoped-release.md)); art/UI/mobile pass in progress; new region blockouts not yet started.
+
+### Progress Notes (August 2026)
+
+Since the June 2026 review pass, work has focused on polish and presentation rather than new region blockouts:
+
+- ✅ Sprite overhaul — Elara, enemies, spells, bosses (multiple commits July–August 2026)
+- ✅ Mobile/touch control support — on-screen controls for Web build
+- ✅ UI/UX pass — title screen background, attack VFX, settings, HUD refinements
+- ✅ Debug tooling — MCP integration, scene capture helpers, debug overlay improvements
+- ⬜ Sunken Catacombs blockout — still pending (gates scoped 1.0 spell `crystal_bridge`)
+- ⬜ Crystal Bridge spell implementation — next critical-path unlock
+- ⬜ Region audio pass — boss + ambient music still placeholder/generic
+
+**Scope guard:** Only the 6 regions in [11-scoped-release.md](11-scoped-release.md) are committed to 1.0. Regions 7–12 remain post-1.0.
 
 ### Godot Tasks (per region sprint)
 
@@ -811,4 +825,4 @@ flowchart LR
 
 ---
 
-*Document version: 1.1 — Phases 0–4 complete (June 2026). Phase 5 (Content Expansion) in progress.*
+*Document version: 1.2 — Phases 0–4 complete (June 2026). Phase 5 (Content Expansion) in progress; August 2026 progress notes added.*

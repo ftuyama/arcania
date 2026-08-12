@@ -5,7 +5,9 @@
 
 **Purpose:** Master checklist and production specs for all visual, audio, and UI assets in Arcania. Cross-reference [03-art-bible.md](03-art-bible.md) for style tokens, [04-enemy-bible.md](04-enemy-bible.md) for enemy IDs, [05-boss-bible.md](05-boss-bible.md) for boss phases, [06-magic-system.md](06-magic-system.md) for spell mechanics, and [02-world-design.md](02-world-design.md) for region context.
 
-**Canonical counts:** 14 spells · 55 enemies · 19 bosses (10 mini + 8 major + 1 final) · 12 regions · Elara @ 56px body / 64×64 canvas
+> **Scope note:** This document lists the **full GDD canonical counts**. The current 1.0 scope is intentionally cut per [11-scoped-release.md](11-scoped-release.md): **10 spells · 12 relics · 6 regions · 2 endings · 19 Whisperwood rooms**. Production should prioritize scoped 1.0 assets before full-GDD counts.
+
+**Canonical counts (full GDD):** 14 spells · 55 enemies · 19 bosses (10 mini + 8 major + 1 final) · 12 regions · Elara @ 56px body / 64×64 canvas
 
 ---
 
@@ -31,6 +33,7 @@
 
 | Category | Subcategory | Count | Notes |
 |----------|-------------|-------|-------|
+| **Scoped 1.0** | Spells / regions / endings | 10 / 6 / 2 | Per [11-scoped-release.md](11-scoped-release.md); prioritize these counts |
 | **Player** | Core locomotion clips | 11 | Idle through Interact |
 | | Melee combo clips | 3 | Attack 1/2/3 |
 | | Mobility variants | 2 | Veil Step dash, Spirit Form set |

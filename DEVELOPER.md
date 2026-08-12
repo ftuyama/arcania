@@ -44,23 +44,23 @@ Core pillars:
 1. Read [01-gdd.md](docs/01-gdd.md) for the full picture.
 2. Open `godot/project.godot` in **Godot 4.3+** and press Play (F5).
 3. See [README.md — How to Play](README.md#how-to-play) for controls and the current playable build.
-4. Follow [10-development-roadmap.md](docs/10-development-roadmap.md) — Phases 0–4 ✅ complete; **Phase 5 (Content Expansion)** is next.
+4. Follow [10-development-roadmap.md](docs/10-development-roadmap.md) — Phases 0–4 ✅ complete; **Phase 5 (Content Expansion)** is in progress (last doc refresh: August 2026).
 5. Use [08-technical-architecture.md](docs/08-technical-architecture.md) as your code blueprint.
 
 **Target engine:** Godot 4.3+ (project tested on Godot 4.7)  
 **Target resolution:** 1920×1080 (viewport 960×540, pixel-perfect scaling)  
 **Art base unit:** 64px tiles, characters ~48–64px tall
 
-### Current Build (Phases 0–4)
+### Current Build (Phases 0–4 + early Phase 5)
 
 | Area | Status |
 |------|--------|
 | **Boot flow** | Title screen → New Game / Continue / Load (3 slots) |
 | **Regions** | Ashen Threshold (2 rooms) + Whisperwood Hollow (16 critical path + 3 secrets) |
-| **Spells** | 6 of 14 — Ember Sigil, Ember Bolt, Veil Step, Rootbind, Arc Step, Rune Anchor |
+| **Spells** | 6 of 10 scoped 1.0 spells — Ember Sigil, Ember Bolt, Veil Step, Rootbind, Arc Step, Rune Anchor |
 | **Bosses** | Thornweft Matron (mini), Root Warden (major) |
 | **Enemies** | Bramble Stalker + Mothling, Bark Wraith, Thornweft Larva, Canopy Hunter |
-| **Systems** | Save/load, Focus Crucibles, Focus Shards, map fog-of-war, relics, quests, spell wheel, pause/settings, gamepad, dialogue |
+| **Systems** | Save/load, Focus Crucibles, Focus Shards, map fog-of-war, 6 relics, quests, spell wheel, pause/settings, gamepad, dialogue, combat juice, playtest tracker |
 | **Audio** | Title music, threshold ambient, SFX (footsteps, spells, UI) |
 
 ---
@@ -82,7 +82,7 @@ at_01_threshold_hub → at_03_east_road (Veil Step shrine) → ww_01 … ww_16_p
 
 | System | Key | Notes |
 |--------|-----|-------|
-| **Relics** | **I** | 6 Tier-I relics; equip from inventory. **Cinder Heart** (Threshold hub), **Thornseed Charm** (Spore Glen secret), **Iron Grip** (Ironroot Depths). Modifiers affect combat (e.g. +20% burn with Cinder Heart). |
+| **Relics** | **I** | 6 Tier-I relics; equip from inventory. **Thornseed Charm** (Spore Glen), **Iron Grip** (Ironroot Depths), **Gloom Lens** (Gardener's Cache secret), **Mist Walker** (Canopy Nest secret). **Cinder Heart** exists but is not yet placed/awarded. Modifiers affect combat (e.g. +20% burn with Cinder Heart). |
 | **Quests** | Pause → Quest Log | Act I: *Ashen Awakening* → *Peddler's Price*. Tracker shown bottom-left on HUD. |
 | **Map** | **M** | Fog-of-war grid for Whisperwood; visited rooms fill in, adjacent rooms show faint outline. Press **E** while map is open to place a marker (3 max). |
 | **Spell wheel** | **Tab** | 8-slot loadout; click a slot then pick a spell. Slots 1–4 sync to quick-cast keys. Persists through save/load. |
@@ -165,14 +165,14 @@ Run the automated ww_07 profile:
 
 ### Known Limitations (Phase 5+)
 
-Per the [development roadmap](docs/10-development-roadmap.md), not yet in the playable build:
+Per the [development roadmap](docs/10-development-roadmap.md) and [scoped release plan](docs/11-scoped-release.md), not yet in the playable build:
 
-- **8 spells** beyond the current set of 6 (14 total in the GDD)
-- **Full Whisperwood** — 16 slice rooms shipped; 42-room region and secrets deferred
+- **4 spells** remaining to reach the scoped 1.0 roster of 10 (14 total in the full GDD)
+- **Full Whisperwood** — 19 rooms shipped for 1.0; the full 42-room region is deferred
 - **Ashen Threshold** — hub + east road only (2 of 5–7 planned rooms)
-- **Enemy variety** — E-03 Bramble Stalker only in slice rooms (Mothling, Bark Wraith, etc. pending)
-- **3 relic resources** defined but not yet placed in-world (`mist_walker`, `frost_nail`, `gloom_lens`)
-- **11 regions** beyond Whisperwood, 3 endings, fast travel (Waystones + Sigil Recall)
+- **Enemy variety** — E-03 Bramble Stalker only in slice rooms (Mothling, Bark Wraith, etc. exist as resources/scenes but are not widely deployed)
+- **Relics** — 6 Tier-I relics implemented; 5 are placed in reachable rooms, `cinder_heart` is not yet awarded/placed
+- **6 regions** beyond Whisperwood cut from scoped 1.0, plus 2 endings, fast-travel network, and endgame spells
 - **NPC dialogue**, cutscenes, region boss music, and full art/audio pass
 
 ---

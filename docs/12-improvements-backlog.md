@@ -2,7 +2,7 @@
 
 > Prioritized improvement backlog derived from the **June 2026 Comprehensive Project Review**. Use this document to pick sprint work; scope boundaries live in [11-scoped-release.md](11-scoped-release.md).
 
-**Last updated:** June 24, 2026
+**Last updated:** August 12, 2026
 **Cadence assumption:** ~15 hrs/week solo dev
 **Status legend:** ✅ Done · 🔄 In progress · ⬜ Backlog · 🚫 Deferred (post-1.0)
 **Effort legend:** XS · S · M · L · XL · XXL (T-shirt sizes; relative scope only)
@@ -37,15 +37,28 @@ If this hour is not compelling, more greybox rooms will not save the project.
 
 ---
 
+## Recent Work (July–August 2026)
+
+Recent commits shifted focus to **presentation, portability, and tooling** rather than new content blockouts:
+
+- ✅ Sprite overhaul — Elara, enemy roster, bosses, spell effects
+- ✅ Mobile/touch controls for Web build
+- ✅ UI/UX polish — title screen, settings panel, HUD, attack VFX
+- ✅ Debug & agent tooling — MCP integration, scene capture helpers, debug overlay
+
+This means several backlog items below need re-triage. In particular, **P0-03 (art pass)** is partially addressed, **P1-18 (quick spell HUD)** is implemented, and **P1-22 (menu UI SFX)** was completed in the June review pass.
+
+---
+
 ## Summary by Priority
 
 | Priority | Open Items | Effort range |
 |----------|------------|--------------|
-| **P0 — Critical** | 7 | S–XXL |
-| **P1 — High** | 16 | XS–XL |
+| **P0 — Critical** | 7 (1 in progress) | S–XXL |
+| **P1 — High** | 15 | XS–XL |
 | **P2 — Medium** | 14 | XS–XL |
 | **P3 — Low / Polish** | 9 | XS–M |
-| **✅ Done (review pass)** | 23 | — |
+| **✅ Done (review pass + Aug 2026)** | 24 | — |
 
 ---
 
@@ -78,6 +91,7 @@ If this hour is not compelling, more greybox rooms will not save the project.
 | P0-05 | Playtest + time vertical slice | Process / QA |
 | P0-06 | 60 FPS profiling in ww_07 + 4 enemies | Tech / Performance |
 | P0-09 | Expand automated tests (SaveManager, SpellManager, gate save/load) | Tech / QA |
+| P1-18 | Quick spell slot HUD (`scripts/ui/quick_spell_bar.gd`) | UI/UX |
 
 ---
 
@@ -85,7 +99,7 @@ If this hour is not compelling, more greybox rooms will not save the project.
 
 | ID | Item | Why | Effort | Impact | Status |
 |----|------|-----|--------|--------|--------|
-| P0-03 | **Whisperwood + Threshold tileset art pass** | Region identity; competes with HK/Nine Sols screenshots | XXL | Critical | ⬜ |
+| P0-03 | **Whisperwood + Threshold tileset art pass** | Region identity; competes with HK/Nine Sols screenshots | XXL | Critical | 🔄 |
 | P0-04 | **Boss + region audio** — unique tracks, combat stems | Silent or generic audio kills dark-fantasy tone | L | High | ⬜ |
 | P0-07 | **Crystal Bridge spell** (next critical-path unlock) | Gates Sunken Catacombs per [11-scoped-release.md](11-scoped-release.md) | XL | Critical | ⬜ |
 | P0-08 | **Sunken Catacombs region blockout** (critical path only) | First region beyond Whisperwood; proves content pipeline | XL | Critical | ⬜ |
@@ -133,7 +147,6 @@ If this hour is not compelling, more greybox rooms will not save the project.
 
 | ID | Item | Why | Effort | Status |
 |----|------|-----|--------|--------|
-| P1-18 | **Quick spell slot HUD** (on-screen 1–4 icons + cooldown radial) | GDD §9.1; keyboard-only discoverability | S | ⬜ |
 | P1-19 | **Damage numbers** render path (toggle exists in settings) | Setting without feature confuses players | S | ⬜ |
 | P1-20 | **Map connection lines** between visited rooms | Fog grid alone hurts navigation literacy | S | ⬜ |
 | P1-21 | **Input remapping UI** | Gamepad added; no rebind screen for Steam | M | ⬜ |
@@ -236,8 +249,9 @@ Per [11-scoped-release.md](11-scoped-release.md) — do not pull into current sp
 
 ### Next 1 Week (~15 hrs)
 
-- P1-04 Gate failure feedback
-- P1-22 Menu UI SFX wiring
+> **Note:** P1-04 and P1-22 were completed in earlier passes; this section should be re-planned from the current open backlog.
+
+- Triage remaining P0 items vs. August 2026 art/UI progress
 
 ### Next 1 Month (~60 hrs)
 
@@ -245,7 +259,6 @@ Per [11-scoped-release.md](11-scoped-release.md) — do not pull into current sp
 - P0-11 Complete Ashen Threshold (5 rooms)
 - P1-03 Boss intro beats
 - P1-12 Overcast vulnerability
-- P1-18 Quick spell HUD
 - P1-19 Damage numbers
 - P0-04 Region + boss audio pass (slice)
 
@@ -302,4 +315,5 @@ Per [11-scoped-release.md](11-scoped-release.md) — do not pull into current sp
 | 2026-06-22 | STARTED: P0-06 — 60 FPS profiling in ww_07 |
 | 2026-06-22 | P0-06 — PerformanceProfiler utility, ww_07 enemy baseline, debug overlay budget line, integration fps_profile_ww07 test |
 | 2026-06-24 | STARTED: P0-09 — Expand automated tests (SaveManager, SpellManager, gate save/load) |
+| 2026-08-12 | Backlog refreshed against recent commits: P0-03 moved to 🔄, P1-18 marked ✅, recent work summary added, suggested timeline updated |
 | 2026-06-24 | P0-09 — Unit tests for SpellManager save round-trip, SaveManager JSON round-trip/corrupt/version mismatch, ability-gate cleared state persistence |

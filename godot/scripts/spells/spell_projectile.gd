@@ -100,14 +100,15 @@ func _on_hitbox_hit(_target: Node, _damage: int) -> void:
 	if _impact_sfx:
 		AudioManager.play_sfx_stream(_impact_sfx, global_position)
 	_notify_nearby_gates()
-	_finish_projectile()
+	if spell_id == &"ember_bolt":
+		_finish_projectile(false)
 
 
-func _finish_projectile() -> void:
+func _finish_projectile(play_impact: bool = true) -> void:
 	_active = false
 	set_physics_process(false)
 	_hitbox.disable_hitbox()
-	if _visual.sprite_frames and _visual.sprite_frames.has_animation(&"impact"):
+	if play_impact and _visual.sprite_frames and _visual.sprite_frames.has_animation(&"impact"):
 		_visual.play(&"impact")
 		await _visual.animation_finished
 	deactivate()

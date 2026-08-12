@@ -10,6 +10,7 @@ Thumbs.db
 # Exported builds
 builds/
 release/
+graphify-out/
 
 # Local debug captures (see tools/capture_scene_screenshot.sh)
 tmp/

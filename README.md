@@ -29,10 +29,11 @@ Play as **Elara Veilmark**, a disgraced apprentice who awakens in the Ashen Thre
 | Move left / right | **A** / **D** (or arrow keys) |
 | Jump | **Space** |
 | Melee attack (3-hit combo) | **J** |
-| Ember Sigil (short-range fire) | **1** or **K** |
-| Ember Bolt (ranged projectile) | **2** |
-| Veil Step (phase dash + i-frames) | **3** or **Shift** *(East Road shrine — not at start)* |
-| Rootbind (vine growth / gates) | **4** *(after pickup in Whisperwood)* |
+| Quick spell slot 1 (default: Ember Sigil) | **1** |
+| Quick spell slot 2 (default: Ember Bolt) | **2** |
+| Quick spell slot 3 (default: Veil Step after shrine) | **3** or **Shift** *(East Road shrine — not at start)* |
+| Quick spell slot 4 (default: Rootbind after pickup) | **4** *(after pickup in Whisperwood)* |
+| Cast primary quick slot (gamepad) | **Y** / **Triangle** |
 | Rest / save at Focus Crucible | **E** |
 | Pause menu (save/load) | **Esc** |
 | Map overlay | **M** |
@@ -40,7 +41,7 @@ Play as **Elara Veilmark**, a disgraced apprentice who awakens in the Ashen Thre
 | Spell wheel (8-slot loadout) | **Tab** |
 | Place map marker (while map open) | **E** |
 
-Hold an aim direction (arrow keys) before casting to fire spells upward, downward, or diagonally.
+Use **Tab** to assign spells to slots **1–4**. Hold an aim direction (arrow keys) before casting to fire spells upward, downward, or diagonally.
 
 ### Mobile browsers
 
@@ -92,11 +93,12 @@ Ashen Threshold hub → East Road (Veil Step shrine) → Whisperwood Hollow
 
 ### What's Not in This Build Yet
 
-- Remaining spells (8 of 14 planned)
+- Remaining scoped 1.0 spells (**4 of 10 planned** for 1.0; 14 in the full GDD)
 - Full Whisperwood region and most other world areas
-- Fast travel, full enemy roster, NPC dialogue, and final art/audio pass
+- Fast travel MVP (Waystones exist in scenes; full Sigil Recall network pending)
+- Full enemy roster, NPC dialogue, and final art/audio pass
 
-See [DEVELOPER.md](DEVELOPER.md) for the full development status and roadmap.
+See [DEVELOPER.md](DEVELOPER.md) and [docs/11-scoped-release.md](docs/11-scoped-release.md) for the full development status and 1.0 scope.
 
 ---
 

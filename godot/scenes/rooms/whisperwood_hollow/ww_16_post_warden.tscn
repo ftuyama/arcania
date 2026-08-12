@@ -41,7 +41,7 @@ position = Vector2(796, 548)
 [node name="AbilityGates" type="Node2D" parent="."]
 
 [node name="FocusCrucible" parent="." instance=ExtResource("4_crucible")]
-position = Vector2(200, 528)
+position = Vector2(200, 576)
 crucible_id = &"ww_16_crucible"
 
 [node name="RoomTransitions" type="Node2D" parent="."]

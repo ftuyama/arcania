@@ -8,23 +8,23 @@ This document is the Godot 4 implementation blueprint for **Arcania**. It define
 **Target viewport:** 960×540 (pixel-perfect upscale to 1920×1080)  
 **Scripting:** GDScript 2.0 (typed where practical)
 
-### Implementation Status (June 2026)
+### Implementation Status (August 2026)
 
-Phases 0–4 are implemented in `godot/`. This table maps design sections to build state; see [10-development-roadmap.md](10-development-roadmap.md) for phase detail.
+Phases 0–4 are implemented in `godot/`; Phase 5 (Content Expansion) is in progress. This table maps design sections to build state; see [10-development-roadmap.md](10-development-roadmap.md) for phase detail and [11-scoped-release.md](11-scoped-release.md) for the 1.0 scope cut.
 
 | Section | Status | Notes |
 |---------|--------|-------|
 | §1 Engine Setup | ✅ | Godot 4.7 project; viewport, layers, gameplay constants |
 | §2 Folder Structure | ✅ | Matches layout below |
-| §3 Autoload Singletons | ✅ | All 8 autoloads registered |
+| §3 Autoload Singletons | ✅ | **11 autoloads** registered (8 original + `CombatJuice`, `InputSetup`, `PlaytestTracker`) |
 | §4 Scene Hierarchy | ✅ | `main.tscn` → title → `game_world.tscn` → `RoomLoader` |
 | §5 Components | ✅ | Health, Hitbox, Hurtbox, Mana |
 | §6 Player Controller | ✅ | 9-state machine; melee + spell cast |
 | §7 Enemy AI | ⚠️ | E-03 Bramble Stalker only |
 | §8 Boss Architecture | ✅ | `BaseBoss`, `BossPhaseManager`; Matron + Warden |
-| §9 Spell System | ⚠️ | 6 of 14 spells; `SpellManager` + wheel |
+| §9 Spell System | ⚠️ | **6 of 10 scoped 1.0 spells** implemented (14 in full GDD); `SpellManager` + wheel |
 | §10 Save System | ✅ | JSON v1, 3 slots, all autoloads persist |
-| §11 Inventory & Relics | ⚠️ | 6 relic resources; 3 placed in-world |
+| §11 Inventory & Relics | ⚠️ | 6 relic resources; 5 placed in reachable rooms, 1 in filler `ww_37`, `cinder_heart` not yet awarded |
 | §12 Quest System | ✅ | Act I quests; 4 objective types |
 | §13 Map & Discovery | ✅ | Fog-of-war grid; Whisperwood + Threshold |
 | §14 Ability Gating | ✅ | Brazier, vine, anchor gates |
@@ -141,7 +141,10 @@ godot/
 │   ├── quest_manager.gd
 │   ├── map_manager.gd
 │   ├── inventory_system.gd
-│   └── spell_manager.gd
+│   ├── spell_manager.gd
+│   ├── combat_juice.gd         # Hit-stop, screen shake, telegraph SFX autoload
+│   ├── input_setup.gd          # Gamepad action remaps and deadzone setup
+│   └── playtest_tracker.gd     # Session timing / metrics for playtests
 │
 ├── scenes/
 │   ├── main/
@@ -260,6 +263,9 @@ All autoloads are registered in `project.godot` and persist for the game session
 | 6 | `InventorySystem` | Relics, robes, focus items, currency, modifier aggregation |
 | 7 | `QuestManager` | Active/completed quests, objective tracking |
 | 8 | `MapManager` | Room discovery grid, fog of war, markers, region completion % |
+| 9 | `CombatJuice` | Hit-stop, screen shake, damage-number hooks, telegraph SFX |
+| 10 | `InputSetup` | Gamepad action remaps, deadzone setup, platform input normalization |
+| 11 | `PlaytestTracker` | Session timer, room timing, debug overlay metrics |
 
 ### Dependency Graph
 
@@ -273,6 +279,9 @@ flowchart TD
     INV[InventorySystem]
     QM[QuestManager]
     MM[MapManager]
+    CJ[CombatJuice]
+    IS[InputSetup]
+    PT[PlaytestTracker]
 
     EB --> GM
     EB --> SM
@@ -281,6 +290,9 @@ flowchart TD
     EB --> INV
     EB --> QM
     EB --> MM
+    EB --> CJ
+    EB --> IS
+    EB --> PT
 
     GM --> SM
     SM --> SPM
@@ -341,6 +353,21 @@ flowchart TD
 - Per-region `RoomGrid` (2D bool/int array).
 - Fog of war: unexplored rooms hidden, visited rooms revealed, current room highlighted.
 - Player markers (max 3).
+
+#### CombatJuice
+
+- Global combat feel helpers: hit-stop (`request_hit_stop`), screen shake (`request_shake`), damage-number spawn hooks.
+- Listens to `EventBus.enemy_damaged`, `player_damaged`, `boss_phase_changed`.
+
+#### InputSetup
+
+- Normalizes gamepad input: maps `JOY_BUTTON_*` to `InputMap` actions at runtime.
+- Owns aim deadzones and platform-specific remaps (mobile touch is handled in `MobileControls`).
+
+#### PlaytestTracker
+
+- Tracks session time, room entry/exit timings, death counts.
+- Exports metrics for the debug overlay (F3) and can write a session report.
 
 ---
 

@@ -43,7 +43,7 @@ one_shot = false
 [node name="AbilityGates" type="Node2D" parent="."]
 
 [node name="FocusCrucible" parent="." instance=ExtResource("4_crucible")]
-position = Vector2(200, 676)
+position = Vector2(200, 704)
 crucible_id = &"at_hub_crucible"
 
 [node name="RoomTransitions" type="Node2D" parent="."]
