@@ -2,7 +2,7 @@ extends HBoxContainer
 ## Persistent quick-spell slots 1–4 with ornate frames, cooldown overlays, key labels.
 
 
-const SLOT_SIZE := 32
+const SLOT_SIZE := 42
 
 var _slots: Array[Dictionary] = []
 var _active_index: int = 0
@@ -102,10 +102,10 @@ func _build_slots() -> void:
 
 		var icon := TextureRect.new()
 		icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		icon.offset_left = 5
-		icon.offset_top = 5
-		icon.offset_right = -5
-		icon.offset_bottom = -5
+		icon.offset_left = 6
+		icon.offset_top = 6
+		icon.offset_right = -6
+		icon.offset_bottom = -6
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -156,6 +156,7 @@ func _set_slot_active(index: int, active: bool) -> void:
 	if entry["uses_texture"]:
 		var frame: TextureRect = entry["frame"]
 		frame.texture = _active_tex if active and _active_tex else _inactive_tex
+		frame.modulate = Color(0.65, 1.0, 1.0, 1.0) if active else Color.WHITE
 	else:
 		var frame: PanelContainer = entry["frame"]
 		frame.add_theme_stylebox_override(&"panel", HudStyle.make_slot_style(active))
