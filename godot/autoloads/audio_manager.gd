@@ -6,6 +6,8 @@ const MAX_SFX_PLAYERS := 24
 
 const GAME_OVER_MUSIC := "res://assets/audio/music/mus_game_over.wav"
 const GAME_OVER_STINGER := "res://assets/audio/sfx/ui/sfx_game_over.wav"
+const LEVEL_UP_DURATION := 0.72
+const LEVEL_UP_MIX_RATE := 44100
 
 var _music_player: AudioStreamPlayer
 var _music_fade_player: AudioStreamPlayer
@@ -18,6 +20,7 @@ var _current_music_path: String = ""
 var _current_ambience_path: String = ""
 var _music_should_loop: bool = true
 var _music_tween: Tween
+var _level_up_stream: AudioStreamWAV
 
 
 func _ready() -> void:
@@ -124,6 +127,35 @@ func play_ui(stream_path: String) -> void:
 		return
 	_ui_player.stream = stream
 	_ui_player.play()
+
+
+func play_level_up() -> void:
+	if _level_up_stream == null:
+		_level_up_stream = _create_level_up_stream()
+	_ui_player.stream = _level_up_stream
+	_ui_player.play()
+
+
+func _create_level_up_stream() -> AudioStreamWAV:
+	var notes := [523.25, 659.25, 783.99, 1046.5]
+	var samples := int(LEVEL_UP_DURATION * float(LEVEL_UP_MIX_RATE))
+	var data := PackedByteArray()
+	data.resize(samples * 2)
+	for i in samples:
+		var time := float(i) / float(LEVEL_UP_MIX_RATE)
+		var note_index := mini(int(time / 0.12), notes.size() - 1)
+		var note_time := fmod(time, 0.12)
+		var envelope := clampf(1.0 - note_time / 0.12, 0.0, 1.0)
+		var shimmer := sin(TAU * notes[note_index] * time)
+		var harmony := sin(TAU * notes[note_index] * 2.0 * time) * 0.22
+		var sample := int((shimmer + harmony) * envelope * 0.24 * 32767.0)
+		data[i * 2] = sample & 0xff
+		data[i * 2 + 1] = (sample >> 8) & 0xff
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = LEVEL_UP_MIX_RATE
+	stream.data = data
+	return stream
 
 
 func play_footstep(surface: StringName, position: Vector2, variant: int = -1) -> void:

@@ -36,6 +36,7 @@ func _run_all_tests() -> void:
 	failures += _test_mana_shards()
 	failures += _test_dead_health_component_ignores_hits()
 	failures += _test_experience_component()
+	failures += _test_level_up_sfx()
 	failures += _test_gate_failure_hints()
 	failures += _test_playtest_tracker()
 	failures += _test_performance_profiler()
@@ -44,6 +45,7 @@ func _run_all_tests() -> void:
 	failures += _test_save_manager()
 	failures += _test_enemy_hit_vfx()
 	failures += _test_mobile_controls()
+	failures += _test_map_toggle()
 	_cleanup_test_saves()
 	if failures == 0:
 		print("All unit tests passed.")
@@ -120,6 +122,21 @@ func _test_experience_component() -> int:
 		push_error("ExperienceComponent should normalize loaded overflow XP")
 		return 1
 	return 0
+
+
+func _test_level_up_sfx() -> int:
+	var audio_manager := root.get_node("AudioManager")
+	audio_manager.play_ui("res://assets/audio/sfx/ui/ui_menu_confirm.wav")
+	audio_manager.play_level_up()
+	for child in audio_manager.get_children():
+		var player := child as AudioStreamPlayer
+		if player and player.bus == &"UI":
+			if not player.stream is AudioStreamWAV:
+				push_error("AudioManager should restore the level-up stream after UI audio")
+				return 1
+			return 0
+	push_error("AudioManager UI player missing")
+	return 1
 
 
 func _test_gate_failure_hints() -> int:
@@ -404,7 +421,6 @@ func _test_mobile_controls() -> int:
 	for action in [
 		&"move_left", &"move_right",
 		&"jump", &"melee_attack", &"dash", &"interact",
-		&"pause", &"map_toggle", &"inventory_toggle",
 		&"quick_spell_1", &"quick_spell_2", &"quick_spell_3", &"quick_spell_4",
 	]:
 		var button := controls.get_node_or_null(NodePath("GameplayControls/%s" % action)) as TouchScreenButton
@@ -426,11 +442,53 @@ func _test_mobile_controls() -> int:
 			push_error("MobileControls action should always be visible when enabled: %s" % action)
 			controls.queue_free()
 			return 1
+	for action in [&"pause", &"map_toggle", &"inventory_toggle"]:
+		var button := controls.get_node_or_null(NodePath("TopBar/%s" % action)) as TouchScreenButton
+		if button == null:
+			push_error("MobileControls missing top bar button: %s" % action)
+			controls.queue_free()
+			return 1
+		if button.name != String(action):
+			push_error("MobileControls top bar button misnamed for action: %s" % action)
+			controls.queue_free()
+			return 1
+		if button.action != &"":
+			push_error("MobileControls top bar action should be manually injected: %s" % action)
+			controls.queue_free()
+			return 1
+		if button.visibility_mode != TouchScreenButton.VISIBILITY_ALWAYS:
+			push_error("MobileControls top bar action should always be visible when enabled: %s" % action)
+			controls.queue_free()
+			return 1
 	if not bool(controls.call(&"is_landscape")):
 		push_error("MobileControls should treat the default viewport as landscape")
 		controls.queue_free()
 		return 1
 	controls.queue_free()
+	return 0
+
+
+func _test_map_toggle() -> int:
+	var ui_layer := load("res://scenes/ui/ui_layer.tscn") as PackedScene
+	var ui := ui_layer.instantiate() as CanvasLayer
+	root.add_child(ui)
+	var game_manager := _autoload_game_manager()
+	game_manager.state = game_manager.GameState.PLAYING
+	var input := InputEventAction.new()
+	input.action = &"map_toggle"
+	input.pressed = true
+	ui._unhandled_input(input)
+	var map_overlay := ui.get_node_or_null("MapOverlay") as Control
+	if map_overlay == null or not map_overlay.visible:
+		push_error("Map toggle should open the map overlay")
+		ui.queue_free()
+		return 1
+	var grid := map_overlay.get_node_or_null("Panel/Margin/VBox/GridContainer") as GridContainer
+	if grid == null or grid.get_child_count() == 0:
+		push_error("Map toggle should render the map grid")
+		ui.queue_free()
+		return 1
+	ui.queue_free()
 	return 0
 
 

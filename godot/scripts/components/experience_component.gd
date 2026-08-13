@@ -41,6 +41,7 @@ func award_experience(amount: int) -> void:
 		current_xp -= get_xp_to_next_level()
 		level += 1
 		_apply_level_up()
+		_play_level_up_sfx()
 		leveled_up.emit(level)
 	_emit_experience_changed()
 
@@ -72,6 +73,14 @@ func _apply_level_up() -> void:
 
 func _emit_experience_changed() -> void:
 	experience_changed.emit(level, current_xp, get_xp_to_next_level())
+
+
+func _play_level_up_sfx() -> void:
+	if not is_inside_tree():
+		return
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager and audio_manager.has_method(&"play_level_up"):
+		audio_manager.play_level_up()
 
 
 func _event_bus() -> Node:

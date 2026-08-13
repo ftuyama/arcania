@@ -97,6 +97,10 @@ func place_marker(region_id: StringName, room_id: StringName) -> bool:
 	return true
 
 
+func get_markers() -> Array[Dictionary]:
+	return _markers.duplicate(true)
+
+
 func remove_marker(index: int) -> void:
 	if index >= 0 and index < _markers.size():
 		_markers.remove_at(index)

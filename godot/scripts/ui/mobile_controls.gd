@@ -61,6 +61,7 @@ const QUICK_SPELL_ACTIONS: Array[StringName] = [
 ]
 
 var _gameplay_controls := Node2D.new()
+var _top_bar := Node2D.new()
 var _rotate_prompt := Control.new()
 var _touch_confirmed := false
 var _touch_available_at_startup := false
@@ -72,17 +73,19 @@ func _ready() -> void:
 	layer = 30
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	name = "MobileControls"
+	_top_bar.name = "TopBar"
 	_gameplay_controls.name = "GameplayControls"
 	_touch_available_at_startup = _detect_touch_available()
+	add_child(_top_bar)
 	add_child(_gameplay_controls)
 
+	for button_data in TOP_UTILITY_BUTTONS:
+		_add_top_bar_button(button_data, UTILITY_ICON_RADIUS)
 	for button_data in MOVE_BUTTONS:
 		_add_action_button(button_data, MOVE_BUTTON_RADIUS)
 	_add_attack_button()
 	_add_action_button(JUMP_BUTTON, JUMP_BUTTON_RADIUS)
 	_build_quick_spell_buttons()
-	for button_data in TOP_UTILITY_BUTTONS:
-		_add_icon_button(button_data, UTILITY_ICON_RADIUS)
 	for button_data in SIDE_UTILITY_BUTTONS:
 		_add_icon_button(button_data, UTILITY_BUTTON_RADIUS)
 
@@ -124,6 +127,7 @@ func _refresh_visibility() -> void:
 	var touch_available := _is_touch_available()
 	var can_play := GameManager.state == GameManager.GameState.PLAYING and _no_modal_is_open()
 	var landscape := is_landscape()
+	_top_bar.visible = can_play and landscape
 	_gameplay_controls.visible = touch_available and can_play and landscape
 	_rotate_prompt.visible = touch_available and not landscape
 
@@ -133,6 +137,8 @@ func _refresh_layout() -> void:
 	var scale_x := viewport_size.x / BASE_VIEWPORT.x
 	var scale_y := viewport_size.y / BASE_VIEWPORT.y
 	var scale := clampf(minf(scale_x, scale_y), MIN_SCALE, 1.0)
+	_top_bar.scale = Vector2(scale, scale)
+	_top_bar.position = (viewport_size - BASE_VIEWPORT * scale) * 0.5
 	_gameplay_controls.scale = Vector2(scale, scale)
 	_gameplay_controls.position = (viewport_size - BASE_VIEWPORT * scale) * 0.5
 
@@ -208,6 +214,27 @@ func _add_action_button(button_data: Dictionary, radius: float) -> void:
 	button.add_child(label)
 
 
+func _add_top_bar_button(button_data: Dictionary, radius: float) -> void:
+	var action := button_data["id"] as StringName
+	var button := _create_desktop_button(action, button_data["position"] as Vector2, radius)
+	_top_bar.add_child(button)
+
+	var icon_root := Node2D.new()
+	icon_root.position = Vector2(radius, radius)
+	button.add_child(icon_root)
+	icon_root.add_child(_create_button_face(radius))
+	icon_root.add_child(_create_button_border(radius))
+
+	var icon_type := button_data["icon"] as StringName
+	match icon_type:
+		&"inventory":
+			icon_root.add_child(_create_inventory_icon(radius))
+		&"map":
+			icon_root.add_child(_create_map_icon(radius))
+		&"menu":
+			icon_root.add_child(_create_menu_icon(radius))
+
+
 func _add_icon_button(button_data: Dictionary, radius: float) -> void:
 	var action := button_data["id"] as StringName
 	var button := _create_touch_button(action, button_data["position"] as Vector2, radius)
@@ -218,12 +245,6 @@ func _add_icon_button(button_data: Dictionary, radius: float) -> void:
 
 	var icon_type := button_data["icon"] as StringName
 	match icon_type:
-		&"inventory":
-			button.add_child(_create_inventory_icon(radius))
-		&"map":
-			button.add_child(_create_map_icon(radius))
-		&"menu":
-			button.add_child(_create_menu_icon(radius))
 		&"use":
 			button.add_child(_create_use_icon(radius))
 		&"dash":
@@ -279,6 +300,27 @@ func _create_touch_button(action: StringName, position: Vector2, radius: float) 
 	button.shape = shape
 	button.pressed.connect(_on_button_pressed.bind(action))
 	button.released.connect(_on_button_released.bind(action))
+	return button
+
+
+func _create_desktop_button(action: StringName, position: Vector2, radius: float) -> Button:
+	var button := Button.new()
+	button.name = String(action)
+	button.position = position - Vector2(radius, radius)
+	button.size = Vector2(radius * 2.0, radius * 2.0)
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.focus_mode = Control.FOCUS_NONE
+	button.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
+
+	var empty_style := StyleBoxEmpty.new()
+	button.add_theme_stylebox_override(&"normal", empty_style)
+	button.add_theme_stylebox_override(&"hover", empty_style)
+	button.add_theme_stylebox_override(&"pressed", empty_style)
+	button.add_theme_stylebox_override(&"disabled", empty_style)
+	button.add_theme_stylebox_override(&"focus", empty_style)
+
+	button.button_down.connect(_on_button_pressed.bind(action))
+	button.button_up.connect(_on_button_released.bind(action))
 	return button
 
 
