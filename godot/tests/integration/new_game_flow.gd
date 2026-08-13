@@ -35,5 +35,9 @@ func _run() -> void:
 		push_error("ControlsOverlay missing after new game")
 		quit(1)
 		return
-	print("new game flow OK (overlay visible=%s)" % overlay.visible)
+	if overlay.visible:
+		push_error("ControlsOverlay should not auto-show on new game")
+		quit(1)
+		return
+	print("new game flow OK (overlay not auto-shown)")
 	quit(0)

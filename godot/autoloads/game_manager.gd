@@ -25,12 +25,49 @@ var _settings: Dictionary = {
 	"damage_numbers": false,
 }
 
+const CONTROLS_SAVE_PATH := "user://controls.json"
+
+const REMAPPABLE_ACTIONS: Array[StringName] = [
+	&"move_left",
+	&"move_right",
+	&"jump",
+	&"melee_attack",
+	&"dash",
+	&"interact",
+	&"spell_wheel",
+	&"quick_spell_1",
+	&"quick_spell_2",
+	&"quick_spell_3",
+	&"quick_spell_4",
+	&"map_toggle",
+	&"inventory_toggle",
+	&"pause",
+]
+
+const DEFAULT_KEY_BINDINGS: Dictionary = {
+	"move_left": KEY_A,
+	"move_right": KEY_D,
+	"jump": KEY_SPACE,
+	"melee_attack": KEY_J,
+	"dash": KEY_SHIFT,
+	"interact": KEY_E,
+	"spell_wheel": KEY_TAB,
+	"quick_spell_1": KEY_1,
+	"quick_spell_2": KEY_2,
+	"quick_spell_3": KEY_3,
+	"quick_spell_4": KEY_4,
+	"map_toggle": KEY_M,
+	"inventory_toggle": KEY_I,
+	"pause": KEY_ESCAPE,
+}
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.ability_gate_cleared.connect(_on_gate_cleared)
 	EventBus.boss_defeated.connect(_on_boss_defeated)
+	load_controls()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -209,6 +246,8 @@ func get_player_snapshot() -> Dictionary:
 		"mana_max": player.mana_component.max_mana,
 		"focus_shards": player.mana_component.focus_shard_count,
 		"essence": player.essence_collected,
+		"level": player.experience_component.level,
+		"current_xp": player.experience_component.current_xp,
 		"facing": player.facing_direction,
 	}
 
@@ -232,6 +271,45 @@ func get_settings_snapshot() -> Dictionary:
 func apply_settings(settings: Dictionary) -> void:
 	for key in settings:
 		_settings[key] = settings[key]
+
+
+func load_controls() -> void:
+	if not FileAccess.file_exists(CONTROLS_SAVE_PATH):
+		return
+	var file := FileAccess.open(CONTROLS_SAVE_PATH, FileAccess.READ)
+	if file == null:
+		return
+	var parsed = JSON.parse_string(file.get_as_text())
+	file.close()
+	if parsed is Dictionary:
+		apply_controls(parsed)
+
+
+func save_controls(bindings: Dictionary) -> void:
+	var file := FileAccess.open(CONTROLS_SAVE_PATH, FileAccess.WRITE)
+	if file == null:
+		push_error("GameManager: failed to save %s" % CONTROLS_SAVE_PATH)
+		return
+	file.store_string(JSON.stringify(bindings, "\t"))
+	file.close()
+
+
+func apply_controls(bindings: Dictionary) -> void:
+	for action in REMAPPABLE_ACTIONS:
+		var keycode: int = bindings.get(String(action), DEFAULT_KEY_BINDINGS.get(String(action), 0))
+		InputMap.action_erase_events(action)
+		if keycode != 0:
+			var new_event := InputEventKey.new()
+			new_event.physical_keycode = keycode
+			InputMap.action_add_event(action, new_event)
+
+
+func reset_controls_to_defaults() -> void:
+	apply_controls(DEFAULT_KEY_BINDINGS.duplicate())
+	var file := FileAccess.open(CONTROLS_SAVE_PATH, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(DEFAULT_KEY_BINDINGS.duplicate(), "\t"))
+		file.close()
 
 
 func apply_save_data(player_data: Dictionary, world_data: Dictionary) -> void:
@@ -260,6 +338,8 @@ func apply_save_data(player_data: Dictionary, world_data: Dictionary) -> void:
 		"mana_current": float(player_data.get("mana_current", 100.0)),
 		"mana_max": float(player_data.get("mana_max", 100.0)),
 		"essence": int(player_data.get("essence", 0)),
+		"level": int(player_data.get("level", 1)),
+		"current_xp": int(player_data.get("current_xp", 0)),
 		"facing": int(player_data.get("facing", 1)),
 	}
 	call_deferred(&"_apply_pending_load")
@@ -291,5 +371,7 @@ func _apply_pending_load() -> void:
 		player.mana_component.set_focus_shard_count(int(data["focus_shards"]))
 	if data.has("essence"):
 		player.essence_collected = int(data["essence"])
+	if data.has("level"):
+		player.experience_component.set_progress(int(data["level"]), int(data.get("current_xp", 0)))
 	if data.has("facing"):
 		player.facing_direction = int(data["facing"])

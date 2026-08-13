@@ -114,3 +114,4 @@ func restore_full() -> void:
 	current_mana = float(max_mana)
 	_regen_timer = 0.0
 	mana_changed.emit(current_mana, float(max_mana))
+	mana_changed.emit(current_mana, float(max_mana))

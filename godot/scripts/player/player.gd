@@ -23,6 +23,7 @@ const COMBO_STEPS: Array[Dictionary] = [
 @onready var camera: Camera2D = $Camera2D
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var mana_component: ManaComponent = $ManaComponent
+@onready var experience_component: Node = $ExperienceComponent
 @onready var spell_caster: Node = $SpellCaster
 @onready var melee_hitbox: HitboxComponent = $MeleeHitbox
 @onready var hurtbox: HurtboxComponent = $HurtboxComponent

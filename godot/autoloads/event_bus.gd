@@ -10,6 +10,7 @@ signal player_healed(amount: int)
 
 # Combat
 signal enemy_defeated(enemy_id: StringName, position: Vector2)
+signal experience_awarded(amount: int)
 signal boss_fight_started(boss_id: StringName)
 signal boss_phase_changed(boss_id: StringName, phase: int)
 signal boss_defeated(boss_id: StringName)

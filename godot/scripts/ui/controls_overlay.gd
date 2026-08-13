@@ -4,19 +4,22 @@ extends Control
 
 signal dismissed
 
-const CONTROL_ROWS: Array[Dictionary] = [
-	{"action": "Move", "keys": "A / D  or  ← / →"},
-	{"action": "Jump", "keys": "Space"},
-	{"action": "Melee Attack", "keys": "J"},
-	{"action": "Aim Spell", "keys": "Arrow keys"},
-	{"action": "Veil Step", "keys": "Shift"},
-	{"action": "Interact", "keys": "E"},
-	{"action": "Spell Wheel", "keys": "Tab"},
-	{"action": "Quick Spells", "keys": "1 – 4"},
-	{"action": "Map", "keys": "M"},
-	{"action": "Inventory", "keys": "I"},
-	{"action": "Pause", "keys": "Esc"},
-]
+const ACTION_DISPLAY_NAMES: Dictionary = {
+	"move_left": "Move Left",
+	"move_right": "Move Right",
+	"jump": "Jump",
+	"melee_attack": "Melee Attack",
+	"dash": "Veil Step",
+	"interact": "Interact",
+	"spell_wheel": "Spell Wheel",
+	"quick_spell_1": "Quick Spell 1",
+	"quick_spell_2": "Quick Spell 2",
+	"quick_spell_3": "Quick Spell 3",
+	"quick_spell_4": "Quick Spell 4",
+	"map_toggle": "Map",
+	"inventory_toggle": "Inventory",
+	"pause": "Pause",
+}
 
 const TIPS: PackedStringArray = [
 	"Spells fight enemies and open new paths — swap loadouts from the spell wheel.",
@@ -98,9 +101,10 @@ func _build_ui() -> void:
 	controls_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_child(controls_row)
 
-	var split := ceili(float(CONTROL_ROWS.size()) / 2.0)
-	controls_row.add_child(_make_control_column(CONTROL_ROWS.slice(0, split)))
-	controls_row.add_child(_make_control_column(CONTROL_ROWS.slice(split)))
+	var control_rows := _build_control_rows()
+	var split := ceili(float(control_rows.size()) / 2.0)
+	controls_row.add_child(_make_control_column(control_rows.slice(0, split)))
+	controls_row.add_child(_make_control_column(control_rows.slice(split)))
 
 	_prompt_label = Label.new()
 	_prompt_label.text = "Tap to begin" if MobileControls.is_likely_touch_device() else "Press Space or E to begin"
@@ -114,6 +118,46 @@ func _build_ui() -> void:
 		begin_button.pressed.connect(_dismiss)
 		HudStyle.apply_ui_font(begin_button, 11)
 		vbox.add_child(begin_button)
+
+
+func _build_control_rows() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for action in GameManager.REMAPPABLE_ACTIONS:
+		var events := InputMap.action_get_events(action)
+		var keycode := 0
+		for event in events:
+			if event is InputEventKey:
+				keycode = event.physical_keycode
+				break
+		if keycode == 0:
+			keycode = GameManager.DEFAULT_KEY_BINDINGS.get(String(action), 0)
+		var display_name: String = ACTION_DISPLAY_NAMES.get(String(action), String(action))
+		rows.append({"action": display_name, "keys": _key_name(keycode)})
+	return rows
+
+
+func _key_name(keycode: int) -> String:
+	if keycode == KEY_SPACE:
+		return "Space"
+	if keycode == KEY_ESCAPE:
+		return "Esc"
+	if keycode == KEY_TAB:
+		return "Tab"
+	if keycode == KEY_SHIFT:
+		return "Shift"
+	if keycode == KEY_CTRL:
+		return "Ctrl"
+	if keycode == KEY_ALT:
+		return "Alt"
+	if keycode == KEY_ENTER:
+		return "Enter"
+	if keycode == KEY_BACKSPACE:
+		return "Backspace"
+	if keycode >= KEY_0 and keycode <= KEY_9:
+		return String.chr(keycode)
+	if keycode >= KEY_A and keycode <= KEY_Z:
+		return String.chr(keycode)
+	return OS.get_keycode_string(keycode)
 
 
 func _make_control_column(rows: Array) -> GridContainer:

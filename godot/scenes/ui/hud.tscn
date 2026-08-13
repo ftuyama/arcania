@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://arcania_hud"]
+[gd_scene load_steps=11 format=3 uid="uid://arcania_hud"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/region_title_card.gd" id="2_region_title"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://scripts/ui/mana_segment_bar.gd" id="4_mana"]
 [ext_resource type="Script" path="res://scripts/ui/minimap_widget.gd" id="5_minimap"]
 [ext_resource type="Script" path="res://scripts/ui/quick_spell_bar.gd" id="6_spells"]
-[ext_resource type="Script" path="res://scripts/ui/currency_bar.gd" id="7_currency"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/icons/ui_spell_icon_ember_sigil.png" id="8_sigil"]
 [ext_resource type="Texture2D" uid="uid://bsbrjh1v2numr" path="res://assets/sprites/ui/hud/ui_hud_portrait_frame.png" id="9_portrait"]
 [ext_resource type="Texture2D" uid="uid://bhw2h66vrc2bb" path="res://assets/sprites/ui/hud/ui_hud_shard_icon.png" id="10_shard"]
@@ -65,11 +64,21 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 3
 
-[node name="CharacterName" type="Label" parent="PlayerStatusCluster/InfoColumn"]
+[node name="NameRow" type="HBoxContainer" parent="PlayerStatusCluster/InfoColumn"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CharacterName" type="Label" parent="PlayerStatusCluster/InfoColumn/NameRow"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(0.91, 0.91, 0.91, 1)
 text = "Elara Veilmark"
+
+[node name="LevelLabel" type="Label" parent="PlayerStatusCluster/InfoColumn/NameRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1, 0.42, 0.208, 1)
+text = "LvL 1"
 
 [node name="HealthPipRow" type="HBoxContainer" parent="PlayerStatusCluster/InfoColumn"]
 layout_mode = 2
@@ -77,9 +86,15 @@ theme_override_constants/separation = 3
 script = ExtResource("3_hp")
 
 [node name="ManaSegmentBar" type="Control" parent="PlayerStatusCluster/InfoColumn"]
-custom_minimum_size = Vector2(140, 16)
+custom_minimum_size = Vector2(96, 16)
 layout_mode = 2
 script = ExtResource("4_mana")
+
+[node name="ExperienceBar" type="ProgressBar" parent="PlayerStatusCluster/InfoColumn"]
+custom_minimum_size = Vector2(140, 6)
+layout_mode = 2
+max_value = 100.0
+show_percentage = false
 
 [node name="ShardCounter" type="HBoxContainer" parent="PlayerStatusCluster/InfoColumn"]
 layout_mode = 2
@@ -171,20 +186,6 @@ layout_mode = 2
 theme_override_constants/separation = 6
 alignment = 0
 script = ExtResource("6_spells")
-
-[node name="CurrencyBar" type="PanelContainer" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -160.0
-offset_top = -40.0
-offset_right = -16.0
-offset_bottom = -6.0
-grow_horizontal = 0
-grow_vertical = 0
-script = ExtResource("7_currency")
 
 [node name="QuestTracker" type="MarginContainer" parent="."]
 anchors_preset = 2

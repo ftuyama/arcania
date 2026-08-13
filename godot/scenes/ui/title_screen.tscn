@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1_title"]
 [ext_resource type="Script" path="res://scripts/ui/title_screen_backdrop.gd" id="2_backdrop"]
+[ext_resource type="Script" path="res://scripts/ui/controls_config_panel.gd" id="3_controls"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -96,6 +97,11 @@ custom_minimum_size = Vector2(220, 28)
 layout_mode = 2
 text = "Load Game"
 
+[node name="ControlsButton" type="Button" parent="SafeArea/MainLayout/MenuCenter/MenuPanel"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+text = "Controls"
+
 [node name="QuitButton" type="Button" parent="SafeArea/MainLayout/MenuCenter/MenuPanel"]
 custom_minimum_size = Vector2(220, 28)
 layout_mode = 2
@@ -171,3 +177,13 @@ text = "Load Selected"
 custom_minimum_size = Vector2(0, 26)
 layout_mode = 2
 text = "Back"
+
+[node name="ControlsPanel" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_controls")

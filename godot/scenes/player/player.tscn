@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://arcania_player"]
+[gd_scene load_steps=23 format=3 uid="uid://arcania_player"]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/state_machine.gd" id="2_sm"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/player/states/player_state_dead.gd" id="11_dead"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="12_health"]
 [ext_resource type="Script" path="res://scripts/components/mana_component.gd" id="13_mana"]
+[ext_resource type="Script" path="res://scripts/components/experience_component.gd" id="22_experience"]
 [ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="14_hitbox"]
 [ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="15_hurt"]
 [ext_resource type="Script" path="res://scripts/player/spell_caster.gd" id="16_caster"]
@@ -59,6 +60,9 @@ max_hp = 80
 
 [node name="ManaComponent" type="Node" parent="."]
 script = ExtResource("13_mana")
+
+[node name="ExperienceComponent" type="Node" parent="."]
+script = ExtResource("22_experience")
 
 [node name="HurtboxComponent" type="Area2D" parent="."]
 collision_layer = 32

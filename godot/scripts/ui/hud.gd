@@ -4,16 +4,17 @@ extends CanvasLayer
 
 const COLOR_BOSS_FILL := Color(0.898, 0.22, 0.231, 1.0)
 
-@onready var character_name: Label = $PlayerStatusCluster/InfoColumn/CharacterName
+@onready var character_name: Label = $PlayerStatusCluster/InfoColumn/NameRow/CharacterName
+@onready var level_label: Label = $PlayerStatusCluster/InfoColumn/NameRow/LevelLabel
 @onready var health_pips: HBoxContainer = $PlayerStatusCluster/InfoColumn/HealthPipRow
 @onready var mana_segments: Control = $PlayerStatusCluster/InfoColumn/ManaSegmentBar
+@onready var experience_bar: ProgressBar = $PlayerStatusCluster/InfoColumn/ExperienceBar
 @onready var shard_count_label: Label = $PlayerStatusCluster/InfoColumn/ShardCounter/ShardCount
 @onready var overcast_label: Label = $PlayerStatusCluster/InfoColumn/OvercastLabel
 @onready var region_label: Label = $NavigationCluster/RegionRow/RegionLabel
 @onready var minimap: Control = $NavigationCluster/MinimapWidget
 @onready var quick_spell_bar: HBoxContainer = $SpellCluster/QuickSpellBar
 @onready var spell_name_fade: Label = $SpellCluster/SpellNameFade
-@onready var currency_bar: PanelContainer = $CurrencyBar
 @onready var quest_label: Label = $QuestTracker/QuestLabel
 @onready var boss_bar: ProgressBar = $BossBarContainer/BossHealthBar
 @onready var boss_name_label: Label = $BossBarContainer/BossNameLabel
@@ -32,6 +33,7 @@ func _ready() -> void:
 	layer = 10
 	_style_static_labels()
 	_style_boss_bar()
+	_style_experience_bar()
 	_load_sigil_icon()
 	if MobileControls.is_likely_touch_device() and quick_spell_bar:
 		quick_spell_bar.visible = false
@@ -52,8 +54,6 @@ func _ready() -> void:
 	_hide_boss_bar()
 	_update_quest_tracker()
 	_refresh_region_label(GameManager.current_region_id)
-	if currency_bar and currency_bar.has_method(&"refresh"):
-		currency_bar.refresh()
 	if minimap and minimap.has_method(&"refresh"):
 		minimap.refresh()
 
@@ -87,6 +87,8 @@ func _disconnect_if(sig: Signal, callable: Callable) -> void:
 func _style_static_labels() -> void:
 	HudStyle.apply_hud_font(character_name, 12, &"semibold")
 	character_name.add_theme_color_override(&"font_color", HudStyle.COLOR_TEXT)
+	HudStyle.apply_hud_font(level_label, 11, &"semibold")
+	level_label.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	HudStyle.apply_hud_font(shard_count_label, 11)
 	shard_count_label.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	HudStyle.apply_hud_font(overcast_label, 10)
@@ -112,6 +114,13 @@ func _style_boss_bar() -> void:
 	boss_bar.add_theme_stylebox_override(&"fill", HudStyle.make_fill_style(COLOR_BOSS_FILL))
 
 
+func _style_experience_bar() -> void:
+	experience_bar.add_theme_stylebox_override(&"background", HudStyle.make_bar_bg())
+	experience_bar.add_theme_stylebox_override(
+		&"fill", HudStyle.make_fill_style(HudStyle.COLOR_EMBER)
+	)
+
+
 func _load_sigil_icon() -> void:
 	var tex := load("res://assets/sprites/ui/icons/ui_spell_icon_ember_sigil.png") as Texture2D
 	if tex and sigil_icon:
@@ -135,9 +144,16 @@ func _bind_player(player: Player) -> void:
 		player.mana_component.overcast_used.connect(_on_overcast_used)
 	if not player.mana_component.focus_shards_changed.is_connected(_on_focus_shards_changed):
 		player.mana_component.focus_shards_changed.connect(_on_focus_shards_changed)
+	if not player.experience_component.experience_changed.is_connected(_on_experience_changed):
+		player.experience_component.experience_changed.connect(_on_experience_changed)
 	_on_hp_changed(0, null)
 	_on_mana_changed(player.mana_component.current_mana, float(player.mana_component.max_mana))
 	_on_focus_shards_changed(player.mana_component.focus_shard_count, ManaComponent.MAX_SHARDS)
+	_on_experience_changed(
+		player.experience_component.level,
+		player.experience_component.current_xp,
+		player.experience_component.get_xp_to_next_level()
+	)
 
 
 func _on_hp_changed(amount: int = 0, _source: Node = null) -> void:
@@ -166,6 +182,12 @@ func _on_focus_shards_changed(count: int, _max_shards: int) -> void:
 			float(_player.mana_component.max_mana),
 			count
 		)
+
+
+func _on_experience_changed(level: int, current_xp: int, xp_to_next_level: int) -> void:
+	level_label.text = "LvL %d" % level
+	experience_bar.max_value = float(xp_to_next_level)
+	experience_bar.value = float(current_xp)
 
 
 func _on_overcast_used(hp_cost: int) -> void:

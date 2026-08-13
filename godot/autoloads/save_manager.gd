@@ -109,7 +109,7 @@ func get_save_summary(slot_id: String) -> Dictionary:
 
 func start_new_game() -> void:
 	current_slot = ""
-	pending_controls_hint = true
+	pending_controls_hint = false
 	GameManager.reset_session()
 	SpellManager.reset_to_defaults()
 	InventorySystem.reset_to_defaults()

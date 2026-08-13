@@ -14,6 +14,7 @@ func enter(_payload: Dictionary) -> void:
 	var data := enemy.get_data()
 	if data:
 		EventBus.enemy_defeated.emit(data.id, enemy.global_position)
+		EventBus.experience_awarded.emit(data.xp_reward)
 		var player := enemy.get_player()
 		if player:
 			player.add_essence(data.essence_reward)

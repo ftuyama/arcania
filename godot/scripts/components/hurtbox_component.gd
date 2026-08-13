@@ -21,7 +21,7 @@ func set_damage_multipliers(multipliers: Dictionary) -> void:
 
 func receive_hit(hitbox: HitboxComponent) -> bool:
 	var health := _get_health()
-	if health == null or health.is_invulnerable:
+	if health == null or health.current_hp <= 0 or health.is_invulnerable:
 		return false
 	var multiplier := 1.0
 	if _damage_multipliers.has(hitbox.damage_type):

@@ -38,7 +38,7 @@ func get_spawn_position(marker_name: StringName = &"default") -> Vector2:
 		return global_position
 
 	for child in spawn_points.get_children():
-		if child is Marker2D and child.name == String(marker_name):
+		if child is Marker2D and child.name == marker_name:
 			return child.global_position
 
 	for child in spawn_points.get_children():

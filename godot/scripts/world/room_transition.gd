@@ -3,6 +3,7 @@ extends Area2D
 
 const TRIGGER_W := 48.0
 const TRIGGER_H := 64.0
+const STANDARD_SPAWN_MARKERS: Array[StringName] = [&"default", &"from_left", &"from_right"]
 
 @export var target_room_id: StringName = &""
 @export var spawn_marker: StringName = &"default"
@@ -16,6 +17,7 @@ func _ready() -> void:
 	collision_layer = 128
 	collision_mask = 2
 	monitoring = true
+	_resolve_spawn_marker()
 	body_entered.connect(_on_body_entered)
 	_layout_collision()
 	_build_visual()
@@ -45,6 +47,17 @@ func _resolved_door_style() -> StringName:
 	if String(target_room_id).begins_with("ww_"):
 		return &"whisperwood_hollow"
 	return &"ashen_threshold"
+
+
+func _resolve_spawn_marker() -> void:
+	## Standard directional doors always spawn on the opposite side of the target room.
+	## Custom spawn markers are preserved for special transitions.
+	if not spawn_marker in STANDARD_SPAWN_MARKERS:
+		return
+	if edge == &"west":
+		spawn_marker = &"from_right"
+	elif edge == &"east":
+		spawn_marker = &"from_left"
 
 
 func _on_body_entered(body: Node2D) -> void:

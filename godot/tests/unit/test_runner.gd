@@ -34,6 +34,8 @@ func _run_all_tests() -> void:
 	var failures := 0
 	failures += _test_modifier_stack()
 	failures += _test_mana_shards()
+	failures += _test_dead_health_component_ignores_hits()
+	failures += _test_experience_component()
 	failures += _test_gate_failure_hints()
 	failures += _test_playtest_tracker()
 	failures += _test_performance_profiler()
@@ -81,6 +83,41 @@ func _test_mana_shards() -> int:
 		return 1
 	if mana.focus_shard_count != ManaComponent.BASE_SHARDS + 1:
 		push_error("ManaComponent shard count not incremented")
+		return 1
+	return 0
+
+
+func _test_dead_health_component_ignores_hits() -> int:
+	var health := HealthComponent.new()
+	health.max_hp = 10
+	health.current_hp = 10
+	health.take_damage(10)
+	health.take_damage(10)
+	if health.current_hp != 0:
+		push_error("HealthComponent should ignore damage after death")
+		return 1
+	return 0
+
+
+func _test_experience_component() -> int:
+	var experience := preload("res://scripts/components/experience_component.gd").new()
+	if experience.get_xp_to_next_level() != 100:
+		push_error("ExperienceComponent level 1 requirement should be 100")
+		return 1
+	experience.award_experience(100)
+	if experience.level != 2 or experience.current_xp != 0:
+		push_error("ExperienceComponent should level at 100 XP")
+		return 1
+	if experience.get_xp_to_next_level() != 125:
+		push_error("ExperienceComponent level 2 requirement should be 125")
+		return 1
+	experience.award_experience(275)
+	if experience.level != 4 or experience.current_xp != 0:
+		push_error("ExperienceComponent should carry XP across multiple levels")
+		return 1
+	experience.set_progress(3, 150)
+	if experience.level != 4 or experience.current_xp != 0:
+		push_error("ExperienceComponent should normalize loaded overflow XP")
 		return 1
 	return 0
 

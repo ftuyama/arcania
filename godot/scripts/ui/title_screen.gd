@@ -1,5 +1,5 @@
 extends Control
-## Title screen — new game, continue, load, quit.
+## Title screen — new game, continue, load, controls, quit.
 
 
 const GAME_WORLD_SCENE := "res://scenes/world/game_world.tscn"
@@ -17,9 +17,11 @@ const BUTTON_FONT_SIZE := 12
 @onready var safe_area: MarginContainer = $SafeArea
 @onready var menu_panel: VBoxContainer = $SafeArea/MainLayout/MenuCenter/MenuPanel
 @onready var load_panel: PanelContainer = $LoadPanel
+@onready var controls_panel: Control = $ControlsPanel
 @onready var new_game_button: Button = $SafeArea/MainLayout/MenuCenter/MenuPanel/NewGameButton
 @onready var continue_button: Button = $SafeArea/MainLayout/MenuCenter/MenuPanel/ContinueButton
 @onready var load_button: Button = $SafeArea/MainLayout/MenuCenter/MenuPanel/LoadButton
+@onready var controls_button: Button = $SafeArea/MainLayout/MenuCenter/MenuPanel/ControlsButton
 @onready var quit_button: Button = $SafeArea/MainLayout/MenuCenter/MenuPanel/QuitButton
 @onready var slot_list: ItemList = $LoadPanel/Margin/VBox/SlotList
 @onready var load_status: Label = $LoadPanel/Margin/VBox/LoadStatus
@@ -45,6 +47,7 @@ func _ready() -> void:
 	new_game_button.pressed.connect(_on_new_game_pressed)
 	continue_button.pressed.connect(_on_continue_pressed)
 	load_button.pressed.connect(_on_load_menu_pressed)
+	controls_button.pressed.connect(_on_controls_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	$LoadPanel/Margin/VBox/LoadConfirmButton.pressed.connect(_on_load_confirm_pressed)
 	$LoadPanel/Margin/VBox/LoadBackButton.pressed.connect(_on_load_back_pressed)
@@ -59,7 +62,7 @@ func _ready() -> void:
 
 
 func _style_buttons() -> void:
-	for btn in [new_game_button, continue_button, load_button, quit_button]:
+	for btn in [new_game_button, continue_button, load_button, controls_button, quit_button]:
 		_apply_button_theme(btn)
 
 
@@ -132,7 +135,7 @@ func _apply_button_theme(btn: Button) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _starting or load_panel.visible:
+	if _starting or load_panel.visible or controls_panel.visible:
 		return
 	if event.is_action_pressed(&"jump") or event.is_action_pressed(&"interact"):
 		var viewport := get_viewport()
@@ -193,6 +196,20 @@ func _on_load_menu_pressed() -> void:
 	_populate_save_slots()
 	if slot_list.item_count > 0:
 		slot_list.select(0)
+
+
+func _on_controls_pressed() -> void:
+	safe_area.visible = false
+	if controls_panel.has_method(&"present"):
+		controls_panel.present()
+	controls_panel.closed.connect(_on_controls_closed)
+
+
+func _on_controls_closed() -> void:
+	if controls_panel.closed.is_connected(_on_controls_closed):
+		controls_panel.closed.disconnect(_on_controls_closed)
+	safe_area.visible = true
+	controls_button.grab_focus()
 
 
 func _on_load_confirm_pressed() -> void:

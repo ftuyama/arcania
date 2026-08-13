@@ -83,6 +83,7 @@ func finalize_custom_defeat() -> void:
 		queue_free()
 		return
 	EventBus.enemy_defeated.emit(data.id, global_position)
+	EventBus.experience_awarded.emit(data.xp_reward)
 	var target := get_player()
 	if target:
 		target.add_essence(data.essence_reward)
@@ -129,4 +130,5 @@ func _on_poise_broken() -> void:
 
 
 func _on_died() -> void:
+	hurtbox_component.monitorable = false
 	state_machine.transition_to(&"Dead", {})

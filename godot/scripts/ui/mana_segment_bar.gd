@@ -5,10 +5,10 @@ extends Control
 const MANA_PER_SHARD := 10
 const SEGMENT_HEIGHT := 8
 const SEGMENT_GAP := 2
-const MIN_SEGMENT_WIDTH := 28
+const SEGMENT_WIDTH := 24
 const BAR_INSET := Rect2(10, 4, 120, 8) # inset inside 140×16 bg sprite
 
-var _shard_count: int = 3
+var _segment_count: int = 3
 var _current_mana: float = 30.0
 var _max_mana: float = 30.0
 var _overcast_visible: bool = false
@@ -18,7 +18,7 @@ var _overcast_tex: Texture2D
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(140, 16)
+	custom_minimum_size = Vector2(96, 16)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_bg_tex = HudStyle.get_hud_texture(&"mana_bar_bg")
 	_fill_tex = HudStyle.get_hud_texture(&"mana_bar_fill")
@@ -28,10 +28,9 @@ func _ready() -> void:
 func update_mana(current: float, maximum: float, shard_count: int = -1) -> void:
 	_current_mana = current
 	_max_mana = maximum
-	if shard_count > 0:
-		_shard_count = shard_count
-	var width := _shard_count * MIN_SEGMENT_WIDTH + maxi(_shard_count - 1, 0) * SEGMENT_GAP + 20
-	var min_size := Vector2(float(maxi(width, 140)), 16.0)
+	_segment_count = maxi(ceili(_max_mana / float(MANA_PER_SHARD)), 1)
+	var width := _segment_count * SEGMENT_WIDTH + maxi(_segment_count - 1, 0) * SEGMENT_GAP + 20
+	var min_size := Vector2(float(width), 16.0)
 	if custom_minimum_size != min_size:
 		custom_minimum_size = min_size
 	queue_redraw()
@@ -55,7 +54,7 @@ func _draw() -> void:
 		draw_texture_rect(_bg_tex, rect, false)
 	else:
 		draw_style_box(HudStyle.make_bar_bg(), rect)
-	if _shard_count <= 0:
+	if _segment_count <= 0:
 		return
 	# Scale inset proportionally when bar is wider than 140
 	var scale_x := size.x / 140.0
@@ -65,9 +64,9 @@ func _draw() -> void:
 		(size.x - 20.0 * scale_x),
 		float(SEGMENT_HEIGHT)
 	)
-	var total_gap := float((_shard_count - 1) * SEGMENT_GAP)
-	var seg_w := (inset.size.x - total_gap) / float(_shard_count)
-	for i in _shard_count:
+	var total_gap := float((_segment_count - 1) * SEGMENT_GAP)
+	var seg_w := (inset.size.x - total_gap) / float(_segment_count)
+	for i in _segment_count:
 		var x := inset.position.x + float(i) * (seg_w + float(SEGMENT_GAP))
 		var seg_rect := Rect2(x, inset.position.y, seg_w, inset.size.y)
 		draw_rect(seg_rect, Color(0.08, 0.08, 0.12, 0.95), true)

@@ -25,7 +25,7 @@ func _ready() -> void:
 
 
 func take_damage(amount: int, source: Node = null, knockback: Vector2 = Vector2.ZERO) -> void:
-	if is_invulnerable or amount <= 0:
+	if current_hp <= 0 or is_invulnerable or amount <= 0:
 		return
 	current_hp = maxi(current_hp - amount, 0)
 	damaged.emit(amount, source)
@@ -53,3 +53,10 @@ func heal(amount: int) -> void:
 		return
 	current_hp = mini(current_hp + amount, max_hp)
 	healed.emit(amount)
+
+
+func restore_full() -> void:
+	var restored := max_hp - current_hp
+	current_hp = max_hp
+	if restored > 0:
+		healed.emit(restored)
