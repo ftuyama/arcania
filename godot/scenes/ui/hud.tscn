@@ -206,14 +206,17 @@ text = ""
 
 [node name="BossBarContainer" type="VBoxContainer" parent="."]
 visible = false
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -200.0
-offset_top = 16.0
-offset_right = 200.0
-offset_bottom = 52.0
-grow_horizontal = 2
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -256.0
+offset_top = -48.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="BossNameLabel" type="Label" parent="BossBarContainer"]
 layout_mode = 2
@@ -222,7 +225,7 @@ text = "Boss"
 horizontal_alignment = 1
 
 [node name="BossHealthBar" type="ProgressBar" parent="BossBarContainer"]
-custom_minimum_size = Vector2(400, 14)
+custom_minimum_size = Vector2(240, 14)
 layout_mode = 2
 max_value = 100.0
 show_percentage = false

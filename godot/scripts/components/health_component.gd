@@ -11,6 +11,7 @@ signal poise_broken
 @export var max_hp: int = 80
 var current_hp: int = 80
 @export var poise: float = 10.0
+@export var receives_knockback: bool = true
 var current_poise: float = 10.0
 var is_invulnerable: bool = false
 var is_staggered: bool = false
@@ -29,7 +30,7 @@ func take_damage(amount: int, source: Node = null, knockback: Vector2 = Vector2.
 		return
 	current_hp = maxi(current_hp - amount, 0)
 	damaged.emit(amount, source)
-	if _owner_body and knockback != Vector2.ZERO:
+	if _owner_body and receives_knockback and knockback != Vector2.ZERO:
 		_owner_body.velocity = knockback
 	if current_hp <= 0:
 		died.emit()

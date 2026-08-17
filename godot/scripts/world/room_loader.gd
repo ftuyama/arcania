@@ -93,7 +93,7 @@ func change_room(
 			if not GameManager.has_bound_crucible():
 				_player.set_respawn_position(room.get_spawn_position(&"default"))
 		_apply_camera_limits(room)
-		AudioManager.play_region(room.region_id)
+		AudioManager.play_room(room.room_id, room.region_id)
 
 	_is_changing_room = false
 

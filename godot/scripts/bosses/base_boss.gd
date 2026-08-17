@@ -10,7 +10,7 @@ extends CharacterBody2D
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var phase_manager: BossPhaseManager = $BossPhaseManager
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var telegraph: ColorRect = $Telegraph
+@onready var telegraph: CanvasItem = $Telegraph
 @onready var arena_boundary: StaticBody2D = $ArenaBoundary
 @onready var hit_flash: Node = $HitFlash
 

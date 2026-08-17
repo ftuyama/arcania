@@ -6,6 +6,7 @@ const MAX_SFX_PLAYERS := 24
 
 const GAME_OVER_MUSIC := "res://assets/audio/music/mus_game_over.wav"
 const GAME_OVER_STINGER := "res://assets/audio/sfx/ui/sfx_game_over.wav"
+const THORNWEFT_MATRON_MUSIC := "res://assets/audio/music/mus_mb_01_thornweft_matron.wav"
 const LEVEL_UP_DURATION := 0.72
 const LEVEL_UP_MIX_RATE := 44100
 
@@ -38,7 +39,9 @@ func _ready() -> void:
 		_sfx_players.append(player)
 
 	EventBus.room_entered.connect(_on_room_entered)
+	EventBus.boss_fight_started.connect(_on_boss_fight_started)
 	EventBus.boss_phase_changed.connect(_on_boss_phase_changed)
+	EventBus.boss_defeated.connect(_on_boss_defeated)
 	EventBus.game_over_started.connect(_on_game_over_started)
 	_music_player.finished.connect(_on_music_finished)
 	call_deferred(&"_apply_saved_settings")
@@ -50,7 +53,9 @@ func _apply_saved_settings() -> void:
 
 func _exit_tree() -> void:
 	EventBus.room_entered.disconnect(_on_room_entered)
+	EventBus.boss_fight_started.disconnect(_on_boss_fight_started)
 	EventBus.boss_phase_changed.disconnect(_on_boss_phase_changed)
+	EventBus.boss_defeated.disconnect(_on_boss_defeated)
 	EventBus.game_over_started.disconnect(_on_game_over_started)
 	if _music_player.finished.is_connected(_on_music_finished):
 		_music_player.finished.disconnect(_on_music_finished)
@@ -80,6 +85,15 @@ func play_region(region_id: StringName) -> void:
 	if not ambience_path.is_empty():
 		if region_changed or ambience_path != _current_ambience_path or not _ambience_player.playing:
 			play_ambience(ambience_path)
+
+
+func play_room(room_id: StringName, region_id: StringName) -> void:
+	play_region(region_id)
+	if (
+		room_id == &"ww_11_heartwood_grove"
+		and not GameManager.is_boss_defeated(&"mb_01_thornweft_matron")
+	):
+		play_music(THORNWEFT_MATRON_MUSIC, true)
 
 
 func play_music(stream_path: String, should_loop: bool = true) -> void:
@@ -182,15 +196,20 @@ func restore_region_music(region_id: StringName = &"") -> void:
 	play_region(target)
 
 
-func _on_room_entered(_room_id: StringName, region_id: StringName) -> void:
-	play_region(region_id)
+func _on_room_entered(room_id: StringName, region_id: StringName) -> void:
+	play_room(room_id, region_id)
+
+
+func _on_boss_fight_started(boss_id: StringName) -> void:
+	if boss_id == &"mb_01_thornweft_matron":
+		play_music(THORNWEFT_MATRON_MUSIC, true)
 
 
 func _on_boss_phase_changed(boss_id: StringName, phase: int) -> void:
 	var path := ""
 	match boss_id:
 		&"mb_01_thornweft_matron":
-			path = "res://assets/audio/music/mus_02_whisperwood.wav"
+			path = THORNWEFT_MATRON_MUSIC
 		&"boss_01_root_warden":
 			path = "res://assets/audio/music/mus_02_whisperwood.wav"
 	if path.is_empty():
@@ -200,6 +219,12 @@ func _on_boss_phase_changed(boss_id: StringName, phase: int) -> void:
 		_music_player.pitch_scale = 1.0 + float(phase) * 0.04
 	else:
 		_music_player.pitch_scale = 1.0
+
+
+func _on_boss_defeated(boss_id: StringName) -> void:
+	if boss_id == &"mb_01_thornweft_matron":
+		_music_player.pitch_scale = 1.0
+		restore_region_music()
 
 
 func apply_settings(settings: Dictionary) -> void:

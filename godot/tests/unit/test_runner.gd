@@ -41,7 +41,7 @@ func _run_all_tests() -> void:
 	failures += _test_playtest_tracker()
 	failures += _test_performance_profiler()
 	failures += _test_spell_manager()
-	failures += _test_hub_quest_and_waystone()
+	failures += _test_hub_quest()
 	failures += _test_ability_gate_save_persistence()
 	failures += _test_spore_glen_progression()
 	failures += _test_save_manager()
@@ -252,7 +252,7 @@ func _test_spell_manager() -> int:
 	return 0
 
 
-func _test_hub_quest_and_waystone() -> int:
+func _test_hub_quest() -> int:
 	var quests := root.get_node("QuestManager")
 	quests.reset_to_defaults()
 	if not quests.start_quest(&"null_rope_bind"):
@@ -265,13 +265,12 @@ func _test_hub_quest_and_waystone() -> int:
 	var hub_scene := load("res://scenes/rooms/ashen_threshold/at_01_threshold_hub.tscn") as PackedScene
 	var hub := hub_scene.instantiate()
 	var corin := hub.get_node_or_null("Entities/MagisterCorin")
-	var waystone := hub.get_node_or_null("Waystone")
 	if corin == null or corin.get("quest_to_start") != &"null_rope_bind":
 		push_error("Magister Corin should start Null-Rope Bind")
 		hub.free()
 		return 1
-	if waystone == null or waystone.get("waystone_id") != &"at_hub":
-		push_error("Threshold hub should contain its central Waystone")
+	if hub.get_node_or_null("Waystone") != null:
+		push_error("Threshold hub should not contain a dormant Waystone")
 		hub.free()
 		return 1
 	hub.free()

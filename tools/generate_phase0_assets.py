@@ -1360,6 +1360,36 @@ def gen_music_whisperwood() -> Path:
     return wav
 
 
+def gen_music_thornweft_matron() -> Path:
+    """Audible cello and discordant choir loop for the Heartwood Grove encounter."""
+    duration = 18.0
+    n = int(SAMPLE_RATE * duration)
+    bass_notes = [73.42, 87.31, 77.78, 65.41]
+    choir_notes = [146.83, 164.81, 174.61, 155.56]
+    samples = []
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        step = int(t / 1.5) % len(bass_notes)
+        local_t = t % 1.5
+        envelope = min(1.0, local_t * 5.0) * (0.4 + 0.6 * math.exp(-local_t * 0.8))
+        bass = bass_notes[step]
+        choir = choir_notes[(step + 1) % len(choir_notes)]
+        pulse = max(0.0, math.sin(math.pi * local_t / 1.5))
+        s = (
+            _sine(bass, t, 0.28 * envelope)
+            + _sine(bass * 2.0, t, 0.1 * envelope)
+            + _sine(choir, t, 0.18 * pulse)
+            + _sine(choir * 1.018, t, 0.12 * pulse)
+            + _sine(choir * 2.0, t, 0.08 * pulse)
+            + _sine(43.65, t, 0.14)
+        )
+        fade = min(1.0, t / 0.05, (duration - t) / 0.05)
+        samples.append(s * fade)
+    wav = ASSETS / "audio/music/mus_mb_01_thornweft_matron.wav"
+    _write_wav(wav, samples)
+    return wav
+
+
 def gen_music_game_over() -> Path:
     """Slow D-minor death screen loop — mus_game_over."""
     duration = 24.0
@@ -1801,6 +1831,7 @@ def main() -> None:
         gen_spell_sfx(spell_id, "impact")
     gen_music_threshold()
     gen_music_whisperwood()
+    gen_music_thornweft_matron()
     gen_music_game_over()
     gen_stinger_main_menu()
     print("Done — assets written to", ASSETS)

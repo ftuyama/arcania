@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://arcania_thornweft_matron"]
+[gd_scene load_steps=13 format=3 uid="uid://arcania_thornweft_matron"]
 
 [ext_resource type="Script" path="res://scripts/bosses/thornweft_matron.gd" id="1_boss"]
 [ext_resource type="Resource" path="res://resources/bosses/mb_01_thornweft_matron.tres" id="2_data"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="6_hitbox"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/bosses/mb_01_thornweft_matron/mb_01_sheet.tres" id="7_frames"]
 [ext_resource type="Script" path="res://scripts/components/hit_flash.gd" id="8_flash"]
+[ext_resource type="PackedScene" path="res://scenes/components/enemy_telegraph.tscn" id="9_telegraph"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(36, 48)
@@ -34,13 +35,8 @@ sprite_frames = ExtResource("7_frames")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="Telegraph" type="ColorRect" parent="."]
-visible = false
-offset_left = -32.0
-offset_top = -72.0
-offset_right = 32.0
-offset_bottom = 8.0
-color = Color(0.32, 0.72, 0.53, 0.5)
+[node name="Telegraph" parent="." instance=ExtResource("9_telegraph")]
+position = Vector2(0, -48)
 
 [node name="BossPhaseManager" type="Node" parent="."]
 script = ExtResource("3_phase")
@@ -50,6 +46,7 @@ script = ExtResource("8_flash")
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4_health")
+receives_knockback = false
 
 [node name="HurtboxComponent" type="Area2D" parent="."]
 collision_layer = 64

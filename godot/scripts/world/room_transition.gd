@@ -8,6 +8,8 @@ const STANDARD_SPAWN_MARKERS: Array[StringName] = [&"default", &"from_left", &"f
 @export var target_room_id: StringName = &""
 @export var spawn_marker: StringName = &"default"
 @export var edge: StringName = &"east"
+@export var required_boss_id: StringName = &""
+@export var locked_message := "This path is sealed until the battle is finished."
 @export_enum("auto", "ashen_threshold", "whisperwood_hollow", "sunken_catacombs", "planar_rift") var door_style: String = "auto"
 
 var _triggered: bool = false
@@ -64,6 +66,9 @@ func _on_body_entered(body: Node2D) -> void:
 	if _triggered:
 		return
 	if not body.is_in_group(&"player"):
+		return
+	if not required_boss_id.is_empty() and not GameManager.is_boss_defeated(required_boss_id):
+		EventBus.ui_toast.emit(locked_message)
 		return
 	if target_room_id.is_empty():
 		push_error("RoomTransition: target_room_id not set on %s" % name)

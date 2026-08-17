@@ -3,6 +3,7 @@ extends Node
 
 
 const CAST_FAIL_SFX := "res://assets/audio/sfx/ui/ui_menu_select.wav"
+const ROOTBIND_PLATFORM_TEXTURE := preload("res://assets/sprites/world/world_rootbind_platform.png")
 
 @onready var projectile_pool: Node = $ProjectilePool
 @onready var melee_hitbox: HitboxComponent = $"../MeleeHitbox"
@@ -123,11 +124,13 @@ func _spawn_vine_platform(player: Player) -> void:
 	shape.shape = rect
 	shape.position = Vector2(32, 8)
 	body.add_child(shape)
-	var visual := ColorRect.new()
-	visual.size = Vector2(64, 16)
-	visual.color = Color(0.32, 0.62, 0.28, 1)
+	var visual := Sprite2D.new()
+	visual.texture = ROOTBIND_PLATFORM_TEXTURE
+	visual.position = Vector2(32, 11)
+	visual.scale = Vector2(64.0 / 1983.0, 56.0 / 1983.0)
+	visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	body.add_child(visual)
-	body.global_position = player.global_position + Vector2(-32, -96)
+	body.global_position = player.global_position + Vector2(-32, -88)
 	player.get_parent().add_child(body)
 
 
