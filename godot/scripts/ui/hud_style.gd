@@ -12,6 +12,7 @@ const COLOR_MANA := Color(0.0, 1.0, 1.0, 1.0) # #00FFFF
 const COLOR_HP := Color(1.0, 0.867, 0.824, 1.0) # #FFDDD2
 const COLOR_HP_LOW := Color(0.898, 0.22, 0.231, 1.0) # #E5383B
 const COLOR_EMBER := Color(1.0, 0.42, 0.208, 1.0) # #FF6B35
+const COLOR_XP := Color(1.0, 0.85, 0.2, 1.0) # #FFD933
 const COLOR_PIP_EMPTY := Color(0.173, 0.173, 0.204, 1.0)
 
 const FONT_REGULAR_PATH := "res://assets/fonts/Cinzel-Regular.ttf"

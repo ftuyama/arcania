@@ -225,19 +225,11 @@ func play_dash_sfx() -> void:
 func play_melee_windup_sfx(combo_index: int) -> void:
 	var path := "res://assets/audio/sfx/player/sfx_melee_swipe_%d.wav" % (combo_index + 1)
 	AudioManager.play_sfx(path, global_position)
-	var windup_scale := Vector2(0.92, 1.06)
-	animated_sprite.scale = windup_scale
-	var tween := create_tween()
-	tween.tween_property(animated_sprite, "scale", Vector2.ONE, float(COMBO_STEPS[combo_index]["windup"])).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func play_melee_swing(combo_index: int) -> void:
 	if melee_swing_vfx and melee_swing_vfx.has_method(&"play_swing"):
 		melee_swing_vfx.play_swing(facing_direction, combo_index)
-	var tween := create_tween()
-	var punch := 1.08 if combo_index < 2 else 1.15
-	animated_sprite.scale = Vector2(punch, 0.92)
-	tween.tween_property(animated_sprite, "scale", Vector2.ONE, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	if combo_index == COMBO_STEPS.size() - 1:
 		CombatJuice.request_screen_shake(2.0, 0.06)
 

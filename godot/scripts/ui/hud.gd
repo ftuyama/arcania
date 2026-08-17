@@ -117,7 +117,7 @@ func _style_boss_bar() -> void:
 func _style_experience_bar() -> void:
 	experience_bar.add_theme_stylebox_override(&"background", HudStyle.make_bar_bg())
 	experience_bar.add_theme_stylebox_override(
-		&"fill", HudStyle.make_fill_style(HudStyle.COLOR_EMBER)
+		&"fill", HudStyle.make_fill_style(HudStyle.COLOR_XP)
 	)
 
 
