@@ -7,6 +7,7 @@ extends Area2D
 @export var dialogue_lines: PackedStringArray = PackedStringArray()
 @export var one_shot: bool = true
 @export var quest_to_start: StringName = &""
+@export var world_flags_on_dialogue_finish: Array[StringName] = []
 @export var sprite_frames: SpriteFrames
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -92,3 +93,5 @@ func _on_dialogue_finished() -> void:
 		_prompt.visible = false
 	if quest_to_start and not QuestManager.is_quest_complete(quest_to_start):
 		QuestManager.start_quest(quest_to_start)
+	for flag in world_flags_on_dialogue_finish:
+		GameManager.set_world_flag(flag)

@@ -24,7 +24,7 @@ script = ExtResource("2_geom")
 tileset_path = "res://assets/sprites/tilesets/02_whisperwood_hollow/tileset.png"
 floor_tile_index = 1
 platform_tile_index = 9
-platform_rects = Array[Rect2]([Rect2(0, 576, 1280, 64), Rect2(192, 448, 128, 20), Rect2(448, 384, 96, 20), Rect2(640, 480, 128, 20), Rect2(832, 352, 160, 20), Rect2(1024, 448, 128, 20), Rect2(1152, 320, 96, 20)])
+platform_rects = Array[Rect2]([Rect2(0, 576, 1280, 64), Rect2(192, 480, 128, 20), Rect2(448, 384, 96, 20), Rect2(640, 480, 128, 20), Rect2(832, 352, 160, 20), Rect2(1024, 448, 128, 20), Rect2(1152, 320, 96, 20)])
 west_transition = true
 east_transition = true
 
@@ -100,4 +100,3 @@ spawn_marker = &"default"
 
 [node name="from_cache" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(1100, 548)
-

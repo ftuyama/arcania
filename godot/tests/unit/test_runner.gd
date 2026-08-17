@@ -41,7 +41,9 @@ func _run_all_tests() -> void:
 	failures += _test_playtest_tracker()
 	failures += _test_performance_profiler()
 	failures += _test_spell_manager()
+	failures += _test_hub_quest_and_waystone()
 	failures += _test_ability_gate_save_persistence()
+	failures += _test_spore_glen_progression()
 	failures += _test_save_manager()
 	failures += _test_enemy_hit_vfx()
 	failures += _test_mobile_controls()
@@ -250,6 +252,33 @@ func _test_spell_manager() -> int:
 	return 0
 
 
+func _test_hub_quest_and_waystone() -> int:
+	var quests := root.get_node("QuestManager")
+	quests.reset_to_defaults()
+	if not quests.start_quest(&"null_rope_bind"):
+		push_error("Null-Rope Bind should start after Corin's dialogue")
+		return 1
+	var quest: QuestData = quests.get_quest(&"null_rope_bind")
+	if quest == null or quest.title != "Null-Rope Bind":
+		push_error("Null-Rope Bind quest data is missing")
+		return 1
+	var hub_scene := load("res://scenes/rooms/ashen_threshold/at_01_threshold_hub.tscn") as PackedScene
+	var hub := hub_scene.instantiate()
+	var corin := hub.get_node_or_null("Entities/MagisterCorin")
+	var waystone := hub.get_node_or_null("Waystone")
+	if corin == null or corin.get("quest_to_start") != &"null_rope_bind":
+		push_error("Magister Corin should start Null-Rope Bind")
+		hub.free()
+		return 1
+	if waystone == null or waystone.get("waystone_id") != &"at_hub":
+		push_error("Threshold hub should contain its central Waystone")
+		hub.free()
+		return 1
+	hub.free()
+	quests.reset_to_defaults()
+	return 0
+
+
 func _test_ability_gate_save_persistence() -> int:
 	const GATE_ID := &"unit_test_vine_gate"
 	var saves := _autoload_save_manager()
@@ -275,6 +304,27 @@ func _test_ability_gate_save_persistence() -> int:
 		return 1
 	if not game.is_gate_cleared(GATE_ID):
 		push_error("cleared gate not restored after load")
+		return 1
+	return 0
+
+
+func _test_spore_glen_progression() -> int:
+	var has_cast_key := false
+	for event in InputMap.action_get_events(&"cast_spell"):
+		if event is InputEventKey and event.physical_keycode == KEY_K:
+			has_cast_key = true
+			break
+	if not has_cast_key:
+		push_error("cast_spell should be bound to K")
+		return 1
+
+	var scene := load("res://scenes/rooms/whisperwood_hollow/ww_05_spore_glen.tscn") as PackedScene
+	var room := scene.instantiate()
+	var geometry := room.get_node_or_null("Geometry")
+	var platforms: Array[Rect2] = geometry.platform_rects
+	room.free()
+	if platforms.size() < 2 or platforms[1].position.y != 480.0:
+		push_error("Spore Glen's first platform should be reachable by a normal jump")
 		return 1
 	return 0
 

@@ -11,7 +11,7 @@ var _hp: int = 30
 var _destroyed: bool = false
 
 @onready var _blocker: CollisionShape2D = $CollisionShape2D
-@onready var _visual: ColorRect = $Visual
+@onready var _visual: CanvasItem = $Visual
 @onready var _secret_door: Area2D = $SecretDoor
 
 

@@ -32,6 +32,7 @@ func _exit_tree() -> void:
 
 func _build_quest_registry() -> void:
 	_register_quest(_make_ashen_awakening())
+	_register_quest(_make_null_rope_bind())
 	_register_quest(_make_peddlers_price())
 	for path in QUEST_PATHS:
 		if ResourceLoader.exists(path):
@@ -77,6 +78,22 @@ func _make_ashen_awakening() -> QuestData:
 	rewards.weave_silk = 2
 	rewards.world_flags = [&"quest_ashen_awakening_done"]
 	quest.rewards = rewards
+	return quest
+
+
+func _make_null_rope_bind() -> QuestData:
+	var quest := QuestData.new()
+	quest.id = &"null_rope_bind"
+	quest.title = "Null-Rope Bind"
+	quest.description = "Corin binds Elara's wrists with null-thread to keep the Hollow at bay."
+	quest.quest_type = QuestData.QuestType.MAIN
+
+	var obj_ambush := QuestObjective.new()
+	obj_ambush.id = &"survive_hollow_ambush"
+	obj_ambush.description = "Survive the Hollow ambush with Corin"
+	obj_ambush.objective_type = QuestObjective.ObjectiveType.INTERACT_OBJECT
+	obj_ambush.target_id = &"corin_hollow_ambush"
+	quest.objectives = [obj_ambush]
 	return quest
 
 
