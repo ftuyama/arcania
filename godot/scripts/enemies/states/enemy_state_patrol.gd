@@ -13,8 +13,16 @@ func physics_update(delta: float) -> void:
 	var left := enemy.home_position.x + enemy.patrol_left
 	var right := enemy.home_position.x + enemy.patrol_right
 	var speed := data.move_speed * float(enemy.facing_direction)
-	enemy.velocity = Vector2(speed, 0.0)
-	enemy.move_and_slide()
+
+	if enemy.is_grounded:
+		enemy.velocity.x = speed
+		enemy.apply_gravity(delta)
+		enemy.move_and_slide()
+		if enemy.is_on_wall():
+			enemy.facing_direction *= -1
+	else:
+		enemy.velocity = Vector2(speed, 0.0)
+		enemy.move_and_slide()
 
 	if enemy.global_position.x <= left:
 		enemy.facing_direction = 1

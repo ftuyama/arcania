@@ -16,7 +16,7 @@ Dark-fantasy 2D Metroidvania built with Godot 4.3+. The player is Elara Veilmark
 
 ## Git usage
 
-- Other agents may be holding `git.index.lock`. Avoid any git command that writes the index or acquires that lock (e.g., `git add`, `git commit`, `git checkout`, `git reset`, `git rebase`). Read-only commands such as `git status`, `git log`, `git diff`, and `git show` are safe.
+- Please DO NOT use `git.index.lock`!
 
 The main documents are `01-gdd.md` (pillars), `02-world-design.md` (regions and gates), `03-art-bible.md` (visual tone), `04-enemy-bible.md`, `05-boss-bible.md`, `06-magic-system.md`, `07-narrative.md`, `08-technical-architecture.md`, `10-development-roadmap.md`, `11-scoped-release.md`, and `12-improvements-backlog.md`.
 

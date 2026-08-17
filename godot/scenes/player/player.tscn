@@ -43,7 +43,7 @@ position = Vector2(0, 2)
 shape = SubResource("RectangleShape2D_body")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1909731270]
-position = Vector2(0, -16)
+position = Vector2(0, -12)
 sprite_frames = ExtResource("19_frames")
 animation = &"idle"
 autoplay = "idle"
@@ -92,7 +92,7 @@ script = ExtResource("18_flash")
 [node name="MeleeSwingVFX" type="Node2D" parent="." unique_id=1049481718]
 visible = false
 z_index = 1
-position = Vector2(0, -16)
+position = Vector2(0, -12)
 script = ExtResource("20_swing")
 
 [node name="SlashSprite" type="Sprite2D" parent="MeleeSwingVFX" unique_id=1246539436]

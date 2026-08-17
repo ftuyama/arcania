@@ -2,7 +2,7 @@ extends State
 ## Chase the player until in attack range.
 
 
-func physics_update(_delta: float) -> void:
+func physics_update(delta: float) -> void:
 	var enemy := _get_enemy()
 	var data := enemy.get_data()
 	var player := enemy.get_player()
@@ -21,8 +21,16 @@ func physics_update(_delta: float) -> void:
 
 	enemy.face_player()
 	enemy.play_animation(&"walk")
-	enemy.velocity = to_player.normalized() * data.chase_speed
-	enemy.move_and_slide()
+
+	if enemy.is_grounded:
+		enemy.velocity.x = float(enemy.facing_direction) * data.chase_speed
+		if enemy.should_jump_toward(player.global_position):
+			enemy.velocity.y = BaseEnemy.JUMP_VELOCITY
+		enemy.apply_gravity(delta)
+		enemy.move_and_slide()
+	else:
+		enemy.velocity = to_player.normalized() * data.chase_speed
+		enemy.move_and_slide()
 
 
 func _get_enemy() -> BaseEnemy:

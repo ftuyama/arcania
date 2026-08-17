@@ -41,6 +41,8 @@ func physics_update(delta: float) -> void:
 		enemy.velocity = Vector2(220.0 * float(enemy.facing_direction), -40.0)
 	elif _phase == 1:
 		enemy.velocity.x = move_toward(enemy.velocity.x, 0.0, 800.0 * delta)
+		if enemy.is_grounded:
+			enemy.apply_gravity(delta)
 		enemy.move_and_slide()
 		if _timer <= 0.0:
 			enemy.hitbox_component.disable_hitbox()

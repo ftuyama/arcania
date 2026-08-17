@@ -28,6 +28,7 @@ script = ExtResource("1_enemy")
 data = ExtResource("2_data")
 patrol_left = -80.0
 patrol_right = 80.0
+is_grounded = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 3)

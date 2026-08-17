@@ -3,9 +3,15 @@ extends CharacterBody2D
 ## Shared enemy body with data-driven stats.
 
 
+const GRAVITY := 980.0
+const MAX_FALL_SPEED := 500.0
+const JUMP_VELOCITY := -280.0
+const JUMP_VERTICAL_THRESHOLD := 24.0
+
 @export var data: EnemyData
 @export var patrol_left: float = -64.0
 @export var patrol_right: float = 64.0
+@export var is_grounded: bool = false
 
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var state_machine: StateMachine = $StateMachine
@@ -47,6 +53,22 @@ func get_player() -> Player:
 
 func get_data() -> EnemyData:
 	return data
+
+
+func apply_gravity(delta: float) -> void:
+	if not is_grounded:
+		return
+	if not is_on_floor():
+		velocity.y += GRAVITY * delta
+		velocity.y = minf(velocity.y, MAX_FALL_SPEED)
+
+
+func should_jump_toward(target_position: Vector2) -> bool:
+	if not is_grounded or not is_on_floor():
+		return false
+	var dy := global_position.y - target_position.y
+	var dx := absf(target_position.x - global_position.x)
+	return dy > JUMP_VERTICAL_THRESHOLD and dx <= data.detection_radius * 0.6
 
 
 func face_player() -> void:
