@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://arcania_root_warden"]
+[gd_scene load_steps=12 format=3 uid="uid://arcania_root_warden"]
 
 [ext_resource type="Script" path="res://scripts/bosses/root_warden.gd" id="1_boss"]
 [ext_resource type="Resource" path="res://resources/bosses/boss_01_root_warden.tres" id="2_data"]
@@ -14,6 +14,9 @@ size = Vector2(40, 56)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
 size = Vector2(44, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_combat"]
+size = Vector2(60, 60)
 
 [node name="RootWarden" type="CharacterBody2D"]
 collision_layer = 4
@@ -55,7 +58,8 @@ collision_mask = 8
 script = ExtResource("5_hurt")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]
-shape = SubResource("RectangleShape2D_hurt")
+position = Vector2(0, -41)
+shape = SubResource("RectangleShape2D_combat")
 
 [node name="HitboxComponent" type="Area2D" parent="."]
 collision_layer = 16
@@ -64,7 +68,8 @@ monitoring = false
 script = ExtResource("6_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
-shape = SubResource("RectangleShape2D_hurt")
+position = Vector2(0, -41)
+shape = SubResource("RectangleShape2D_combat")
 
 [node name="ArenaBoundary" type="StaticBody2D" parent="."]
 collision_layer = 0

@@ -375,3 +375,5 @@ func _apply_pending_load() -> void:
 		player.experience_component.set_progress(int(data["level"]), int(data.get("current_xp", 0)))
 	if data.has("facing"):
 		player.facing_direction = int(data["facing"])
+
+	player.reset_state()

@@ -19,7 +19,7 @@
 size = Vector2(18, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
-size = Vector2(28, 48)
+size = Vector2(58, 58)
 
 [node name="MothlingSwarm" type="CharacterBody2D" unique_id=1821670710]
 collision_layer = 4
@@ -52,7 +52,7 @@ collision_mask = 8
 script = ExtResource("10_hurt")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" unique_id=2020167452]
-position = Vector2(-3, -10)
+position = Vector2(0, -16)
 shape = SubResource("RectangleShape2D_hurt")
 
 [node name="HitboxComponent" type="Area2D" parent="." unique_id=341225188]
@@ -61,7 +61,7 @@ collision_mask = 32
 script = ExtResource("11_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" unique_id=1663653234]
-position = Vector2(6, -10)
+position = Vector2(0, -16)
 shape = SubResource("RectangleShape2D_hurt")
 
 [node name="DetectionArea" type="Area2D" parent="." unique_id=1067376002]

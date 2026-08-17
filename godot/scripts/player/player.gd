@@ -182,11 +182,18 @@ func respawn() -> void:
 	health_component.current_hp = health_component.max_hp
 	mana_component.restore_full()
 	global_position = respawn_position
+	reset_state()
+
+
+func reset_state() -> void:
 	velocity = Vector2.ZERO
 	combo_index = 0
+	combo_reset_timer = 0.0
 	animated_sprite.modulate = Color.WHITE
 	set_invulnerable(false)
+	is_phasing = false
 	state_machine.transition_to(&"Idle", {})
+	play_animation(&"idle")
 
 
 func add_essence(amount: int) -> void:

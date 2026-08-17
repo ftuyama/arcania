@@ -45,6 +45,7 @@ func _run_all_tests() -> void:
 	failures += _test_ability_gate_save_persistence()
 	failures += _test_spore_glen_progression()
 	failures += _test_save_manager()
+	failures += _test_player_load_resets_death_state()
 	failures += _test_enemy_hit_vfx()
 	failures += _test_mobile_controls()
 	failures += _test_map_toggle()
@@ -397,6 +398,41 @@ func _test_save_manager() -> int:
 		return 1
 
 	saves.start_new_game()
+	return 0
+
+
+func _test_player_load_resets_death_state() -> int:
+	var scene = load("res://scenes/player/player.tscn")
+	if scene == null:
+		push_error("Failed to load player scene for reset test")
+		return 1
+	var player = scene.instantiate()
+	if player == null:
+		push_error("Failed to instantiate player for reset test")
+		return 1
+	root.add_child(player)
+
+	player.state_machine.transition_to(&"Dead", {})
+	if player.state_machine.current_state.name != &"Dead":
+		push_error("Player should enter Dead state for reset test")
+		player.free()
+		return 1
+
+	player.reset_state()
+	if player.state_machine.current_state.name != &"Idle":
+		push_error("reset_state should return player to Idle")
+		player.free()
+		return 1
+	if player.animated_sprite.modulate != Color.WHITE:
+		push_error("reset_state should restore sprite color")
+		player.free()
+		return 1
+	if player.is_invulnerable or player.health_component.is_invulnerable:
+		push_error("reset_state should clear invulnerability")
+		player.free()
+		return 1
+
+	player.free()
 	return 0
 
 
