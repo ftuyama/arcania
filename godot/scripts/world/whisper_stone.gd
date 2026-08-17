@@ -9,7 +9,8 @@ const PUZZLE_FLAG := &"whisper_loop_solved"
 
 var _activated: bool = false
 
-@onready var _visual: ColorRect = $Visual
+@onready var _visual: Sprite2D = $Visual
+@onready var _glow: Sprite2D = $Glow
 
 
 func _ready() -> void:
@@ -18,7 +19,7 @@ func _ready() -> void:
 	monitoring = true
 	body_entered.connect(_on_body_entered)
 	if GameManager.has_world_flag(PUZZLE_FLAG):
-		_visual.color = Color(0.6, 0.95, 0.75, 1.0)
+		_set_active_visual()
 		_activated = true
 
 
@@ -39,14 +40,22 @@ func _on_body_entered(body: Node2D) -> void:
 		progress = []
 	if sequence_index != EXPECTED_SEQUENCE[progress.size()]:
 		GameManager.set_world_value(&"whisper_loop_progress", [])
-		_visual.color = Color(0.9, 0.3, 0.3, 1.0)
+		_visual.modulate = Color(0.9, 0.3, 0.3, 1.0)
+		_glow.visible = false
+		EventBus.ui_toast.emit("The whispers fall silent.")
 		return
 	progress.append(sequence_index)
 	GameManager.set_world_value(&"whisper_loop_progress", progress)
-	_visual.color = Color(0.6, 0.95, 0.75, 1.0)
+	_set_active_visual()
+	EventBus.ui_toast.emit("A whisper stirs (%d/3)." % progress.size())
 	_activated = true
 	if progress.size() >= EXPECTED_SEQUENCE.size():
 		_complete_puzzle()
+
+
+func _set_active_visual() -> void:
+	_visual.modulate = Color(0.75, 1.0, 0.85, 1.0)
+	_glow.visible = true
 
 
 func _complete_puzzle() -> void:

@@ -374,19 +374,19 @@ animations = [
 "frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_33")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_34")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_35")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_36")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_37")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_38")}],
 "loop": false,
 "name": &"melee_1",
-"speed": 20.0
+"speed": 16.0
 },
 {
 "frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_39")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_40")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_41")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_42")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_43")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_44")}],
 "loop": false,
 "name": &"melee_2",
-"speed": 25.0
+"speed": 16.0
 },
 {
 "frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_45")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_46")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_47")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_48")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_49")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_50")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_51")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_52")}],
 "loop": false,
 "name": &"melee_3",
-"speed": 17.4
+"speed": 16.0
 },
 {
 "frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_53")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_54")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_55")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_56")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_57")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_58")}],

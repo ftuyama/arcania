@@ -2,9 +2,12 @@ extends Control
 ## 8-slot spell wheel for loadout management.
 
 
-@onready var slot_grid: GridContainer = $Panel/Margin/VBox/SlotGrid
-@onready var acquired_list: ItemList = $Panel/Margin/VBox/AcquiredList
-@onready var hint_label: Label = $Panel/Margin/VBox/HintLabel
+const WHEEL_RADIUS := 78.0
+const SLOT_SIZE := Vector2(48, 28)
+
+@onready var slot_grid: Control = $Panel/Margin/VBox/ContentRow/SlotGrid
+@onready var acquired_list: ItemList = $Panel/Margin/VBox/ContentRow/SpellArchive/AcquiredList
+@onready var hint_label: Label = $Panel/Margin/VBox/ContentRow/SpellArchive/HintLabel
 
 
 var _selected_wheel_slot: int = -1
@@ -13,25 +16,39 @@ var _selected_wheel_slot: int = -1
 func _ready() -> void:
 	visible = false
 	HudStyle.apply_hud_font($Panel/Margin/VBox/Title, 16, &"semibold")
+	HudStyle.apply_hud_font($Panel/Margin/VBox/ContentRow/SpellArchive/ArchiveLabel, 12, &"semibold")
+	HudStyle.apply_hud_font($Panel/Margin/VBox/ContentRow/SlotGrid/CenterLabel, 13, &"semibold")
 	HudStyle.apply_ui_font(acquired_list, 11)
 	HudStyle.apply_hud_font(hint_label, 12)
 	acquired_list.item_selected.connect(_on_acquired_selected)
-	_add_close_button()
+	_style_panel()
 
 
 func refresh() -> void:
 	for child in slot_grid.get_children():
 		child.queue_free()
-	slot_grid.columns = 4
+	var center := slot_grid.size * 0.5
+	if center == Vector2.ZERO:
+		center = slot_grid.custom_minimum_size * 0.5
 	for i in SpellManager.WHEEL_SIZE:
 		var btn := Button.new()
 		var spell_id := SpellManager.get_wheel_slot(i)
+		btn.custom_minimum_size = SLOT_SIZE
+		btn.size = SLOT_SIZE
+		var angle := -PI * 0.5 + TAU * float(i) / float(SpellManager.WHEEL_SIZE)
+		btn.position = center + Vector2(cos(angle), sin(angle)) * WHEEL_RADIUS - SLOT_SIZE * 0.5
 		if spell_id.is_empty():
-			btn.text = "[%d] —" % (i + 1)
+			btn.text = "%d  —" % (i + 1)
 		else:
 			var spell := SpellManager.get_spell(spell_id)
-			btn.text = "[%d] %s" % [i + 1, spell.display_name if spell else String(spell_id)]
+			btn.text = str(i + 1)
+			if spell:
+				btn.icon = spell.icon
+				btn.tooltip_text = "%s\n%d mana" % [spell.description, spell.mana_cost]
 		HudStyle.apply_ui_font(btn, 11)
+		btn.add_theme_stylebox_override(&"normal", HudStyle.make_slot_style(i == _selected_wheel_slot))
+		if i == _selected_wheel_slot:
+			btn.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 		btn.pressed.connect(_on_wheel_slot_pressed.bind(i))
 		UiSfx.wire_button(btn)
 		slot_grid.add_child(btn)
@@ -39,13 +56,15 @@ func refresh() -> void:
 	for spell_id in SpellManager.get_acquired_spells():
 		var spell := SpellManager.get_spell(spell_id)
 		if spell:
-			acquired_list.add_item(spell.display_name)
+			acquired_list.add_item(spell.display_name, spell.icon)
 			acquired_list.set_item_metadata(acquired_list.item_count - 1, spell_id)
-	hint_label.text = "Select wheel slot, then pick a spell. Quick slots 1-4 use wheel loadout."
+	hint_label.text = "Pick a wheel slot, then a spell."
 
 
 func _on_wheel_slot_pressed(index: int) -> void:
 	_selected_wheel_slot = index
+	refresh()
+	hint_label.text = "Slot %d selected." % (index + 1)
 
 
 func _on_acquired_selected(index: int) -> void:
@@ -58,13 +77,13 @@ func _on_acquired_selected(index: int) -> void:
 	refresh()
 
 
-func _add_close_button() -> void:
-	var close_button := Button.new()
-	close_button.text = "Close"
-	HudStyle.apply_ui_font(close_button, 11)
-	close_button.pressed.connect(func() -> void:
-		var ui := get_parent()
-		if ui.has_method(&"close_overlay"):
-			ui.close_overlay()
-	)
-	$Panel/Margin/VBox.add_child(close_button)
+func _style_panel() -> void:
+	var panel := HudStyle.make_panel_style(true)
+	panel.bg_color = Color("171724")
+	$Panel.add_theme_stylebox_override(&"panel", panel)
+	var archive := HudStyle.make_panel_style()
+	archive.bg_color = Color("10101a")
+	acquired_list.add_theme_stylebox_override(&"panel", archive)
+	$Panel/Margin/VBox/Title.add_theme_color_override(&"font_color", HudStyle.COLOR_XP)
+	$Panel/Margin/VBox/ContentRow/SpellArchive/ArchiveLabel.add_theme_color_override(&"font_color", HudStyle.COLOR_MANA)
+	$Panel/Margin/VBox/ContentRow/SlotGrid/CenterLabel.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)

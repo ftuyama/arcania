@@ -28,6 +28,9 @@ east_transition = true
 [node name="default" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(80, 676)
 
+[node name="from_right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(944, 676)
+
 [node name="Entities" type="Node2D" parent="."]
 
 [node name="Enemies" type="Node2D" parent="Entities"]

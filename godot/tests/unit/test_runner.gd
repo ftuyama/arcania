@@ -474,6 +474,7 @@ func _test_map_toggle() -> int:
 	root.add_child(ui)
 	var game_manager := _autoload_game_manager()
 	game_manager.state = game_manager.GameState.PLAYING
+	paused = false
 	var input := InputEventAction.new()
 	input.action = &"map_toggle"
 	input.pressed = true
@@ -483,9 +484,18 @@ func _test_map_toggle() -> int:
 		push_error("Map toggle should open the map overlay")
 		ui.queue_free()
 		return 1
+	if not paused or game_manager.state != game_manager.GameState.PAUSED:
+		push_error("Map toggle should pause the game")
+		ui.queue_free()
+		return 1
 	var grid := map_overlay.get_node_or_null("Panel/Margin/VBox/GridContainer") as GridContainer
 	if grid == null or grid.get_child_count() == 0:
 		push_error("Map toggle should render the map grid")
+		ui.queue_free()
+		return 1
+	ui._unhandled_input(input)
+	if paused or game_manager.state != game_manager.GameState.PLAYING:
+		push_error("Map toggle should resume the game when closed")
 		ui.queue_free()
 		return 1
 	ui.queue_free()

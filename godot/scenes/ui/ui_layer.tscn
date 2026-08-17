@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://arcania_ui_layer"]
+[gd_scene load_steps=10 format=3 uid="uid://arcania_ui_layer"]
 
 [ext_resource type="Script" path="res://scripts/ui/ui_manager.gd" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/ui/inventory_panel.gd" id="2_inv"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/ui/relic_toast.gd" id="7_toast"]
 [ext_resource type="Script" path="res://scripts/ui/game_over_screen.gd" id="8_gameover"]
 [ext_resource type="Script" path="res://scripts/ui/mobile_controls.gd" id="9_mobile"]
+[ext_resource type="Script" path="res://scripts/ui/map_canvas.gd" id="10_map_canvas"]
 
 [node name="UILayer" type="CanvasLayer"]
 script = ExtResource("1_ui")
@@ -32,10 +33,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -160.0
-offset_right = 220.0
-offset_bottom = 160.0
+offset_left = -228.0
+offset_top = -123.0
+offset_right = 228.0
+offset_bottom = 123.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -48,27 +49,67 @@ theme_override_constants/margin_bottom = 12
 
 [node name="VBox" type="VBoxContainer" parent="InventoryPanel/Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "Relics"
-horizontal_alignment = 1
+text = "RELICS"
 
-[node name="RelicList" type="ItemList" parent="InventoryPanel/Panel/Margin/VBox"]
-custom_minimum_size = Vector2(380, 180)
+[node name="Subtitle" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Passive fragments recovered from the buried world"
+
+[node name="ContentRow" type="HBoxContainer" parent="InventoryPanel/Panel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 18
 
-[node name="DetailLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
+[node name="RelicList" type="ItemList" parent="InventoryPanel/Panel/Margin/VBox/ContentRow"]
+custom_minimum_size = Vector2(230, 125)
 layout_mode = 2
+size_flags_horizontal = 3
+icon_mode = 1
+fixed_icon_size = Vector2i(32, 32)
+max_columns = 6
+
+[node name="DetailPanel" type="PanelContainer" parent="InventoryPanel/Panel/Margin/VBox/ContentRow"]
+custom_minimum_size = Vector2(176, 125)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="InventoryPanel/Panel/Margin/VBox/ContentRow/DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="InventoryPanel/Panel/Margin/VBox/ContentRow/DetailPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DetailHeading" type="Label" parent="InventoryPanel/Panel/Margin/VBox/ContentRow/DetailPanel/Margin/VBox"]
+layout_mode = 2
+text = "RELIC ARCHIVE"
+
+[node name="EquipLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox/ContentRow/DetailPanel/Margin/VBox"]
+layout_mode = 2
+text = "Equipped: 0 / 6"
+
+[node name="DetailLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox/ContentRow/DetailPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
 autowrap_mode = 2
 
 [node name="CurrencyLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Silk: 0"
+
+[node name="HintLabel" type="Label" parent="InventoryPanel/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Select a relic to study it. Double-click to equip or remove it."
 
 [node name="QuestLog" type="Control" parent="."]
 layout_mode = 3
@@ -134,10 +175,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -200.0
-offset_right = 220.0
-offset_bottom = 200.0
+offset_left = -228.0
+offset_top = -123.0
+offset_right = 228.0
+offset_bottom = 123.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -150,21 +191,42 @@ theme_override_constants/margin_bottom = 12
 
 [node name="VBox" type="VBoxContainer" parent="MapOverlay/Panel/Margin"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="RegionLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "Region"
-horizontal_alignment = 1
+text = "REGION"
 
-[node name="CompletionLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox"]
+[node name="MapCanvas" type="Control" parent="MapOverlay/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 172)
 layout_mode = 2
-text = "Completion: 0%"
-horizontal_alignment = 1
+size_flags_vertical = 3
+script = ExtResource("10_map_canvas")
 
 [node name="GridContainer" type="GridContainer" parent="MapOverlay/Panel/Margin/VBox"]
+visible = false
 layout_mode = 2
 columns = 4
+
+[node name="Footer" type="HBoxContainer" parent="MapOverlay/Panel/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="CompletionLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox/Footer"]
+layout_mode = 2
+text = "Completion: 0%"
+
+[node name="SceneLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Scene: Unknown"
+horizontal_alignment = 1
+
+[node name="LegendLabel" type="Label" parent="MapOverlay/Panel/Margin/VBox/Footer"]
+layout_mode = 2
+text = "◇ Marker"
 
 [node name="SpellWheel" type="Control" parent="."]
 layout_mode = 3
@@ -182,10 +244,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -180.0
-offset_right = 240.0
-offset_bottom = 180.0
+offset_left = -228.0
+offset_top = -123.0
+offset_right = 228.0
+offset_bottom = 123.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -198,24 +260,56 @@ theme_override_constants/margin_bottom = 12
 
 [node name="VBox" type="VBoxContainer" parent="SpellWheel/Panel/Margin"]
 layout_mode = 2
+theme_override_constants/separation = 5
 
 [node name="Title" type="Label" parent="SpellWheel/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "Spell Wheel"
+text = "SPELL WHEEL"
+
+[node name="ContentRow" type="HBoxContainer" parent="SpellWheel/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="SlotGrid" type="Control" parent="SpellWheel/Panel/Margin/VBox/ContentRow"]
+custom_minimum_size = Vector2(270, 170)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CenterLabel" type="Label" parent="SpellWheel/Panel/Margin/VBox/ContentRow/SlotGrid"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 50.0
+offset_right = 210.0
+offset_bottom = 120.0
+text = "SIGIL\nWHEEL"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="SlotGrid" type="GridContainer" parent="SpellWheel/Panel/Margin/VBox"]
+[node name="SpellArchive" type="VBoxContainer" parent="SpellWheel/Panel/Margin/VBox/ContentRow"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-columns = 4
+theme_override_constants/separation = 4
 
-[node name="AcquiredList" type="ItemList" parent="SpellWheel/Panel/Margin/VBox"]
-custom_minimum_size = Vector2(440, 100)
+[node name="ArchiveLabel" type="Label" parent="SpellWheel/Panel/Margin/VBox/ContentRow/SpellArchive"]
 layout_mode = 2
+text = "SPELLS"
 
-[node name="HintLabel" type="Label" parent="SpellWheel/Panel/Margin/VBox"]
+[node name="AcquiredList" type="ItemList" parent="SpellWheel/Panel/Margin/VBox/ContentRow/SpellArchive"]
+custom_minimum_size = Vector2(150, 118)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HintLabel" type="Label" parent="SpellWheel/Panel/Margin/VBox/ContentRow/SpellArchive"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
+autowrap_mode = 2
+
+[node name="FooterLabel" type="Label" parent="SpellWheel/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Pick a slot, then a spell."
+horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="PauseMenu" type="Control" parent="."]

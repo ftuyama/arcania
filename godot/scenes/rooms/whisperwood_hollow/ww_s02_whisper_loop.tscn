@@ -19,7 +19,7 @@ script = ExtResource("2_geom")
 tileset_path = "res://assets/sprites/tilesets/02_whisperwood_hollow/tileset.png"
 floor_tile_index = 1
 platform_tile_index = 9
-platform_rects = Array[Rect2]([Rect2(0, 704, 896, 64), Rect2(64, 448, 768, 64)])
+platform_rects = Array[Rect2]([Rect2(0, 704, 896, 64), Rect2(512, 448, 320, 64), Rect2(256, 620, 128, 20), Rect2(384, 536, 128, 20)])
 
 [node name="SpawnPoints" type="Node2D" parent="."]
 
@@ -41,12 +41,12 @@ position = Vector2(640, 676)
 sequence_index = 3
 
 [node name="WhisperStone2" parent="." instance=ExtResource("4_whisper")]
-position = Vector2(384, 512)
+position = Vector2(640, 420)
 sequence_index = 2
 
 [node name="RoomTransitions" type="Node2D" parent="."]
 
 [node name="Exit" parent="RoomTransitions" instance=ExtResource("3_door")]
-position = Vector2(12, 676)
+position = Vector2(12, 704)
 target_room_id = &"ww_02_whisper_path"
 spawn_marker = &"from_whisper"

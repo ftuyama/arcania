@@ -90,7 +90,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_toggle_pause()
 		get_viewport().set_input_as_handled()
 		return
-	if GameManager.state == GameManager.GameState.PAUSED:
+	if GameManager.state == GameManager.GameState.PAUSED and not _any_overlay_visible():
 		return
 	if event.is_action_pressed(&"inventory_toggle"):
 		_toggle_panel(inventory_panel)
@@ -150,6 +150,23 @@ func _toggle_panel(panel: Control) -> void:
 			panel.refresh()
 	else:
 		_ui_open = false
+	_sync_overlay_pause()
+
+
+func _any_overlay_visible() -> bool:
+	return inventory_panel.visible or quest_log.visible or map_overlay.visible or spell_wheel.visible
+
+
+func _sync_overlay_pause() -> void:
+	if _any_overlay_visible():
+		if GameManager.state == GameManager.GameState.PLAYING:
+			GameManager.state = GameManager.GameState.PAUSED
+			get_tree().paused = true
+			EventBus.game_paused.emit()
+	elif GameManager.state == GameManager.GameState.PAUSED and not pause_menu.visible and not game_over_screen.visible:
+		GameManager.state = GameManager.GameState.PLAYING
+		get_tree().paused = false
+		EventBus.game_resumed.emit()
 
 
 func _hide_all_overlays() -> void:
@@ -163,6 +180,7 @@ func _hide_all_overlays() -> void:
 
 func close_overlay() -> void:
 	_hide_all_overlays()
+	_sync_overlay_pause()
 
 
 func _try_place_map_marker() -> void:

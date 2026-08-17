@@ -13,9 +13,9 @@ const FOOTSTEP_INTERVAL := 0.32
 const HURT_SFX := "res://assets/audio/sfx/player/sfx_player_hurt_1.wav"
 
 const COMBO_STEPS: Array[Dictionary] = [
-	{"windup": 0.08, "active": 0.10, "recovery": 0.12, "damage": 8, "knockback": Vector2(120, -40)},
-	{"windup": 0.06, "active": 0.08, "recovery": 0.10, "damage": 8, "knockback": Vector2(120, -40)},
-	{"windup": 0.12, "active": 0.14, "recovery": 0.20, "damage": 14, "knockback": Vector2(180, -80)},
+	{"windup": 0.10, "active": 0.12, "recovery": 0.16, "damage": 8, "knockback": Vector2(120, -40)},
+	{"windup": 0.08, "active": 0.12, "recovery": 0.18, "damage": 8, "knockback": Vector2(120, -40)},
+	{"windup": 0.14, "active": 0.16, "recovery": 0.20, "damage": 14, "knockback": Vector2(180, -80)},
 ]
 
 @onready var state_machine: StateMachine = $StateMachine
