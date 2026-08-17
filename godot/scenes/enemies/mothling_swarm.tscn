@@ -1,87 +1,87 @@
-[gd_scene load_steps=17 format=3 uid="uid://arcania_bramble_stalker"]
+[gd_scene format=3 uid="uid://bkeiuapbt2yjy"]
 
-[ext_resource type="Script" path="res://scripts/enemies/mothling_swarm.gd" id="1_enemy"]
+[ext_resource type="Script" uid="uid://dw1i853ltdbl1" path="res://scripts/enemies/mothling_swarm.gd" id="1_enemy"]
 [ext_resource type="Resource" path="res://resources/enemies/e_07_mothling_swarm.tres" id="2_data"]
-[ext_resource type="Script" path="res://scripts/components/state_machine.gd" id="3_sm"]
-[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_patrol.gd" id="4_patrol"]
-[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_chase.gd" id="5_chase"]
-[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_attack.gd" id="6_attack"]
-[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_hit.gd" id="7_hit"]
-[ext_resource type="Script" path="res://scripts/enemies/states/enemy_state_dead.gd" id="8_dead"]
-[ext_resource type="Script" path="res://scripts/components/health_component.gd" id="9_health"]
-[ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="10_hurt"]
-[ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="11_hitbox"]
+[ext_resource type="Script" uid="uid://dsicreaa1bcjh" path="res://scripts/components/state_machine.gd" id="3_sm"]
+[ext_resource type="Script" uid="uid://dma2r8dfxhfs1" path="res://scripts/enemies/states/enemy_state_patrol.gd" id="4_patrol"]
+[ext_resource type="Script" uid="uid://b37mxf3i2y4kq" path="res://scripts/enemies/states/enemy_state_chase.gd" id="5_chase"]
+[ext_resource type="Script" uid="uid://bnw5cpkcjg626" path="res://scripts/enemies/states/enemy_state_attack.gd" id="6_attack"]
+[ext_resource type="Script" uid="uid://cs17jk4xdwv82" path="res://scripts/enemies/states/enemy_state_hit.gd" id="7_hit"]
+[ext_resource type="Script" uid="uid://pkkgebxm23q2" path="res://scripts/enemies/states/enemy_state_dead.gd" id="8_dead"]
+[ext_resource type="Script" uid="uid://cov0f4cdbviv3" path="res://scripts/components/health_component.gd" id="9_health"]
+[ext_resource type="Script" uid="uid://cr4pjg24fex6j" path="res://scripts/components/hurtbox_component.gd" id="10_hurt"]
+[ext_resource type="Script" uid="uid://clmxcj33u1ooa" path="res://scripts/components/hitbox_component.gd" id="11_hitbox"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/enemies/e07_mothling_swarm/e07_sheet.tres" id="12_frames"]
-[ext_resource type="Script" path="res://scripts/components/hit_flash.gd" id="13_flash"]
+[ext_resource type="Script" uid="uid://bd5d7bo64mduj" path="res://scripts/components/hit_flash.gd" id="13_flash"]
 [ext_resource type="PackedScene" path="res://scenes/components/enemy_telegraph.tscn" id="14_telegraph"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(18, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
-size = Vector2(20, 32)
+size = Vector2(28, 48)
 
-[node name="MothlingSwarm" type="CharacterBody2D"]
+[node name="MothlingSwarm" type="CharacterBody2D" unique_id=1821670710]
 collision_layer = 4
-collision_mask = 1
 script = ExtResource("1_enemy")
 data = ExtResource("2_data")
 patrol_left = -80.0
 patrol_right = 80.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=896920122]
 position = Vector2(0, 3)
 shape = SubResource("RectangleShape2D_body")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=580172736]
 position = Vector2(0, -16)
 sprite_frames = ExtResource("12_frames")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="Telegraph" parent="." instance=ExtResource("14_telegraph")]
+[node name="Telegraph" parent="." unique_id=842685042 instance=ExtResource("14_telegraph")]
 
-[node name="HitFlash" type="Node" parent="."]
+[node name="HitFlash" type="Node" parent="." unique_id=1364279316]
 script = ExtResource("13_flash")
 
-[node name="HealthComponent" type="Node" parent="."]
+[node name="HealthComponent" type="Node" parent="." unique_id=1193057351]
 script = ExtResource("9_health")
 
-[node name="HurtboxComponent" type="Area2D" parent="."]
+[node name="HurtboxComponent" type="Area2D" parent="." unique_id=1695175974]
 collision_layer = 64
 collision_mask = 8
 script = ExtResource("10_hurt")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" unique_id=2020167452]
+position = Vector2(-3, -10)
 shape = SubResource("RectangleShape2D_hurt")
 
-[node name="HitboxComponent" type="Area2D" parent="."]
+[node name="HitboxComponent" type="Area2D" parent="." unique_id=341225188]
 collision_layer = 16
 collision_mask = 32
 script = ExtResource("11_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
-position = Vector2(16, 0)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" unique_id=1663653234]
+position = Vector2(6, -10)
 shape = SubResource("RectangleShape2D_hurt")
 
-[node name="DetectionArea" type="Area2D" parent="."]
+[node name="DetectionArea" type="Area2D" parent="." unique_id=1067376002]
 collision_layer = 0
 collision_mask = 2
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="StateMachine" type="Node" parent="." unique_id=2058587449]
 script = ExtResource("3_sm")
 
-[node name="Patrol" type="Node" parent="StateMachine"]
+[node name="Patrol" type="Node" parent="StateMachine" unique_id=1583166626]
 script = ExtResource("4_patrol")
 
-[node name="Chase" type="Node" parent="StateMachine"]
+[node name="Chase" type="Node" parent="StateMachine" unique_id=259168496]
 script = ExtResource("5_chase")
 
-[node name="Attack" type="Node" parent="StateMachine"]
+[node name="Attack" type="Node" parent="StateMachine" unique_id=1742903170]
 script = ExtResource("6_attack")
 
-[node name="Hit" type="Node" parent="StateMachine"]
+[node name="Hit" type="Node" parent="StateMachine" unique_id=601113736]
 script = ExtResource("7_hit")
 
-[node name="Dead" type="Node" parent="StateMachine"]
+[node name="Dead" type="Node" parent="StateMachine" unique_id=1961272584]
 script = ExtResource("8_dead")

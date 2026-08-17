@@ -1,73 +1,75 @@
-[gd_scene load_steps=13 format=3 uid="uid://arcania_thornweft_matron"]
+[gd_scene format=3 uid="uid://bqukkhclpb5ar"]
 
-[ext_resource type="Script" path="res://scripts/bosses/thornweft_matron.gd" id="1_boss"]
+[ext_resource type="Script" uid="uid://t76wbfr33xmv" path="res://scripts/bosses/thornweft_matron.gd" id="1_boss"]
 [ext_resource type="Resource" path="res://resources/bosses/mb_01_thornweft_matron.tres" id="2_data"]
-[ext_resource type="Script" path="res://scripts/components/boss_phase_manager.gd" id="3_phase"]
-[ext_resource type="Script" path="res://scripts/components/health_component.gd" id="4_health"]
-[ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="5_hurt"]
-[ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="6_hitbox"]
+[ext_resource type="Script" uid="uid://bnu7xfrsisn2b" path="res://scripts/components/boss_phase_manager.gd" id="3_phase"]
+[ext_resource type="Script" uid="uid://cov0f4cdbviv3" path="res://scripts/components/health_component.gd" id="4_health"]
+[ext_resource type="Script" uid="uid://cr4pjg24fex6j" path="res://scripts/components/hurtbox_component.gd" id="5_hurt"]
+[ext_resource type="Script" uid="uid://clmxcj33u1ooa" path="res://scripts/components/hitbox_component.gd" id="6_hitbox"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/bosses/mb_01_thornweft_matron/mb_01_sheet.tres" id="7_frames"]
-[ext_resource type="Script" path="res://scripts/components/hit_flash.gd" id="8_flash"]
+[ext_resource type="Script" uid="uid://bd5d7bo64mduj" path="res://scripts/components/hit_flash.gd" id="8_flash"]
 [ext_resource type="PackedScene" path="res://scenes/components/enemy_telegraph.tscn" id="9_telegraph"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(36, 48)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
-size = Vector2(40, 52)
+size = Vector2(58, 49)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_arena"]
-size = Vector2(1152, 540)
+size = Vector2(59, 51)
 
-[node name="ThornweftMatron" type="CharacterBody2D"]
+[node name="ThornweftMatron" type="CharacterBody2D" unique_id=55496477]
 collision_layer = 4
-collision_mask = 1
 script = ExtResource("1_boss")
 data = ExtResource("2_data")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 4)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=196266047]
+position = Vector2(2, -26)
 shape = SubResource("RectangleShape2D_body")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1465634349]
 position = Vector2(0, -48)
+scale = Vector2(1.5, 1.5)
 sprite_frames = ExtResource("7_frames")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="Telegraph" parent="." instance=ExtResource("9_telegraph")]
+[node name="Telegraph" parent="." unique_id=854520700 instance=ExtResource("9_telegraph")]
 position = Vector2(0, -48)
 
-[node name="BossPhaseManager" type="Node" parent="."]
+[node name="BossPhaseManager" type="Node" parent="." unique_id=2085876953]
 script = ExtResource("3_phase")
 
-[node name="HitFlash" type="Node" parent="."]
+[node name="HitFlash" type="Node" parent="." unique_id=609073220]
 script = ExtResource("8_flash")
 
-[node name="HealthComponent" type="Node" parent="."]
+[node name="HealthComponent" type="Node" parent="." unique_id=1760649000]
 script = ExtResource("4_health")
 receives_knockback = false
 
-[node name="HurtboxComponent" type="Area2D" parent="."]
+[node name="HurtboxComponent" type="Area2D" parent="." unique_id=1646039229]
 collision_layer = 64
 collision_mask = 8
 script = ExtResource("5_hurt")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" unique_id=1095462844]
+position = Vector2(-1, -26)
 shape = SubResource("RectangleShape2D_hurt")
 
-[node name="HitboxComponent" type="Area2D" parent="."]
+[node name="HitboxComponent" type="Area2D" parent="." unique_id=630251553]
 collision_layer = 16
 collision_mask = 32
 monitoring = false
 script = ExtResource("6_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" unique_id=961628521]
+position = Vector2(8, -27)
 shape = SubResource("RectangleShape2D_hurt")
 
-[node name="ArenaBoundary" type="StaticBody2D" parent="."]
+[node name="ArenaBoundary" type="StaticBody2D" parent="." unique_id=154651505]
 collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ArenaBoundary"]
-position = Vector2(576, 270)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ArenaBoundary" unique_id=912707857]
+position = Vector2(4.5, -25.5)
 shape = SubResource("RectangleShape2D_arena")
