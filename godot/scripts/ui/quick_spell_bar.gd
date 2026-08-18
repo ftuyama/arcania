@@ -24,6 +24,7 @@ func _ready() -> void:
 		_name_label.add_theme_color_override(&"font_color", HudStyle.COLOR_EMBER)
 	EventBus.spell_acquired.connect(_on_spell_acquired)
 	EventBus.spell_cast.connect(_on_spell_cast)
+	EventBus.quick_spell_slot_changed.connect(_on_quick_spell_slot_changed)
 	refresh()
 
 
@@ -32,6 +33,8 @@ func _exit_tree() -> void:
 		EventBus.spell_acquired.disconnect(_on_spell_acquired)
 	if EventBus.spell_cast.is_connected(_on_spell_cast):
 		EventBus.spell_cast.disconnect(_on_spell_cast)
+	if EventBus.quick_spell_slot_changed.is_connected(_on_quick_spell_slot_changed):
+		EventBus.quick_spell_slot_changed.disconnect(_on_quick_spell_slot_changed)
 
 
 func _process(_delta: float) -> void:
@@ -193,6 +196,10 @@ func _update_cooldowns() -> void:
 
 
 func _on_spell_acquired(_spell_id: StringName) -> void:
+	refresh()
+
+
+func _on_quick_spell_slot_changed(_index: int, _spell_id: StringName) -> void:
 	refresh()
 
 

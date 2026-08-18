@@ -340,7 +340,7 @@ Full relic placement and acquisition paths: [06-magic-system.md](06-magic-system
 
 ### 7.4 HP & Defensive Progression
 
-- **Vitality Threads**: 4 fragments per HP pip; 5 pips base, max 8 pips (12 fragments optional).
+- **Vitality Threads**: 4 fragments per HP pip; 5 pips base, 12 optional fragments add up to 3 pips, and the Matron grants one complete +10 HP thread (9 pips max).
 - Sources: mini-bosses, hidden gardens, one major boss reward.
 - No armor stat beyond robes and relics—HP and skill expression are the defensive model.
 

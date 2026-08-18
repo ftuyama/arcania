@@ -43,6 +43,7 @@ func _ready() -> void:
 	EventBus.boss_defeated.connect(_on_boss_defeated)
 	EventBus.game_paused.connect(_on_game_paused)
 	EventBus.game_resumed.connect(_on_game_resumed)
+	EventBus.game_loaded.connect(_on_game_loaded)
 	EventBus.ui_toast.connect(_on_ui_toast)
 	EventBus.spell_acquired.connect(_on_spell_acquired)
 	EventBus.quest_started.connect(_on_quest_changed)
@@ -51,11 +52,9 @@ func _ready() -> void:
 	_player = get_tree().get_first_node_in_group(&"player") as Player
 	if _player:
 		_bind_player(_player)
+	else:
+		refresh()
 	_hide_boss_bar()
-	_update_quest_tracker()
-	_refresh_region_label(GameManager.current_region_id)
-	if minimap and minimap.has_method(&"refresh"):
-		minimap.refresh()
 
 
 func _exit_tree() -> void:
@@ -65,6 +64,7 @@ func _exit_tree() -> void:
 	_disconnect_if(EventBus.boss_defeated, _on_boss_defeated)
 	_disconnect_if(EventBus.game_paused, _on_game_paused)
 	_disconnect_if(EventBus.game_resumed, _on_game_resumed)
+	_disconnect_if(EventBus.game_loaded, _on_game_loaded)
 	_disconnect_if(EventBus.ui_toast, _on_ui_toast)
 	_disconnect_if(EventBus.spell_acquired, _on_spell_acquired)
 	_disconnect_if(EventBus.quest_started, _on_quest_changed)
@@ -134,10 +134,10 @@ func _on_player_spawned(player: Node2D) -> void:
 
 func _bind_player(player: Player) -> void:
 	_player = player
+	if not player.health_component.health_changed.is_connected(_on_health_changed):
+		player.health_component.health_changed.connect(_on_health_changed)
 	if not player.health_component.damaged.is_connected(_on_hp_changed):
 		player.health_component.damaged.connect(_on_hp_changed)
-	if not player.health_component.healed.is_connected(_on_hp_changed):
-		player.health_component.healed.connect(_on_hp_changed)
 	if not player.mana_component.mana_changed.is_connected(_on_mana_changed):
 		player.mana_component.mana_changed.connect(_on_mana_changed)
 	if not player.mana_component.overcast_used.is_connected(_on_overcast_used):
@@ -146,22 +146,39 @@ func _bind_player(player: Player) -> void:
 		player.mana_component.focus_shards_changed.connect(_on_focus_shards_changed)
 	if not player.experience_component.experience_changed.is_connected(_on_experience_changed):
 		player.experience_component.experience_changed.connect(_on_experience_changed)
-	_on_hp_changed(0, null)
-	_on_mana_changed(player.mana_component.current_mana, float(player.mana_component.max_mana))
-	_on_focus_shards_changed(player.mana_component.focus_shard_count, ManaComponent.MAX_SHARDS)
-	_on_experience_changed(
-		player.experience_component.level,
-		player.experience_component.current_xp,
-		player.experience_component.get_xp_to_next_level()
-	)
+	refresh()
 
 
-func _on_hp_changed(amount: int = 0, _source: Node = null) -> void:
+func refresh() -> void:
+	if _player and is_instance_valid(_player):
+		_on_health_changed(_player.health_component.current_hp, _player.health_component.max_hp)
+		_on_mana_changed(_player.mana_component.current_mana, float(_player.mana_component.max_mana))
+		_on_focus_shards_changed(_player.mana_component.focus_shard_count, ManaComponent.MAX_SHARDS)
+		_on_experience_changed(
+			_player.experience_component.level,
+			_player.experience_component.current_xp,
+			_player.experience_component.get_xp_to_next_level()
+		)
+	if quick_spell_bar and quick_spell_bar.has_method(&"refresh"):
+		quick_spell_bar.refresh()
+	_update_quest_tracker()
+	_refresh_region_label(GameManager.current_region_id)
+	if minimap and minimap.has_method(&"refresh"):
+		minimap.refresh()
+
+
+func _on_game_loaded(_slot_id: String) -> void:
+	refresh()
+
+
+func _on_health_changed(current_hp: int, max_hp: int) -> void:
 	if _player == null or health_pips == null:
 		return
-	var hp := _player.health_component
 	if health_pips.has_method(&"update_health"):
-		health_pips.update_health(hp.current_hp, hp.max_hp)
+		health_pips.update_health(current_hp, max_hp)
+
+
+func _on_hp_changed(amount: int, _source: Node = null) -> void:
 	if amount > 0 and health_pips.has_method(&"flash_damage"):
 		health_pips.flash_damage()
 

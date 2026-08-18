@@ -96,12 +96,25 @@ func _on_boss_defeated() -> void:
 		return
 	_defeated = true
 	_fight_active = false
+	set_physics_process(false)
+	velocity = Vector2.ZERO
+	hitbox_component.disable_hitbox()
+	hurtbox_component.set_deferred(&"monitorable", false)
+	telegraph.visible = false
+	var body_collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if body_collision:
+		body_collision.set_deferred(&"disabled", true)
 	if arena_boundary:
 		arena_boundary.collision_layer = 0
+	play_animation(&"dead")
+	animated_sprite.pause()
 	if data:
 		GameManager.set_world_flag(data.world_flag)
 		if player and data.essence_reward > 0:
 			player.add_essence(data.essence_reward)
+		if player and data.max_hp_reward > 0:
+			player.health_component.max_hp += data.max_hp_reward
+			player.health_component.restore_full()
 		if not data.spell_unlock.is_empty():
 			SpellManager.acquire_spell(data.spell_unlock)
 
@@ -114,6 +127,8 @@ func face_player() -> void:
 
 
 func play_animation(anim_name: StringName) -> void:
+	if _defeated and anim_name != &"dead":
+		return
 	if _current_anim == anim_name:
 		return
 	if not animated_sprite.sprite_frames or not animated_sprite.sprite_frames.has_animation(anim_name):

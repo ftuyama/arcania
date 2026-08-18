@@ -5,6 +5,10 @@ const TEST_SAVE_SLOT := "_unit_test_slot"
 const CORRUPT_SAVE_SLOT := "_corrupt_test_slot"
 const SAVE_DIR := "user://saves/"
 
+var _quick_slot_change_count := 0
+var _last_quick_slot_index := -1
+var _last_quick_slot_spell_id: StringName = &""
+
 
 func _autoload_playtest_tracker() -> Node:
 	return root.get_node("PlaytestTracker")
@@ -34,6 +38,7 @@ func _run_all_tests() -> void:
 	var failures := 0
 	failures += _test_modifier_stack()
 	failures += _test_mana_shards()
+	failures += _test_mana_bar_full_with_partial_segment()
 	failures += _test_dead_health_component_ignores_hits()
 	failures += _test_experience_component()
 	failures += _test_level_up_sfx()
@@ -41,11 +46,13 @@ func _run_all_tests() -> void:
 	failures += _test_playtest_tracker()
 	failures += _test_performance_profiler()
 	failures += _test_spell_manager()
+	failures += _test_quick_spell_bar_refresh()
 	failures += _test_hub_quest()
 	failures += _test_ability_gate_save_persistence()
 	failures += _test_spore_glen_progression()
 	failures += _test_save_manager()
 	failures += _test_player_load_resets_death_state()
+	failures += _test_loaded_state_updates_hud()
 	failures += _test_enemy_hit_vfx()
 	failures += _test_mobile_controls()
 	failures += _test_map_toggle()
@@ -88,6 +95,17 @@ func _test_mana_shards() -> int:
 		return 1
 	if mana.focus_shard_count != ManaComponent.BASE_SHARDS + 1:
 		push_error("ManaComponent shard count not incremented")
+		return 1
+	return 0
+
+
+func _test_mana_bar_full_with_partial_segment() -> int:
+	var mana_bar := preload("res://scripts/ui/mana_segment_bar.gd").new()
+	mana_bar.update_mana(25.0, 25.0)
+	var fill_ratio: float = mana_bar._get_segment_fill_ratio(2)
+	mana_bar.free()
+	if not is_equal_approx(fill_ratio, 1.0):
+		push_error("Full mana should completely fill a partial final segment")
 		return 1
 	return 0
 
@@ -204,6 +222,7 @@ func _test_performance_profiler() -> int:
 
 func _test_spell_manager() -> int:
 	var spells := _autoload_spell_manager()
+	var event_bus := _autoload_event_bus()
 	spells.reset_to_defaults()
 	if not spells.has_spell(&"ember_sigil"):
 		push_error("SpellManager starter spell ember_sigil missing")
@@ -214,6 +233,18 @@ func _test_spell_manager() -> int:
 	if spells.has_spell(&"arc_step"):
 		push_error("SpellManager arc_step should not be acquired by default")
 		return 1
+	_quick_slot_change_count = 0
+	event_bus.quick_spell_slot_changed.connect(_on_quick_spell_slot_changed)
+	spells.set_quick_slot(0, &"ember_bolt")
+	spells.set_quick_slot(0, &"ember_bolt")
+	event_bus.quick_spell_slot_changed.disconnect(_on_quick_spell_slot_changed)
+	if _quick_slot_change_count != 1:
+		push_error("SpellManager should emit one event when a quick slot changes")
+		return 1
+	if _last_quick_slot_index != 0 or _last_quick_slot_spell_id != &"ember_bolt":
+		push_error("SpellManager quick-slot event should identify the changed loadout")
+		return 1
+	spells.set_quick_slot(0, &"ember_sigil")
 
 	spells.acquire_spell(&"veil_step")
 	spells.acquire_spell(&"rootbind")
@@ -250,6 +281,31 @@ func _test_spell_manager() -> int:
 		return 1
 
 	spells.reset_to_defaults()
+	return 0
+
+
+func _on_quick_spell_slot_changed(index: int, spell_id: StringName) -> void:
+	_quick_slot_change_count += 1
+	_last_quick_slot_index = index
+	_last_quick_slot_spell_id = spell_id
+
+
+func _test_quick_spell_bar_refresh() -> int:
+	var spells := _autoload_spell_manager()
+	spells.reset_to_defaults()
+	var bar := HBoxContainer.new()
+	bar.set_script(load("res://scripts/ui/quick_spell_bar.gd"))
+	root.add_child(bar)
+	var slots: Array = bar.get("_slots")
+	var first_icon: TextureRect = slots[0]["icon"]
+	spells.set_quick_slot(0, &"ember_bolt")
+	var ember_bolt: SpellData = spells.get_spell(&"ember_bolt")
+	var refreshed := first_icon.texture == ember_bolt.icon
+	bar.free()
+	spells.reset_to_defaults()
+	if not refreshed:
+		push_error("QuickSpellBar should refresh when the spell menu changes a quick slot")
+		return 1
 	return 0
 
 
@@ -433,6 +489,46 @@ func _test_player_load_resets_death_state() -> int:
 		return 1
 
 	player.free()
+	return 0
+
+
+func _test_loaded_state_updates_hud() -> int:
+	var hud_scene := load("res://scenes/ui/hud.tscn") as PackedScene
+	var hud := hud_scene.instantiate() as CanvasLayer
+	root.add_child(hud)
+
+	var health := HealthComponent.new()
+	var health_pips := preload("res://scripts/ui/health_pip_row.gd").new()
+	root.add_child(health)
+	root.add_child(health_pips)
+	health.health_changed.connect(health_pips.update_health)
+	health.set_health(30, 80)
+	var filled_texture := HudStyle.get_hud_texture(&"hp_pip_filled")
+	var filled_count := 0
+	for child in health_pips.get_children():
+		if child is TextureRect and child.texture == filled_texture:
+			filled_count += 1
+	var pip_count := health_pips.get_child_count()
+	var spells := _autoload_spell_manager()
+	spells.reset_to_defaults()
+	spells.acquire_spell(&"veil_step")
+	var saved_spells: Dictionary = spells.get_save_data()
+	saved_spells["quick_slots"] = ["veil_step", "ember_bolt", "", ""]
+	spells.apply_save_data(saved_spells)
+	_autoload_event_bus().game_loaded.emit(TEST_SAVE_SLOT)
+	var quick_bar := hud.get_node("SpellCluster/QuickSpellBar")
+	var slots: Array = quick_bar.get("_slots")
+	var first_icon: TextureRect = slots[0]["icon"]
+	var veil_step: SpellData = spells.get_spell(&"veil_step")
+	var spell_slots_refreshed: bool = first_icon.texture == veil_step.icon
+
+	hud.free()
+	health_pips.free()
+	health.free()
+	spells.reset_to_defaults()
+	if pip_count != 8 or filled_count != 3 or not spell_slots_refreshed:
+		push_error("Loaded state should refresh health and quick spell slots in the HUD")
+		return 1
 	return 0
 
 

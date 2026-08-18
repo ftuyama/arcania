@@ -4,6 +4,8 @@ extends Node
 
 const CAST_FAIL_SFX := "res://assets/audio/sfx/ui/ui_menu_select.wav"
 const ROOTBIND_PLATFORM_TEXTURE := preload("res://assets/sprites/world/world_rootbind_platform.png")
+const ARC_STEP_VFX := preload("res://assets/sprites/vfx/spells/vfx_arc_step.tres")
+const ARC_STEP_COLOR := Color(0.0, 1.0, 1.0, 0.65)
 
 @onready var projectile_pool: Node = $ProjectilePool
 @onready var melee_hitbox: HitboxComponent = $"../MeleeHitbox"
@@ -73,15 +75,83 @@ func blink_player(player: Player, direction: Vector2, distance: float) -> void:
 	var mods := InventorySystem.get_aggregated_modifiers()
 	var iframe_bonus := int(mods.get("veil_step_iframes_flat", 0))
 	var iframe_duration := 0.14 + float(iframe_bonus) / 60.0
+	var travel_direction := direction.normalized()
+	var departure_position := player.global_position
+	var arrival_position := departure_position + travel_direction * distance
 	player.set_invulnerable(true)
 	player.set_phasing(true)
-	player.global_position += direction.normalized() * distance
-	player.velocity = direction.normalized() * Player.DASH_SPEED
+	_spawn_arc_step_vfx(player, departure_position, travel_direction)
+	_spawn_arc_step_afterimage(player)
+	player.global_position = arrival_position
+	player.velocity = travel_direction * Player.DASH_SPEED
+	_spawn_arc_step_vfx(player, arrival_position, travel_direction)
+	_animate_arc_step_arrival(player)
 	player.get_tree().create_timer(iframe_duration).timeout.connect(func() -> void:
 		if is_instance_valid(player):
 			player.set_invulnerable(false)
 			player.set_phasing(false)
 	, CONNECT_ONE_SHOT)
+
+
+func _spawn_arc_step_vfx(
+	player: Player,
+	world_position: Vector2,
+	direction: Vector2
+) -> void:
+	var parent := player.get_parent()
+	if parent == null:
+		return
+	var vfx := AnimatedSprite2D.new()
+	vfx.sprite_frames = ARC_STEP_VFX
+	parent.add_child(vfx)
+	vfx.global_position = world_position + Vector2(0, -12)
+	vfx.rotation = direction.angle()
+	vfx.z_index = 50
+	vfx.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var glow_material := CanvasItemMaterial.new()
+	glow_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	vfx.material = glow_material
+	vfx.play(&"effect")
+	vfx.animation_finished.connect(vfx.queue_free, CONNECT_ONE_SHOT)
+
+
+func _spawn_arc_step_afterimage(player: Player) -> void:
+	var parent := player.get_parent()
+	var source := player.animated_sprite
+	if parent == null or source.sprite_frames == null:
+		return
+	var texture := source.sprite_frames.get_frame_texture(source.animation, source.frame)
+	if texture == null:
+		return
+	var afterimage := Sprite2D.new()
+	afterimage.texture = texture
+	afterimage.flip_h = source.flip_h
+	afterimage.flip_v = source.flip_v
+	afterimage.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	afterimage.modulate = ARC_STEP_COLOR
+	afterimage.z_index = 49
+	parent.add_child(afterimage)
+	afterimage.global_transform = source.global_transform
+	var tween := afterimage.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(afterimage, "modulate:a", 0.0, 0.14).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(
+		afterimage,
+		"scale",
+		afterimage.scale * Vector2(1.15, 0.9),
+		0.14
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.chain().tween_callback(afterimage.queue_free)
+
+
+func _animate_arc_step_arrival(player: Player) -> void:
+	var sprite := player.animated_sprite
+	sprite.scale = Vector2(0.18, 1.08)
+	sprite.modulate.a = 0.0
+	var tween := sprite.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(sprite, "modulate:a", 1.0, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func _cast_rootbind(player: Player, spell: SpellData) -> void:

@@ -182,6 +182,7 @@ Elara's Ember Sigil dries roots on contact — the Matron recognizes the Veilmar
 #### Defeat Rewards
 
 - **Essence:** 120
+- **Vitality:** One complete Vitality Thread (+10 max HP); fully restores HP
 - **Items:** Thornbound Token (faction +1), Focus Shard fragment (½ — complete second fragment in secret grove)
 - **Unlock:** Path to Ironroot Depths / Root Warden arena
 

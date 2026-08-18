@@ -312,7 +312,7 @@ func reset_controls_to_defaults() -> void:
 		file.close()
 
 
-func apply_save_data(player_data: Dictionary, world_data: Dictionary) -> void:
+func apply_save_data(player_data: Dictionary, world_data: Dictionary, slot_id: String) -> void:
 	_world_flags = world_data.get("flags", {}).duplicate()
 	_cleared_gates.assign(world_data.get("cleared_gates", []))
 	_collected_pickups.assign(world_data.get("collected_pickups", []))
@@ -341,6 +341,7 @@ func apply_save_data(player_data: Dictionary, world_data: Dictionary) -> void:
 		"level": int(player_data.get("level", 1)),
 		"current_xp": int(player_data.get("current_xp", 0)),
 		"facing": int(player_data.get("facing", 1)),
+		"slot_id": slot_id,
 	}
 	call_deferred(&"_apply_pending_load")
 
@@ -362,8 +363,10 @@ func _apply_pending_load() -> void:
 	elif data.has("position"):
 		player.set_respawn_position(data["position"])
 	if data.has("hp_current"):
-		player.health_component.max_hp = int(data.get("hp_max", player.health_component.max_hp))
-		player.health_component.current_hp = int(data["hp_current"])
+		player.health_component.set_health(
+			int(data["hp_current"]),
+			int(data.get("hp_max", player.health_component.max_hp))
+		)
 	if data.has("mana_current"):
 		player.mana_component.max_mana = int(data.get("mana_max", player.mana_component.max_mana))
 		player.mana_component.current_mana = float(data["mana_current"])
@@ -377,3 +380,4 @@ func _apply_pending_load() -> void:
 		player.facing_direction = int(data["facing"])
 
 	player.reset_state()
+	EventBus.game_loaded.emit(data["slot_id"])

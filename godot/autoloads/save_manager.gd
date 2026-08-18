@@ -39,9 +39,8 @@ func load_game(slot_id: String) -> bool:
 		push_error("SaveManager: invalid JSON in %s" % path)
 		return false
 	PlaytestTracker.disable_tracking()
-	_apply_save_data(parsed)
 	current_slot = slot_id
-	EventBus.game_loaded.emit(slot_id)
+	_apply_save_data(parsed, slot_id)
 	return true
 
 
@@ -118,11 +117,11 @@ func start_new_game() -> void:
 	PlaytestTracker.begin_new_game_session()
 
 
-func _apply_save_data(data: Dictionary) -> void:
+func _apply_save_data(data: Dictionary, slot_id: String) -> void:
 	if data.get("version", 0) != SAVE_VERSION:
 		push_warning("SaveManager: version mismatch")
 	GameManager.playtime_seconds = float(data.get("playtime_seconds", 0.0))
-	GameManager.apply_save_data(data.get("player", {}), data.get("world", {}))
+	GameManager.apply_save_data(data.get("player", {}), data.get("world", {}), slot_id)
 	SpellManager.apply_save_data(data.get("spells", {}))
 	InventorySystem.apply_save_data(data.get("inventory", {}))
 	QuestManager.apply_save_data(data.get("quests", {}))

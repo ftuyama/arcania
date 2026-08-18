@@ -92,6 +92,8 @@ func _perform_attack() -> void:
 
 func _vine_lash() -> void:
 	await show_telegraph(0.25, Color(1.0, 0.7, 0.2, 0.9), 1)
+	if _defeated or player == null:
+		return
 	play_animation(&"attack")
 	hitbox_component.damage = 12
 	hitbox_component.damage_type = &"nature"
@@ -122,7 +124,7 @@ func _canopy_rain() -> void:
 	await get_tree().create_timer(0.55).timeout
 	if not is_instance_valid(indicator):
 		return
-	if player == null:
+	if _defeated or player == null:
 		indicator.visible = false
 		indicator.position = indicator_position
 		return

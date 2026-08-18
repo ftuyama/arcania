@@ -9,6 +9,8 @@ const GAME_OVER_STINGER := "res://assets/audio/sfx/ui/sfx_game_over.wav"
 const THORNWEFT_MATRON_MUSIC := "res://assets/audio/music/mus_mb_01_thornweft_matron.wav"
 const LEVEL_UP_DURATION := 0.72
 const LEVEL_UP_MIX_RATE := 44100
+const VICTORY_DURATION := 1.2
+const VICTORY_MIX_RATE := 44100
 
 var _music_player: AudioStreamPlayer
 var _music_fade_player: AudioStreamPlayer
@@ -22,6 +24,7 @@ var _current_ambience_path: String = ""
 var _music_should_loop: bool = true
 var _music_tween: Tween
 var _level_up_stream: AudioStreamWAV
+var _victory_stream: AudioStreamWAV
 
 
 func _ready() -> void:
@@ -150,6 +153,13 @@ func play_level_up() -> void:
 	_ui_player.play()
 
 
+func play_victory() -> void:
+	if _victory_stream == null:
+		_victory_stream = _create_victory_stream()
+	_ui_player.stream = _victory_stream
+	_ui_player.play()
+
+
 func _create_level_up_stream() -> AudioStreamWAV:
 	var notes := [523.25, 659.25, 783.99, 1046.5]
 	var samples := int(LEVEL_UP_DURATION * float(LEVEL_UP_MIX_RATE))
@@ -168,6 +178,30 @@ func _create_level_up_stream() -> AudioStreamWAV:
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = LEVEL_UP_MIX_RATE
+	stream.data = data
+	return stream
+
+
+func _create_victory_stream() -> AudioStreamWAV:
+	var notes := [392.0, 523.25, 659.25, 783.99]
+	var samples := int(VICTORY_DURATION * float(VICTORY_MIX_RATE))
+	var data := PackedByteArray()
+	data.resize(samples * 2)
+	for i in samples:
+		var time := float(i) / float(VICTORY_MIX_RATE)
+		var note_index := mini(int(time / 0.22), notes.size() - 1)
+		var note_time := fmod(time, 0.22)
+		var attack := clampf(note_time / 0.025, 0.0, 1.0)
+		var release := clampf((VICTORY_DURATION - time) / 0.35, 0.0, 1.0)
+		var envelope := attack * release
+		var fundamental := sin(TAU * notes[note_index] * time)
+		var harmony := sin(TAU * notes[note_index] * 1.5 * time) * 0.18
+		var sample := int((fundamental + harmony) * envelope * 0.22 * 32767.0)
+		data[i * 2] = sample & 0xff
+		data[i * 2 + 1] = (sample >> 8) & 0xff
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = VICTORY_MIX_RATE
 	stream.data = data
 	return stream
 
@@ -224,6 +258,7 @@ func _on_boss_phase_changed(boss_id: StringName, phase: int) -> void:
 func _on_boss_defeated(boss_id: StringName) -> void:
 	if boss_id == &"mb_01_thornweft_matron":
 		_music_player.pitch_scale = 1.0
+		play_victory()
 		restore_region_music()
 
 

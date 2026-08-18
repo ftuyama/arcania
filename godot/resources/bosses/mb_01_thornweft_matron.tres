@@ -12,4 +12,5 @@ poise = 80.0
 essence_reward = 120
 phase_thresholds = Array[float]([0.5])
 spell_unlock = &"arc_step"
+max_hp_reward = 10
 world_flag = &"defeated_mb_01_thornweft_matron"

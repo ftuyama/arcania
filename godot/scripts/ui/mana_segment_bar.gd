@@ -47,6 +47,13 @@ func flash_overcast() -> void:
 	tween.tween_property(self, "modulate", Color.WHITE, 0.14)
 
 
+func _get_segment_fill_ratio(segment_index: int) -> float:
+	var shard_start := float(segment_index * MANA_PER_SHARD)
+	var segment_capacity := minf(float(MANA_PER_SHARD), _max_mana - shard_start)
+	var fill_in_shard := clampf(_current_mana - shard_start, 0.0, segment_capacity)
+	return fill_in_shard / segment_capacity
+
+
 func _draw() -> void:
 	var rect := Rect2(Vector2.ZERO, size)
 	if _bg_tex:
@@ -70,9 +77,7 @@ func _draw() -> void:
 		var x := inset.position.x + float(i) * (seg_w + float(SEGMENT_GAP))
 		var seg_rect := Rect2(x, inset.position.y, seg_w, inset.size.y)
 		draw_rect(seg_rect, Color(0.08, 0.08, 0.12, 0.95), true)
-		var shard_start := float(i * MANA_PER_SHARD)
-		var fill_in_shard := clampf(_current_mana - shard_start, 0.0, float(MANA_PER_SHARD))
-		var fill_ratio := fill_in_shard / float(MANA_PER_SHARD)
+		var fill_ratio := _get_segment_fill_ratio(i)
 		if fill_ratio > 0.0:
 			var fill_rect := Rect2(seg_rect.position, Vector2(seg_rect.size.x * fill_ratio, seg_rect.size.y))
 			if _fill_tex:

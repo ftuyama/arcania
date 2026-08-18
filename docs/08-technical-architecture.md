@@ -1184,6 +1184,7 @@ signal boss_defeated(boss_id: StringName)
 signal spell_cast(spell_id: StringName, caster: Node2D)
 signal spell_acquired(spell_id: StringName)
 signal spell_upgraded(spell_id: StringName, tier: int)
+signal quick_spell_slot_changed(index: int, spell_id: StringName)
 
 # World
 signal room_entered(room_id: StringName, region_id: StringName)

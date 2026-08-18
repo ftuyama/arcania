@@ -15,4 +15,5 @@ extends Resource
 
 @export_group("Rewards")
 @export var spell_unlock: StringName = &""
+@export var max_hp_reward: int = 0
 @export var world_flag: StringName = &""

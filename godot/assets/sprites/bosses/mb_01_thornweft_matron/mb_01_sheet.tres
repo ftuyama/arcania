@@ -1,6 +1,7 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://b2ehlky1w7y87"]
 
 [ext_resource type="Texture2D" uid="uid://b87svgvc1tqad" path="res://assets/sprites/bosses/mb_01_thornweft_matron/mb_01_sheet.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/bosses/mb_01_thornweft_matron/mb_01_dead.png" id="2_dead"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7"]
 atlas = ExtResource("1_tex")
@@ -107,6 +108,14 @@ animations = [{
 "loop": 0,
 "name": &"attack",
 "speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_dead")
+}],
+"loop": 0,
+"name": &"dead",
+"speed": 1.0
 }, {
 "frames": [{
 "duration": 1.0,

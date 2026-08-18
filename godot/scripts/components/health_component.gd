@@ -6,6 +6,7 @@ extends Node
 signal damaged(amount: int, source: Node)
 signal died
 signal healed(amount: int)
+signal health_changed(current_hp: int, max_hp: int)
 signal poise_broken
 
 @export var max_hp: int = 80
@@ -29,6 +30,7 @@ func take_damage(amount: int, source: Node = null, knockback: Vector2 = Vector2.
 	if current_hp <= 0 or is_invulnerable or amount <= 0:
 		return
 	current_hp = maxi(current_hp - amount, 0)
+	health_changed.emit(current_hp, max_hp)
 	damaged.emit(amount, source)
 	if _owner_body and receives_knockback and knockback != Vector2.ZERO:
 		_owner_body.velocity = knockback
@@ -53,6 +55,7 @@ func heal(amount: int) -> void:
 	if amount <= 0:
 		return
 	current_hp = mini(current_hp + amount, max_hp)
+	health_changed.emit(current_hp, max_hp)
 	healed.emit(amount)
 
 
@@ -60,4 +63,11 @@ func restore_full() -> void:
 	var restored := max_hp - current_hp
 	current_hp = max_hp
 	if restored > 0:
+		health_changed.emit(current_hp, max_hp)
 		healed.emit(restored)
+
+
+func set_health(saved_current_hp: int, saved_max_hp: int) -> void:
+	max_hp = maxi(saved_max_hp, 1)
+	current_hp = clampi(saved_current_hp, 0, max_hp)
+	health_changed.emit(current_hp, max_hp)

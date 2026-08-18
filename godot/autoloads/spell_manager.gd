@@ -114,7 +114,10 @@ func set_quick_slot(index: int, spell_id: StringName) -> void:
 		return
 	if not spell_id.is_empty() and not has_spell(spell_id):
 		return
+	if _quick_slots[index] == spell_id:
+		return
 	_quick_slots[index] = spell_id
+	EventBus.quick_spell_slot_changed.emit(index, spell_id)
 
 
 func get_wheel_spells() -> Array[StringName]:
