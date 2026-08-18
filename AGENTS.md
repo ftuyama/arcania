@@ -69,6 +69,18 @@ The main documents are `01-gdd.md` (pillars), `02-world-design.md` (regions and 
 - Quest/NPC: `docs/07-narrative.md` → `resources/quests/`.
 - Every spell needs combat and exploration utility. Do not invent stats that contradict the design bibles.
 
+## graphify — project knowledge graph
+
+This project has a built graphify knowledge graph in `graphify-out/`.
+
+- **Before answering broad codebase questions** ("how does X work?", "what calls Y?", "trace data flow through Z"), prefer querying the graph: `/graphify query "<question>"`.
+- **After significant code or design-document changes**, rebuild incrementally with `/graphify --update` so the graph stays current.
+- **Outputs:**
+  - `graphify-out/graph.html` — interactive visualization
+  - `graphify-out/GRAPH_REPORT.md` — audit report with god nodes, surprising connections, and suggested questions
+  - `graphify-out/graph.json` — raw graph data
+- Do not invent edges or relationships that the graph does not contain. If unsure, flag it as ambiguous.
+
 <!-- rtk-instructions v2 -->
 # RTK (Rust Token Killer) - Token-Optimized Commands
 
