@@ -28,7 +28,6 @@ const COMBO_STEPS: Array[Dictionary] = [
 @onready var melee_hitbox: HitboxComponent = $MeleeHitbox
 @onready var hurtbox: HurtboxComponent = $HurtboxComponent
 @onready var hit_flash: Node = $HitFlash
-@onready var melee_swing_vfx: Node2D = $MeleeSwingVFX
 
 var facing_direction: int = 1
 var coyote_timer: float = 0.0
@@ -235,8 +234,6 @@ func play_melee_windup_sfx(combo_index: int) -> void:
 
 
 func play_melee_swing(combo_index: int) -> void:
-	if melee_swing_vfx and melee_swing_vfx.has_method(&"play_swing"):
-		melee_swing_vfx.play_swing(facing_direction, combo_index)
 	if combo_index == COMBO_STEPS.size() - 1:
 		CombatJuice.request_screen_shake(2.0, 0.06)
 

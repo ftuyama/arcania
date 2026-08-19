@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://bxejhjentib12" path="res://assets/sprites/player/elara_core.png" id="1_tex"]
 [ext_resource type="Texture2D" uid="uid://baipv4dlwwp7v" path="res://assets/sprites/player/elara_run_12.png" id="2_run"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/elara_melee.png" id="3_melee"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_53"]
 atlas = ExtResource("1_tex")
@@ -180,84 +181,84 @@ atlas = ExtResource("1_tex")
 region = Rect2(330, 132, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_33"]
-atlas = ExtResource("1_tex")
-region = Rect2(0, 330, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(0, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_34"]
-atlas = ExtResource("1_tex")
-region = Rect2(66, 330, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(96, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_35"]
-atlas = ExtResource("1_tex")
-region = Rect2(132, 330, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(192, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_36"]
-atlas = ExtResource("1_tex")
-region = Rect2(198, 330, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(288, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_37"]
-atlas = ExtResource("1_tex")
-region = Rect2(264, 330, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(384, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_38"]
-atlas = ExtResource("1_tex")
-region = Rect2(330, 330, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(480, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_39"]
-atlas = ExtResource("1_tex")
-region = Rect2(0, 396, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(0, 96, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_40"]
-atlas = ExtResource("1_tex")
-region = Rect2(66, 396, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(96, 96, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_41"]
-atlas = ExtResource("1_tex")
-region = Rect2(132, 396, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(192, 96, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_42"]
-atlas = ExtResource("1_tex")
-region = Rect2(198, 396, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(288, 96, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_43"]
-atlas = ExtResource("1_tex")
-region = Rect2(264, 396, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(384, 96, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_44"]
-atlas = ExtResource("1_tex")
-region = Rect2(330, 396, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(480, 96, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_45"]
-atlas = ExtResource("1_tex")
-region = Rect2(0, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(0, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_46"]
-atlas = ExtResource("1_tex")
-region = Rect2(66, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(96, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_47"]
-atlas = ExtResource("1_tex")
-region = Rect2(132, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(192, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_48"]
-atlas = ExtResource("1_tex")
-region = Rect2(198, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(288, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_49"]
-atlas = ExtResource("1_tex")
-region = Rect2(264, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(384, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_50"]
-atlas = ExtResource("1_tex")
-region = Rect2(330, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(480, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_51"]
-atlas = ExtResource("1_tex")
-region = Rect2(396, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(576, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_52"]
-atlas = ExtResource("1_tex")
-region = Rect2(462, 462, 64, 64)
+atlas = ExtResource("3_melee")
+region = Rect2(672, 192, 96, 96)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_run_1"]
 atlas = ExtResource("2_run")
