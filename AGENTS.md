@@ -175,3 +175,10 @@ rtk wget <url>          # Compact download output (65%)
 ```
 
 <!-- /rtk-instructions -->
+
+
+<!-- graphify-instructions -->
+# graphify
+- **graphify** (`~/.Codex/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
+When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
+<!-- /graphify-instructions -->
